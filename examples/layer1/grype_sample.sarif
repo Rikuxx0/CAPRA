@@ -1,0 +1,30 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "grype",
+          "rules": [
+            {
+              "id": "CVE-2023-9999",
+              "properties": {
+                "packageName": "openssl"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "CVE-2023-9999",
+          "level": "error",
+          "message": {
+            "text": "CVE-2023-9999 affects openssl"
+          },
+          "locations": []
+        }
+      ]
+    }
+  ]
+}

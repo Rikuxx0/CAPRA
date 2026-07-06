@@ -1,0 +1,20 @@
+{
+  "matches": [
+    {
+      "vulnerability": {
+        "id": "CVE-2023-1234",
+        "severity": "High",
+        "fix": {
+          "versions": ["1.2.3"]
+        }
+      },
+      "artifact": {
+        "name": "openssl",
+        "version": "1.1.1",
+        "metadata": {
+          "image": "backend-api"
+        }
+      }
+    }
+  ]
+}

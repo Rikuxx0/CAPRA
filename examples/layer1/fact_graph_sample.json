@@ -1,0 +1,27 @@
+{
+  "nodes": [
+    {
+      "id": "aws:role:AdminRole",
+      "name": "AdminRole",
+      "type": "role",
+      "cloud": "aws",
+      "importance": 1.0,
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": true,
+      "asset_category": "critical",
+      "vulnerabilities": [],
+      "raw_evidence": {}
+    }
+  ],
+  "edges": [],
+  "unmapped_vulnerabilities": [],
+  "metadata": {
+    "source_files": [],
+    "node_count": 1,
+    "edge_count": 0,
+    "vulnerability_count": 0,
+    "unmapped_vulnerability_count": 0,
+    "schema_status": "provisional"
+  }
+}

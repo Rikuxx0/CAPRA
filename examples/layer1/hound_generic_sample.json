@@ -1,0 +1,37 @@
+{
+  "nodes": [
+    {
+      "id": "aws:user:low-priv-user",
+      "name": "low-priv-user",
+      "type": "user",
+      "cloud": "aws",
+      "is_entry": true
+    },
+    {
+      "id": "aws:role:AdminRole",
+      "name": "AdminRole",
+      "type": "role",
+      "cloud": "aws"
+    },
+    {
+      "id": "k8s:pod:backend-api",
+      "name": "backend-api",
+      "type": "container",
+      "cloud": "k8s"
+    }
+  ],
+  "edges": [
+    {
+      "source": "aws:user:low-priv-user",
+      "target": "aws:role:AdminRole",
+      "type": "sts:AssumeRole",
+      "permission": "sts:AssumeRole"
+    },
+    {
+      "source": "aws:role:AdminRole",
+      "target": "k8s:pod:backend-api",
+      "type": "network",
+      "permission": "network"
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+streamlit
+pandas
+networkx
+pyvis
+pydantic
+PyYAML
+pytest
