@@ -10,6 +10,7 @@ from capra.layer1.parsers.grype_parser import parse_grype_json
 from capra.layer1.parsers.hound_parser import parse_hound_generic
 
 
+# 重要資産候補は自動で固定 Goal にならず、候補属性だけが付くことを確認する。
 def test_asset_marker_sets_goal_candidate_not_fixed_goal():
     hound = json.loads(Path("examples/layer1/hound_generic_sample.json").read_text())
     assets = yaml.safe_load(Path("examples/layer1/important_assets.yaml").read_text())
@@ -20,9 +21,9 @@ def test_asset_marker_sets_goal_candidate_not_fixed_goal():
 
     assert admin.goal_candidate is True
     assert admin.is_goal is False
-    assert admin.importance == 1.0
 
 
+# ノードとエッジから基本的な Fact Graph が構築できることを確認する。
 def test_build_fact_graph():
     hound = json.loads(Path("examples/layer1/hound_generic_sample.json").read_text())
     nodes, edges = parse_hound_generic(hound)
@@ -33,6 +34,7 @@ def test_build_fact_graph():
     assert graph.nodes["aws:user:low-priv-user"]["name"] == "low-priv-user"
 
 
+# 複数入力を統合した Fact Graph の JSON 出力内容を検証する。
 def test_export_fact_graph_json():
     hound = json.loads(Path("examples/layer1/hound_generic_sample.json").read_text())
     grype = json.loads(Path("examples/layer1/grype_sample.json").read_text())

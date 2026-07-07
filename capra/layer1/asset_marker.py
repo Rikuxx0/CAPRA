@@ -6,6 +6,7 @@ from .schemas import NodeModel
 from .utils.ids import generate_node_id
 
 
+# 重要資産候補と侵入起点を既存ノードへ重ねて goal 候補情報を付与する。
 def apply_asset_markers(
     nodes: list[NodeModel],
     asset_config: dict[str, Any] | None,
@@ -40,6 +41,7 @@ def apply_asset_markers(
     return list(merged.values())
 
 
+# 資産定義の生データを NodeModel に正規化する。
 def _asset_to_node(raw: dict[str, Any], goal_candidate: bool) -> NodeModel:
     name = raw.get("name") or raw.get("id") or "unknown"
     node_type = raw.get("type", "unknown")
@@ -51,7 +53,6 @@ def _asset_to_node(raw: dict[str, Any], goal_candidate: bool) -> NodeModel:
         name=str(name),
         type=str(node_type),
         cloud=str(cloud),
-        importance=float(raw.get("importance", 1.0 if goal_candidate else 0.0) or 0.0),
         is_entry=bool(raw.get("is_entry", False)),
         is_goal=False,
         goal_candidate=bool(raw.get("goal_candidate", goal_candidate)),
@@ -60,6 +61,7 @@ def _asset_to_node(raw: dict[str, Any], goal_candidate: bool) -> NodeModel:
     )
 
 
+# ID 優先、なければ名前・種別・クラウド一致で既存ノードを探す。
 def _find_match(nodes: dict[str, NodeModel], candidate: NodeModel) -> str | None:
     if candidate.id in nodes:
         return candidate.id
@@ -73,11 +75,11 @@ def _find_match(nodes: dict[str, NodeModel], candidate: NodeModel) -> str | None
     return None
 
 
+# 既存ノードへ資産属性を上書き統合し、必要なら Goal 扱いにする。
 def _merge_node(existing: NodeModel | None, incoming: NodeModel, force_goal: bool = False) -> NodeModel:
     if existing is None:
         incoming.is_goal = force_goal
         return incoming
-    existing.importance = max(existing.importance, incoming.importance)
     existing.is_entry = existing.is_entry or incoming.is_entry
     existing.is_goal = existing.is_goal or force_goal
     existing.goal_candidate = existing.goal_candidate or incoming.goal_candidate

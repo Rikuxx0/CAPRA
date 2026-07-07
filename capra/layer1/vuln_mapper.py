@@ -5,6 +5,7 @@ from typing import Any
 from .schemas import NodeModel, VulnerabilityModel, model_to_dict
 
 
+# 脆弱性をマッピング定義や推定ルールでノードへ割り当て、未割当も返す。
 def attach_vulnerabilities_to_nodes(
     nodes: list[NodeModel],
     vulnerabilities: list[VulnerabilityModel],
@@ -29,6 +30,7 @@ def attach_vulnerabilities_to_nodes(
     return list(node_by_id.values()), unmapped
 
 
+# 明示的な CVE/package/node ルールに一致するノードを優先して探す。
 def _match_by_mapping(
     vulnerability: VulnerabilityModel,
     rules: list[dict[str, Any]],
@@ -46,6 +48,7 @@ def _match_by_mapping(
     return None
 
 
+# 生データ中の対象ヒント文字列から該当ノードを推定する。
 def _match_by_target_hint(vulnerability: VulnerabilityModel, nodes: list[NodeModel]) -> NodeModel | None:
     hints = _extract_target_hints(vulnerability.raw_evidence)
     for hint in hints:
@@ -56,6 +59,7 @@ def _match_by_target_hint(vulnerability: VulnerabilityModel, nodes: list[NodeMod
     return None
 
 
+# パッケージ名や成果物名の部分一致で緩やかにノードを推定する。
 def _match_by_partial_name(vulnerability: VulnerabilityModel, nodes: list[NodeModel]) -> NodeModel | None:
     candidates = [vulnerability.package_name]
     artifact = vulnerability.raw_evidence.get("artifact") or {}
@@ -69,6 +73,7 @@ def _match_by_partial_name(vulnerability: VulnerabilityModel, nodes: list[NodeMo
     return None
 
 
+# スキャナ出力の複数フィールドから対象ノード推定用の文字列を抽出する。
 def _extract_target_hints(raw: dict[str, Any]) -> list[str]:
     hints: list[str] = []
     for key in ("target", "image", "container", "location"):

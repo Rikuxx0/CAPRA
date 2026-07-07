@@ -105,7 +105,7 @@ if st.button("Build Layer 1 Fact Graph"):
             m1, m2, m3, m4 = st.columns(4)
             m1.metric("Nodes", fact_json["metadata"]["node_count"])
             m2.metric("Edges", fact_json["metadata"]["edge_count"])
-            m3.metric("Vulnerabilities", fact_json["metadata"]["vulnerability_count"])
+            m3.metric("CVEs", fact_json["metadata"]["vulnerability_count"])
             m4.metric("Unmapped CVEs", fact_json["metadata"]["unmapped_vulnerability_count"])
 
             st.subheader("Layer 1 Node Table")

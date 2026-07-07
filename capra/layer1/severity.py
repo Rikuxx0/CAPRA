@@ -1,14 +1,5 @@
 from __future__ import annotations
 
-SEVERITY_SCORES: dict[str, float] = {
-    "Critical": 1.0,
-    "High": 0.8,
-    "Medium": 0.5,
-    "Low": 0.2,
-    "Negligible": 0.1,
-    "Unknown": 0.0,
-}
-
 _ALIASES = {
     "critical": "Critical",
     "high": "High",
@@ -26,7 +17,7 @@ _ALIASES = {
 }
 
 
-def normalize_severity(severity: str | None) -> tuple[str, float]:
-    """Normalize scanner severity labels into CAPRA's provisional scale."""
-    normalized = _ALIASES.get(str(severity or "").strip().lower(), "Unknown")
-    return normalized, SEVERITY_SCORES[normalized]
+# スキャナごとの差分を吸収して CAPRA 用の severity ラベルへ変換する。
+def normalize_severity(severity: str | None) -> str:
+    """Normalize scanner severity labels into CAPRA's labels."""
+    return _ALIASES.get(str(severity or "").strip().lower(), "Unknown")

@@ -8,11 +8,13 @@ import networkx as nx
 import pandas as pd
 
 
+# Fact Graph を API/保存向けの JSON 互換辞書にまとめる。
 def export_fact_graph_json(graph: nx.DiGraph) -> dict[str, Any]:
     nodes = [dict(data) for _, data in graph.nodes(data=True)]
     edges = [dict(data) for _, _, data in graph.edges(data=True)]
     vulnerabilities = [vuln for node in nodes for vuln in node.get("vulnerabilities", [])]
     unmapped = graph.graph.get("unmapped_vulnerabilities", [])
+    vulnerability_count = len(vulnerabilities) + len(unmapped)
     return {
         "nodes": nodes,
         "edges": edges,
@@ -21,13 +23,15 @@ def export_fact_graph_json(graph: nx.DiGraph) -> dict[str, Any]:
             "source_files": graph.graph.get("source_files", []),
             "node_count": graph.number_of_nodes(),
             "edge_count": graph.number_of_edges(),
-            "vulnerability_count": len(vulnerabilities),
+            "vulnerability_count": vulnerability_count,
+            "mapped_vulnerability_count": len(vulnerabilities),
             "unmapped_vulnerability_count": len(unmapped),
             "schema_status": graph.graph.get("schema_status", "provisional"),
         },
     }
 
 
+# ノード一覧を表示用 DataFrame に整形し、重い生データは除外する。
 def export_nodes_dataframe(graph: nx.DiGraph) -> pd.DataFrame:
     rows = []
     for _, data in graph.nodes(data=True):
@@ -39,6 +43,7 @@ def export_nodes_dataframe(graph: nx.DiGraph) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# エッジ一覧を表示用 DataFrame に整形し、不要な生データは除外する。
 def export_edges_dataframe(graph: nx.DiGraph) -> pd.DataFrame:
     rows = []
     for _, _, data in graph.edges(data=True):
@@ -48,6 +53,7 @@ def export_edges_dataframe(graph: nx.DiGraph) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# ノード配下と未割当の脆弱性を 1 つの表形式にまとめる。
 def export_vulnerabilities_dataframe(graph: nx.DiGraph) -> pd.DataFrame:
     rows = []
     for _, node in graph.nodes(data=True):
@@ -67,6 +73,7 @@ def export_vulnerabilities_dataframe(graph: nx.DiGraph) -> pd.DataFrame:
     return pd.DataFrame(rows)
 
 
+# Fact Graph の JSON 表現を指定パスへ保存する。
 def save_fact_graph_json(graph: nx.DiGraph, path: str | Path) -> None:
     output_path = Path(path)
     output_path.write_text(json.dumps(export_fact_graph_json(graph), indent=2, ensure_ascii=False), encoding="utf-8")

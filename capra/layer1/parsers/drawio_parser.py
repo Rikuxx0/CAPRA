@@ -9,6 +9,7 @@ from ..schemas import EdgeModel, NodeModel
 from ..utils.ids import generate_node_id
 
 
+# Draw.io XML を Layer 1 のノード・エッジ構造へ変換する。
 def parse_drawio_to_layer1(xml_text: str) -> tuple[list[NodeModel], list[EdgeModel]]:
     """Parse Draw.io XML into Layer 1's provisional schema."""
     graph = _parse_drawio_xml(xml_text)
@@ -27,7 +28,6 @@ def parse_drawio_to_layer1(xml_text: str) -> tuple[list[NodeModel], list[EdgeMod
                 name=label,
                 type=node_type,
                 cloud="unknown",
-                importance=0.8 if goal_candidate else 0.2 if is_entry else 0.0,
                 is_entry=is_entry,
                 goal_candidate=goal_candidate,
                 asset_category="critical" if goal_candidate else "unknown",
@@ -46,13 +46,13 @@ def parse_drawio_to_layer1(xml_text: str) -> tuple[list[NodeModel], list[EdgeMod
                     type="network_access",
                     permission="drawio:connected",
                     provider="unknown",
-                    strength=0.30,
                     raw_evidence=raw_edge,
                 )
             )
     return nodes, edges
 
 
+# Draw.io XML 内の mxCell を走査してノードとエッジの生データへ分解する。
 def _parse_drawio_xml(xml_text: str) -> dict[str, list[dict[str, Any]]]:
     root = ET.fromstring(xml_text)
     nodes: list[dict[str, Any]] = []
@@ -85,6 +85,7 @@ def _parse_drawio_xml(xml_text: str) -> dict[str, list[dict[str, Any]]]:
     return {"nodes": nodes, "edges": edges}
 
 
+# Draw.io ラベルの HTML を除去し、空白を整えて安全な文字列へ戻す。
 def _clean_drawio_label(value: str) -> str:
     unescaped = html.unescape(value or "")
     value_with_spaces = re.sub(r"</p>|<br/?>|</div>", " ", unescaped, flags=re.I)
@@ -92,6 +93,7 @@ def _clean_drawio_label(value: str) -> str:
     return html.escape(re.sub(r"\s+", " ", stripped_value).strip())
 
 
+# ラベル文字列からノード種別と Goal/Entry 候補属性を推定する。
 def _infer_node_traits(label: str) -> tuple[str, bool, bool]:
     text = label.lower()
     if any(keyword in text for keyword in ("db", "database", "rds", "sql")):

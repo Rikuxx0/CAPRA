@@ -3,17 +3,14 @@ assets:
     name: "AdminRole"
     type: "role"
     cloud: "aws"
-    importance: 1.0
     goal_candidate: true
     asset_category: "critical"
   - name: "Secret Manager"
     type: "secret"
     cloud: "aws"
-    importance: 0.95
     goal_candidate: true
     asset_category: "critical"
 entry_points:
   - name: "Internet"
     type: "external"
-    importance: 0.2
     is_entry: true

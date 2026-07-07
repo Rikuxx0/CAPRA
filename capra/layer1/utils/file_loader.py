@@ -6,6 +6,7 @@ from typing import Any
 import yaml
 
 
+# 拡張子を手掛かりに JSON/YAML を読み分け、失敗時はもう一方でも再試行する。
 def load_json_or_yaml(text: str, filename: str | None = None) -> dict[str, Any]:
     name = (filename or "").lower()
     if name.endswith(".json"):

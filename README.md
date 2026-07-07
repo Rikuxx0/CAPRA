@@ -22,7 +22,8 @@ Layer 1 では、複数形式のセキュリティ情報を同じスキーマに
 
 - JSON の場合は `matches[*].vulnerability` と `matches[*].artifact` から CVE、パッケージ名、導入バージョン、修正版、severity を抽出します。
 - SARIF の場合は `runs[*].results` と `tool.driver.rules` を参照し、`ruleId`、message、rule properties から CVE、パッケージ名、severity を抽出します。
-- CVE は `CVE-\d{4}-\d{4,}` の正規表現で検出します。
+- CVE は `CVE-\d{4}-\d{4,}` の正規表現で検出します。`vulnerability.id` が GHSA など CVE 以外の場合でも、`aliases`、`relatedVulnerabilities`、SARIF rule/result 内の文字列を再帰的に確認して CVE を抽出します。
+- `vulnerability.id` は元のスキャナIDを保持し、抽出できた CVE は `cve_id` に格納します。
 
 ### 3. Hound 系 JSON のノード・エッジパース
 
@@ -51,51 +52,30 @@ Layer 1 では、複数形式のセキュリティ情報を同じスキーマに
 - 同じ ID のノード、または `name` / `type` / `cloud` が一致するノードは同一資産としてマージします。
 - Streamlit UI で選択された重要資産だけを `is_goal=True` にします。候補であることと、今回の分析で Goal として扱うことを分離しています。
 
-## スコアリング実装について
+## スコアリングについて
 
-Layer 1 では、旧 AttackRoute_Scanner のような攻撃パス探索や総合リスクスコア計算は実装していません。現在の独自ロジックは、後続レイヤーに渡す Fact Graph を安定して作るための正規化、名寄せ、重複排除、暫定スコア付けです。
+Layer 1 では、旧 AttackRoute_Scanner のような攻撃パス探索、総合リスクスコア計算、重要度スコア、エッジ重み付けは実装していません。現在の独自ロジックは、後続レイヤーに渡す Fact Graph を安定して作るための正規化、名寄せ、重複排除です。
 
 ### Severity の正規化
 
-脆弱性の severity は、文字列ラベルを 0.0 から 1.0 の暫定スコアに変換します。
+脆弱性の severity は、スキャナごとの表記揺れを CAPRA 内で扱う文字列ラベルへ正規化します。数値スコアには変換しません。
 
 ```text
-Critical   -> 1.0
-High       -> 0.8
-Medium     -> 0.5
-Low        -> 0.2
-Negligible -> 0.1
-Unknown    -> 0.0
+critical        -> Critical
+high            -> High
+medium/moderate -> Medium
+low/note        -> Low
+info            -> Negligible
+unknown/error   -> Unknown
 ```
 
-`moderate` は `Medium`、`info` / `informational` は `Negligible`、`warning` は `Medium` として扱います。この値は現時点では脆弱性の正規化指標であり、ノード全体のリスクスコアではありません。
-
-### エッジ強度の暫定スコア
-
-Hound 系の関係には、後続レイヤーで攻撃経路の重みとして利用できるように `strength` を付与しています。
-
-```text
-modify_policy       -> 0.70
-create_access_key   -> 0.65
-pass_role_or_act_as -> 0.60
-read_secret         -> 0.50
-assume_role         -> 0.45
-write_data          -> 0.55
-read_data           -> 0.35
-network_access      -> 0.30
-attached_policy     -> 0.25
-member_of           -> 0.20
-unknown             -> 0.10
-```
-
-これは確率ではなく、権限関係の攻撃利用しやすさを表す暫定的な重みです。現時点では Layer 1 内で経路計算には使っていません。
+`informational` は `Negligible`、`warning` は `Medium` として扱います。この値は脆弱性ラベルであり、ノード全体のリスクスコアではありません。
 
 ### ノードマージ規則
 
 同じノード ID が複数入力から得られた場合は、以下の規則で統合します。
 
 ```text
-importance      = max(existing.importance, incoming.importance)
 is_entry        = existing.is_entry OR incoming.is_entry
 is_goal         = existing.is_goal OR incoming.is_goal
 goal_candidate  = existing.goal_candidate OR incoming.goal_candidate
@@ -115,6 +95,18 @@ raw_evidence    = existing.raw_evidence と incoming.raw_evidence を統合
 4. どれにも一致しない脆弱性は `unmapped_vulnerabilities` として保持します。
 
 この処理は完全な資産特定ではなく、Fact Graph 生成段階での暫定的な名寄せです。確実に対応付けたい場合は、明示的な mapping ファイルを使う前提です。
+
+### 脆弱性件数の扱い
+
+Fact Graph JSON の `metadata` では、脆弱性件数を以下のように扱います。
+
+```text
+vulnerability_count          = mapped_vulnerability_count + unmapped_vulnerability_count
+mapped_vulnerability_count   = ノードへ付与できた脆弱性数
+unmapped_vulnerability_count = ノードへ付与できず unmapped_vulnerabilities に残した脆弱性数
+```
+
+Streamlit UI の `CVEs` メトリクスは `vulnerability_count` を表示します。したがって、ノードへマップできなかった CVE も総数には含まれ、別途 `Unmapped CVEs` として確認できます。
 
 ### ID 生成規則
 
@@ -140,7 +132,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-画面で Grype JSON/SARIF、Hound generic JSON、重要資産 YAML/JSON、任意の CVE-to-node mapping YAML/JSON、任意の Draw.io XML をアップロードし、`Build Layer 1 Fact Graph` を押すと、ノード表、エッジ表、脆弱性表、簡易グラフ、Fact Graph JSON のダウンロードが表示されます。
+画面で Grype JSON/SARIF、Hound generic JSON、重要資産 YAML/JSON、任意の CVE-to-node mapping YAML/JSON、任意の Draw.io XML をアップロードし、`Build Layer 1 Fact Graph` を押すと、ノード表、エッジ表、脆弱性表、簡易グラフ、Fact Graph JSON のダウンロードが表示されます。上部メトリクスの `CVEs` はマップ済みと未マップの合計、`Unmapped CVEs` はノードへ対応付けできなかった件数です。
 
 ### 可視化カラーの暫定仕様
 
@@ -152,9 +144,9 @@ goal_candidate=True   -> 黄: Goal 候補だが、今回の Goal には未選択
 その他のノード        -> 青: 通常ノード
 ```
 
-判定順は `is_goal` が最優先で、次に `goal_candidate`、どちらでもない場合は通常ノードとして表示します。現時点では、脆弱性件数、severity、edge strength、攻撃経路上にあるかどうかでは色を変えていません。後続レイヤーでリスクスコアや攻撃経路が実装された場合、この色分けは変更する想定です。
+判定順は `is_goal` が最優先で、次に `goal_candidate`、どちらでもない場合は通常ノードとして表示します。現時点では、脆弱性件数、severity、攻撃経路上にあるかどうかでは色を変えていません。後続レイヤーでリスクスコアや攻撃経路が実装された場合、この色分けは変更する想定です。
 
-エッジの色は、現時点では `type`、`permission`、`strength`、severity などでは判定していません。意味のある色分けに見えないよう、すべてのエッジを薄いグレー `#C7CED8` で固定表示しています。エッジ上のラベルには `network_access`、`assume_role`、`read_secret` などのエッジ種別だけを表示しています。
+エッジの色は、現時点では `type`、`permission`、severity などでは判定していません。意味のある色分けに見えないよう、すべてのエッジを薄いグレー `#C7CED8` で固定表示しています。エッジ上のラベルには `network_access`、`assume_role`、`read_secret` などのエッジ種別だけを表示しています。
 
 ## サンプル入力
 
@@ -173,7 +165,7 @@ goal_candidate=True   -> 黄: Goal 候補だが、今回の Goal には未選択
 pytest
 ```
 
-現在のテストでは、Grype parser、Hound parser、Fact Graph builder、Layer 1 schema の基本動作を確認しています。
+現在のテストでは、Grype parser、Hound parser、Fact Graph builder、Layer 1 schema の基本動作を確認しています。Grype parser では、`vulnerability.id` が GHSA 形式で `aliases` に CVE が含まれるケースも確認しています。
 
 ## 現在の制約
 

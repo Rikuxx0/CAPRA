@@ -26,22 +26,7 @@ EDGE_TYPE_ALIASES = {
     "haspermission": "has_permission",
 }
 
-EDGE_STRENGTHS = {
-    "assume_role": 0.45,
-    "read_secret": 0.50,
-    "modify_policy": 0.70,
-    "create_access_key": 0.65,
-    "pass_role_or_act_as": 0.60,
-    "read_data": 0.35,
-    "write_data": 0.55,
-    "network_access": 0.30,
-    "attached_policy": 0.25,
-    "member_of": 0.20,
-    "has_permission": 0.30,
-    "unknown": 0.10,
-}
-
-
+# Hound 系の汎用グラフ JSON を Node/Edge モデルへ変換する。
 def parse_hound_generic(data: dict[str, Any]) -> tuple[list[NodeModel], list[EdgeModel]]:
     graph = _extract_graph_container(data)
     nodes = [_parse_node(node) for node in graph.get("nodes", []) or []]
@@ -65,12 +50,14 @@ def parse_hound_generic(data: dict[str, Any]) -> tuple[list[NodeModel], list[Edg
     return nodes, edges
 
 
+# Hound ごとに揺れる権限名や関係名を CAPRA の標準エッジ種別へ寄せる。
 def normalize_edge_type(value: str | None) -> str:
     compact = re.sub(r"[\s_-]+", "", str(value or "").strip().lower())
     direct = str(value or "").strip().lower()
     return EDGE_TYPE_ALIASES.get(compact) or EDGE_TYPE_ALIASES.get(direct) or direct or "unknown"
 
 
+# 複数フィールドの文字列からクラウドプロバイダを推定する。
 def infer_provider(*values: Any) -> str:
     text = " ".join(str(value or "") for value in values).lower()
     if "arn:aws:" in text:
@@ -84,6 +71,7 @@ def infer_provider(*values: Any) -> str:
     return "unknown"
 
 
+# 入力 JSON のどこに nodes/edges があるかを吸収して取り出す。
 def _extract_graph_container(data: dict[str, Any]) -> dict[str, Any]:
     if "nodes" in data or "edges" in data:
         return data
@@ -94,6 +82,7 @@ def _extract_graph_container(data: dict[str, Any]) -> dict[str, Any]:
     return {"nodes": [], "edges": []}
 
 
+# 生ノード辞書から NodeModel を生成し、欠損値は推定や既定値で補う。
 def _parse_node(node: dict[str, Any]) -> NodeModel:
     name = node.get("name") or node.get("label") or node.get("displayName") or node.get("id") or "unknown"
     node_type = node.get("type") or node.get("kind") or node.get("labels") or "unknown"
@@ -106,7 +95,6 @@ def _parse_node(node: dict[str, Any]) -> NodeModel:
         name=str(name),
         type=str(node_type),
         cloud=str(cloud),
-        importance=float(node.get("importance", 0.0) or 0.0),
         is_entry=bool(node.get("is_entry", False)),
         is_goal=bool(node.get("is_goal", False)),
         goal_candidate=bool(node.get("goal_candidate", False)),
@@ -115,6 +103,7 @@ def _parse_node(node: dict[str, Any]) -> NodeModel:
     )
 
 
+# 生エッジ辞書から EdgeModel を生成し、種別を正規化する。
 def _parse_edge(edge: dict[str, Any]) -> EdgeModel:
     source = edge.get("source") or edge.get("from") or edge.get("start") or edge.get("source_id")
     target = edge.get("target") or edge.get("to") or edge.get("end") or edge.get("target_id")
@@ -127,6 +116,5 @@ def _parse_edge(edge: dict[str, Any]) -> EdgeModel:
         type=edge_type,
         permission=str(permission),
         provider=str(provider),
-        strength=float(edge.get("strength", EDGE_STRENGTHS.get(edge_type, 0.10)) or 0.10),
         raw_evidence=edge,
     )

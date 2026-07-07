@@ -5,7 +5,6 @@
       "name": "AdminRole",
       "type": "role",
       "cloud": "aws",
-      "importance": 1.0,
       "is_entry": false,
       "is_goal": false,
       "goal_candidate": true,
@@ -21,6 +20,7 @@
     "node_count": 1,
     "edge_count": 0,
     "vulnerability_count": 0,
+    "mapped_vulnerability_count": 0,
     "unmapped_vulnerability_count": 0,
     "schema_status": "provisional"
   }
