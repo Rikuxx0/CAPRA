@@ -131,7 +131,6 @@ streamlit run app.py
 画面で Grype JSON/SARIF、Hound generic JSON、重要資産 YAML/JSON、任意の CVE-to-node mapping YAML/JSON、任意の Draw.io XML をアップロードし、`Build Layer 1 Fact Graph` を押すと、ノード表、エッジ表、脆弱性表、簡易グラフ、Fact Graph JSON のダウンロードが表示されます。上部メトリクスの `CVEs` はマップ済みと未マップの合計、`Unmapped CVEs` はノードへ対応付けできなかった件数です。
 
 ### ゴールノードのカラー指定
-
 Streamlit 上の `Layer 1 Fact Graph` では、ノードの色をリスクスコアではなく、重要資産の状態に基づいて暫定的に変更しています。
 
 ```text
