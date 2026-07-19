@@ -402,7 +402,7 @@ source Fact node ── source ──▶ Attack Operator ── target ──▶
 
 ### 入出力
 
-入力は Layer 1 が出力する Fact Graph JSON です。`nodes`、`edges`、ノード配下の `vulnerabilities`、`unmapped_vulnerabilities`、`metadata` を読み込みます。古い JSON で `fact_id`、`source_tool`、`source_file`、`original_edge_type` が欠けていても、推定可能な値だけ補完し、残りは `unknown` または `unresolved_items` に保持します。`raw_evidence` の provenance は維持しますが、Secret、Token、Password、Access Key などは再帰的に `[REDACTED]` へ置換します。
+入力は Layer 1 が出力する Fact Graph JSON です。`nodes`、`edges`、ノード配下の `vulnerabilities`、`unmapped_vulnerabilities`、`metadata` を読み込みます。古い JSON で `fact_id`、`source_tool`、`source_file`、`original_edge_type` が欠けていても、推定可能な値だけ補完し、残りは `unknown` または `unresolved_items` に保持します。
 
 出力 `attack_operator_graph.json` の主なフィールドは次のとおりです。
 
