@@ -1,0 +1,1 @@
+{"id": "unresolved:azurehound:example", "type": "unknown_edge", "source_tool": "azurehound", "source_fact_ids": ["az-unknown"], "missing_conditions": [], "reason": "No mapping exists for this source-tool edge", "raw_evidence": {}, "metadata": {}}

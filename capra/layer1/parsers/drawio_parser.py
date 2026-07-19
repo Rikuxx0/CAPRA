@@ -41,11 +41,14 @@ def parse_drawio_to_layer1(xml_text: str) -> tuple[list[NodeModel], list[EdgeMod
         if source and target:
             edges.append(
                 EdgeModel(
+                    fact_id=str(raw_edge.get("id")) if raw_edge.get("id") else None,
                     source=source,
                     target=target,
                     type="network_access",
                     permission="drawio:connected",
                     provider="unknown",
+                    source_tool="drawio",
+                    original_edge_type="network_access",
                     raw_evidence=raw_edge,
                 )
             )

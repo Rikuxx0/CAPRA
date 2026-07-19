@@ -1,0 +1,1 @@
+{"operator_type": "access_unauthenticated_kubernetes_api", "manual_verification_required": true, "verification_status": "unverified", "missing_conditions": ["network_reachability_is_confirmed", "anonymous_authentication_is_enabled"]}

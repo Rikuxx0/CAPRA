@@ -11,6 +11,6 @@ assets:
     goal_candidate: true
     asset_category: "critical"
 entry_points:
-  - name: "Internet"
+  - name: "OWASP Juice Shopper"
     type: "external"
     is_entry: true

@@ -1,0 +1,57 @@
+version: "0.1.0"
+mappings:
+  CanCreateKeys:
+    rule_id: gcp_hound.cancreatekeys.v1
+    classification: ATTACK_EDGE
+    operator_type: create_service_account_key
+    preconditions: [can_create_service_account_key]
+    effects: [service_account_key_created]
+    produces: [credential, identity]
+  CanImpersonate:
+    rule_id: gcp_hound.canimpersonate.v1
+    classification: ATTACK_EDGE
+    operator_type: impersonate_service_account
+    preconditions: [can_impersonate_service_account]
+    effects: [service_account_identity_obtained]
+    produces: [identity]
+  CanReadSecrets:
+    rule_id: gcp_hound.canreadsecrets.v1
+    classification: ATTACK_EDGE
+    operator_type: read_secret
+    preconditions: [can_access_secret]
+    effects: [secret_data_may_be_read]
+    produces: [data_access]
+  CanReadSecretsInProject:
+    rule_id: gcp_hound.canreadsecretsinproject.v1
+    classification: ATTACK_EDGE
+    operator_type: read_project_secrets
+    preconditions: [can_access_project_secrets]
+    effects: [project_secret_data_may_be_read]
+    produces: [data_access]
+  CanSignBlob:
+    rule_id: gcp_hound.cansignblob.v1
+    classification: ATTACK_EDGE
+    operator_type: sign_blob_as_service_account
+    preconditions: [can_sign_blob]
+    effects: [blob_signed_as_service_account]
+  CanSignJWT:
+    rule_id: gcp_hound.cansignjwt.v1
+    classification: ATTACK_EDGE
+    operator_type: sign_jwt_as_service_account
+    preconditions: [can_sign_jwt]
+    effects: [jwt_signed_as_service_account]
+    produces: [identity]
+  CanModifyBucketPoliciesInProject:
+    rule_id: gcp_hound.canmodifybucketpoliciesinproject.v1
+    classification: ATTACK_EDGE
+    operator_type: modify_bucket_policy
+    preconditions: [can_modify_bucket_policy]
+    effects: [bucket_policy_modified]
+    produces: [resource_control]
+  CanListKeys:
+    rule_id: gcp_hound.canlistkeys.v1
+    classification: PERMISSION
+  ContainsServiceAccount: {rule_id: gcp_hound.containsserviceaccount.v1, classification: RELATIONSHIP}
+  OwnsStorageBucket: {rule_id: gcp_hound.ownsstoragebucket.v1, classification: RELATIONSHIP}
+  HasGoogleOwnedSA: {rule_id: gcp_hound.hasgoogleownedsa.v1, classification: RELATIONSHIP}
+  BelongsTo: {rule_id: gcp_hound.belongsto.v1, classification: RELATIONSHIP}

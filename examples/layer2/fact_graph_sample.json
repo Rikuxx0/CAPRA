@@ -1,0 +1,13 @@
+{
+  "nodes": [
+    {"id": "gcp:user:analyst", "name": "analyst", "type": "principal", "cloud": "gcp", "vulnerabilities": []},
+    {"id": "gcp:serviceaccount:reporter", "name": "reporter", "type": "serviceaccount", "cloud": "gcp", "vulnerabilities": [
+      {"id": "CVE-2019-1010218", "cve_id": "CVE-2019-1010218", "installed_version": "1.0", "source": "grype"}
+    ]}
+  ],
+  "edges": [
+    {"fact_id": "gcp-edge-1", "source": "gcp:user:analyst", "target": "gcp:serviceaccount:reporter", "type": "CanCreateKeys", "original_edge_type": "CanCreateKeys", "provider": "gcp", "source_tool": "gcp_hound", "source_file": "gcp_hound.json", "raw_evidence": {"type": "CanCreateKeys"}}
+  ],
+  "unmapped_vulnerabilities": [],
+  "metadata": {"schema_version": "0.1.0", "source_files": ["gcp_hound.json", "grype.json"]}
+}

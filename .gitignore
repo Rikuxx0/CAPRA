@@ -191,6 +191,10 @@ cython_debug/
 # Ruff stuff:
 .ruff_cache/
 
+# CAPRA Layer 2 runtime NVD cache (fixtures live under examples/tests).
+cache/nvd/*.json
+!cache/nvd/.gitkeep
+
 # PyPI configuration file
 .pypirc
 

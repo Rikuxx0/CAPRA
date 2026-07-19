@@ -1,0 +1,51 @@
+{
+  "schema_version": "0.1.0",
+  "attack_operators": [
+    {
+      "id": "attack_op:gcp:create_service_account_key:example",
+      "operator_type": "create_service_account_key",
+      "origin_kind": "iam_direct_edge",
+      "source_tool": "gcp_hound",
+      "source_fact_ids": ["gcp-edge-1"],
+      "source_files": ["gcp_hound.json"],
+      "source_node": "gcp:user:analyst",
+      "target_node": "gcp:serviceaccount:reporter",
+      "preconditions": ["can_create_service_account_key"],
+      "effects": ["service_account_key_created"],
+      "produces": [{"artifact_type": "credential", "subject_node_id": "gcp:serviceaccount:reporter", "properties": {}}, {"artifact_type": "identity", "subject_node_id": "gcp:serviceaccount:reporter", "properties": {}}],
+      "requires": [],
+      "cve_ids": [],
+      "cwe_ids": [],
+      "status": "complete",
+      "verification_status": "unverified",
+      "missing_conditions": [],
+      "manual_verification_required": false,
+      "public_exploit_candidate": false,
+      "mapping_rule_id": "gcp_hound.cancreatekeys.v1",
+      "raw_evidence": {},
+      "metadata": {"original_edge_type": "CanCreateKeys"}
+    }
+  ],
+  "connections": [],
+  "unresolved_items": [],
+  "layer3_candidates": ["attack_op:gcp:create_service_account_key:example"],
+  "metadata": {
+    "input_fact_graph_schema_version": "0.1.0",
+    "input_fact_graph_hash": "example",
+    "rule_set_version": "0.1.0",
+    "used_source_tools": ["gcp_hound"],
+    "used_rule_ids": ["gcp_hound.cancreatekeys.v1"],
+    "nvd_cache_entries": [],
+    "fact_node_count": 2,
+    "fact_edge_count": 1,
+    "operator_count": 1,
+    "iam_operator_count": 1,
+    "cve_operator_count": 0,
+    "connection_count": 0,
+    "unresolved_count": 0,
+    "manual_verification_count": 0,
+    "processing_time_ms": 0,
+    "generated_at": "2026-01-01T00:00:00+00:00",
+    "execution_config": {"nvd_mode": "cache-only"}
+  }
+}

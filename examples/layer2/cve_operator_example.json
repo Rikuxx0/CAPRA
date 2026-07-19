@@ -1,0 +1,1 @@
+{"operator_type": "buffer_overflow", "origin_kind": "cve", "source_tool": "nvd", "target_node": "gcp:serviceaccount:reporter", "status": "partial", "verification_status": "unverified", "missing_conditions": ["target_is_reachable"]}

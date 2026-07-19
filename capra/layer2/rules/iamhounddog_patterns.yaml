@@ -1,0 +1,37 @@
+version: "0.1.0"
+rules:
+  - id: aws.ec2.passrole.v1
+    version: "1"
+    enabled: true
+    source_tool: iamhounddog
+    max_hops: 6
+    pattern:
+      - from_type: principal
+        edge_type: assume_role
+        to_type: role
+        bind_from_as: source_principal
+      - from_type: role
+        edge_type: attached_policy
+        to_type: policy
+      - from_type: policy
+        edge_type: ec2_run_instances
+        to_type: ec2
+      - from_type: ec2
+        edge_type: instance_role
+        to_type: role
+        bind_to_as: target_role
+    required_permissions:
+      - ec2:RunInstances
+      - iam:PassRole
+    operator:
+      type: launch_instance_with_role
+      preconditions:
+        - can_run_instances
+        - can_pass_target_role
+        - instance_uses_target_role
+      effects:
+        - instance_created
+        - target_role_identity_may_be_obtained
+      produces:
+        - artifact_type: identity
+          subject_node_ref: target_role

@@ -1,0 +1,26 @@
+version: "0.1.0"
+mappings:
+  AZContains:
+    rule_id: azurehound.azcontains.v1
+    classification: RELATIONSHIP
+  AZAddSecret:
+    rule_id: azurehound.azaddsecret.v1
+    classification: ATTACK_EDGE
+    operator_type: add_application_secret
+    preconditions: [can_modify_application_credentials]
+    effects: [application_secret_added]
+    produces: [credential, identity]
+  AZAddMembers:
+    rule_id: azurehound.azaddmembers.v1
+    classification: ATTACK_EDGE
+    operator_type: add_group_member
+    preconditions: [can_modify_group_membership]
+    effects: [group_membership_added]
+    produces: [identity]
+  AZMGGrantRole:
+    rule_id: azurehound.azmggrantrole.v1
+    classification: ATTACK_EDGE
+    operator_type: grant_management_group_role
+    preconditions: [can_grant_management_group_role]
+    effects: [management_group_role_granted]
+    produces: [permission, resource_control]

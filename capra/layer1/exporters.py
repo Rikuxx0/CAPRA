@@ -20,6 +20,7 @@ def export_fact_graph_json(graph: nx.DiGraph) -> dict[str, Any]:
         "edges": edges,
         "unmapped_vulnerabilities": unmapped,
         "metadata": {
+            "schema_version": "0.1.0",
             "source_files": graph.graph.get("source_files", []),
             "node_count": graph.number_of_nodes(),
             "edge_count": graph.number_of_edges(),

@@ -111,10 +111,14 @@ def _parse_edge(edge: dict[str, Any]) -> EdgeModel:
     edge_type = normalize_edge_type(edge.get("type") or permission)
     provider = edge.get("provider") or edge.get("cloud") or infer_provider(source, target, permission, edge)
     return EdgeModel(
+        fact_id=str(edge.get("fact_id") or edge.get("id")) if edge.get("fact_id") or edge.get("id") else None,
         source=str(source or "unknown-source"),
         target=str(target or "unknown-target"),
         type=edge_type,
         permission=str(permission),
         provider=str(provider),
+        source_tool=str(edge.get("source_tool") or edge.get("tool") or "unknown").strip().lower(),
+        source_file=str(edge.get("source_file")) if edge.get("source_file") else None,
+        original_edge_type=str(edge.get("original_edge_type") or edge.get("type") or permission or "unknown"),
         raw_evidence=edge,
     )

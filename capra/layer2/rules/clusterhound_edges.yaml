@@ -1,0 +1,47 @@
+version: "0.1.0"
+mappings:
+  canBind: {rule_id: clusterhound.canbind.v1, classification: ATTACK_EDGE, operator_type: bind_rbac_role, effects: [rbac_binding_modified], produces: [permission]}
+  canEscalate: {rule_id: clusterhound.canescalate.v1, classification: ATTACK_EDGE, operator_type: escalate_rbac_privileges, effects: [rbac_privileges_escalated], produces: [permission]}
+  canImpersonate: {rule_id: clusterhound.canimpersonate.v1, classification: ATTACK_EDGE, operator_type: impersonate_kubernetes_identity, effects: [kubernetes_identity_obtained], produces: [identity]}
+  canCreateToken: {rule_id: clusterhound.cancreatetoken.v1, classification: ATTACK_EDGE, operator_type: create_service_account_token, effects: [service_account_token_created], produces: [credential, identity]}
+  fullAccess: {rule_id: clusterhound.fullaccess.v1, classification: ATTACK_EDGE, operator_type: exercise_full_cluster_access, effects: [cluster_resources_may_be_controlled], produces: [resource_control]}
+  canAssumeServiceAccount: {rule_id: clusterhound.canassumeserviceaccount.v1, classification: ATTACK_EDGE, operator_type: assume_service_account, effects: [service_account_identity_obtained], produces: [identity]}
+  mountsServiceAccount: {rule_id: clusterhound.mountsserviceaccount.v1, classification: ATTACK_EDGE, operator_type: obtain_mounted_service_account, effects: [mounted_service_account_may_be_obtained], produces: [credential, identity]}
+  canExec: {rule_id: clusterhound.canexec.v1, classification: ATTACK_EDGE, operator_type: exec_in_workload, effects: [workload_command_may_be_executed], produces: [resource_control]}
+  canAttach: {rule_id: clusterhound.canattach.v1, classification: ATTACK_EDGE, operator_type: attach_to_workload, effects: [workload_process_may_be_attached], produces: [resource_control]}
+  canPortForward: {rule_id: clusterhound.canportforward.v1, classification: ATTACK_EDGE, operator_type: port_forward_to_workload, effects: [workload_network_may_be_reached], produces: [network_reachability]}
+  canCreateWorkload: {rule_id: clusterhound.cancreateworkload.v1, classification: ATTACK_EDGE, operator_type: create_workload, effects: [workload_created], produces: [resource_control]}
+  canPatch: {rule_id: clusterhound.canpatch.v1, classification: ATTACK_EDGE, operator_type: patch_workload, effects: [workload_modified], produces: [resource_control]}
+  canCreateEphemeral: {rule_id: clusterhound.cancreateephemeral.v1, classification: ATTACK_EDGE, operator_type: create_ephemeral_container, effects: [ephemeral_container_created], produces: [resource_control]}
+  secretsRead: {rule_id: clusterhound.secretsread.v1, classification: ATTACK_EDGE, operator_type: read_kubernetes_secret, effects: [secret_data_may_be_read], produces: [data_access]}
+  secretsCreate: {rule_id: clusterhound.secretscreate.v1, classification: ATTACK_EDGE, operator_type: create_kubernetes_secret, effects: [kubernetes_secret_created], produces: [resource_control]}
+  podPrivileged: {rule_id: clusterhound.podprivileged.v1, classification: ATTACK_EDGE, operator_type: use_privileged_pod, effects: [privileged_workload_control], produces: [resource_control]}
+  podHostPID: {rule_id: clusterhound.podhostpid.v1, classification: ATTACK_EDGE, operator_type: access_host_pid_namespace, effects: [host_pid_namespace_may_be_accessed], produces: [resource_control]}
+  podHostNetwork: {rule_id: clusterhound.podhostnetwork.v1, classification: ATTACK_EDGE, operator_type: access_host_network, effects: [host_network_may_be_accessed], produces: [network_reachability]}
+  podHostIPC: {rule_id: clusterhound.podhostipc.v1, classification: ATTACK_EDGE, operator_type: access_host_ipc, effects: [host_ipc_may_be_accessed], produces: [resource_control]}
+  nodesProxyRCE: {rule_id: clusterhound.nodesproxyrce.v1, classification: ATTACK_EDGE, operator_type: use_nodes_proxy_rce, effects: [node_command_execution_may_be_possible], produces: [resource_control]}
+  entryPoint: {rule_id: clusterhound.entrypoint.v1, classification: RELATIONSHIP}
+  unauthAPIAccess:
+    rule_id: clusterhound.unauthapiaccess.v1
+    classification: ATTACK_EDGE
+    operator_type: access_unauthenticated_kubernetes_api
+    effects: [kubernetes_api_may_be_reachable]
+    produces: [network_reachability]
+    manual_verification_required: true
+    missing_conditions: [network_reachability_is_confirmed, anonymous_authentication_is_enabled]
+  unauthKubeletAccess:
+    rule_id: clusterhound.unauthkubeletaccess.v1
+    classification: ATTACK_EDGE
+    operator_type: access_unauthenticated_kubelet
+    effects: [kubelet_api_may_be_reachable]
+    produces: [network_reachability]
+    manual_verification_required: true
+    missing_conditions: [network_reachability_is_confirmed, anonymous_authentication_is_enabled]
+  accessIMDS:
+    rule_id: clusterhound.accessimds.v1
+    classification: ATTACK_EDGE
+    operator_type: access_instance_metadata_service
+    effects: [instance_metadata_may_be_accessed]
+    produces: [credential]
+    manual_verification_required: true
+    missing_conditions: [network_reachability_is_confirmed, imds_access_is_confirmed]

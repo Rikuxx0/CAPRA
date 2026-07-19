@@ -1,0 +1,1 @@
+{"edges": [{"fact_id": "g1", "source": "principal", "target": "service-account", "type": "CanImpersonate", "original_edge_type": "CanImpersonate", "source_tool": "gcp_hound"}, {"fact_id": "g2", "source": "project", "target": "service-account", "type": "ContainsServiceAccount", "original_edge_type": "ContainsServiceAccount", "source_tool": "gcp_hound"}]}

@@ -1,0 +1,15 @@
+version: "0.1.0"
+rules:
+  - {id: cve.out_of_bounds_write.v1, phrase: "out-of-bounds write", operator_type: out_of_bounds_write}
+  - {id: cve.authentication_bypass.v1, phrase: "authentication bypass", operator_type: authentication_bypass}
+  - {id: cve.information_disclosure.v1, phrase: "information disclosure", operator_type: information_disclosure}
+  - {id: cve.privilege_escalation.v1, phrase: "privilege escalation", operator_type: privilege_escalation}
+  - {id: cve.cross_site_scripting.v1, phrase: "cross-site scripting", operator_type: cross_site_scripting}
+  - {id: cve.directory_traversal.v1, phrase: "directory traversal", operator_type: path_traversal}
+  - {id: cve.command_injection.v1, phrase: "command injection", operator_type: command_injection}
+  - {id: cve.buffer_overflow.v1, phrase: "buffer overflow", operator_type: buffer_overflow}
+  - {id: cve.denial_of_service.v1, phrase: "denial of service", operator_type: denial_of_service}
+  - {id: cve.path_traversal.v1, phrase: "path traversal", operator_type: path_traversal}
+  - {id: cve.sql_injection.v1, phrase: "sql injection", operator_type: sql_injection}
+  - {id: cve.code_injection.v1, phrase: "code injection", operator_type: code_injection}
+  - {id: cve.use_after_free.v1, phrase: "use after free", operator_type: use_after_free}

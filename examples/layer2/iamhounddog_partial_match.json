@@ -1,0 +1,10 @@
+{
+  "description": "The structural pattern matches, but iam:PassRole is absent.",
+  "nodes": [{"id": "p", "type": "principal"}, {"id": "r1", "type": "role"}, {"id": "policy", "type": "policy"}, {"id": "ec2", "type": "ec2"}, {"id": "r2", "type": "role"}],
+  "edges": [
+    {"fact_id": "f1", "source": "p", "target": "r1", "type": "assume_role", "source_tool": "iamhounddog"},
+    {"fact_id": "f2", "source": "r1", "target": "policy", "type": "attached_policy", "source_tool": "iamhounddog"},
+    {"fact_id": "f3", "source": "policy", "target": "ec2", "type": "ec2_run_instances", "permission": "ec2:RunInstances", "source_tool": "iamhounddog"},
+    {"fact_id": "f4", "source": "ec2", "target": "r2", "type": "instance_role", "source_tool": "iamhounddog"}
+  ]
+}

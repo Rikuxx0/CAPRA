@@ -1,0 +1,1 @@
+{"edges": [{"fact_id": "az1", "source": "principal", "target": "application", "type": "AZAddSecret", "original_edge_type": "AZAddSecret", "source_tool": "azurehound"}, {"fact_id": "az2", "source": "tenant", "target": "group", "type": "AZContains", "original_edge_type": "AZContains", "source_tool": "azurehound"}]}

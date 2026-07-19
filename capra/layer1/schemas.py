@@ -79,11 +79,15 @@ class NodeModel(BaseModel):
 
 
 class EdgeModel(BaseModel):
+    fact_id: str | None = None
     source: str
     target: str
     type: str = "unknown"
     permission: str = ""
     provider: str = "unknown"
+    source_tool: str = "unknown"
+    source_file: str | None = None
+    original_edge_type: str | None = None
     raw_evidence: dict[str, Any] = Field(default_factory=dict)
 
     @before_field_validator("provider")
