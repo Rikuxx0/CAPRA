@@ -367,12 +367,12 @@ Operator間の接続は `capra/layer2/operator_graph_builder.py` が担当しま
 2. 先行Operatorの `produces` artifactが後続Operatorの `requires` artifactを満たす場合、先行から後続へ `enables`、後続から先行へ `requires` を作ります。
 
 
->`enables` / `requires` は、同じ依存関係を読む向きによって表したConnectionです。`enables` は「このOperatorの結果によって、次のOperatorを実行できる可能性が生まれる」という順方向の関係です。`requires` はその逆向きで、「このOperatorを考えるには、前段のOperatorが作るartifactが必要になる」という依存元への関係です。
->
->例えば、あるOperatorが`identity(gcp:serviceaccount:reporter)` を `produces` し、別のOperatorが同じ `identity(gcp:serviceaccount:reporter)` を `requires` している場合、前者から後者へ `enables`、後者から前者へ `requires` を作ります。これは「前者の実行が後者を可能にする」と同時に、「後者は前者の成果物に依存している」ことを、グラフ上で両方向からたどれるようにするためです。Layer 2ではこのConnectionは依存関係のモデル化であり、実環境で攻撃が成功することや、検証済みであることを意味しません。
+`enables` / `requires` は、同じ依存関係を読む向きによって表したConnectionです。`enables` は「このOperatorの結果によって、次のOperatorを実行できる可能性が生まれる」という順方向の関係です。`requires` はその逆向きで、「このOperatorを考えるには、前段のOperatorが作るartifactが必要になる」という依存元への関係です。
 
->artifact接続では、`artifact_type` と `subject_node_id` が一致し、要求側 `properties` のすべてを生成側が満たす必要があります。`unknown` や空の対象ノードは接続に使用しません。Connection IDは `capra/layer2/ids.py` の `generate_connection_id()` が接続元、接続先、種別、artifactから決定的に生成し、`max_connections` に達した場合は安全に打ち切ってwarningを残します。
->`build_attack_operator_graph()` は生成したConnectionとLayer 3候補をOperator群とともにまとめ、最終的な `AttackOperatorGraphModel` を返します。JSON出力は `capra/layer2/exporter.py`、Streamlit用のPyVis可視化は `capra/layer2/visualization.py` が担当します。可視化では共通形式のOperatorをnode、`enables` / `requires` を有向edgeとして表示します。
+例えば、あるOperatorが`identity(gcp:serviceaccount:reporter)` を `produces` し、別のOperatorが同じ `identity(gcp:serviceaccount:reporter)` を `requires` している場合、前者から後者へ `enables`、後者から前者へ `requires` を作ります。これは「前者の実行が後者を可能にする」と同時に、「後者は前者の成果物に依存している」ことを、グラフ上で両方向からたどれるようにするためです。Layer 2ではこのConnectionは依存関係のモデル化であり、実環境で攻撃が成功することや、検証済みであることを意味しません。
+
+artifact接続では、`artifact_type` と `subject_node_id` が一致し、要求側 `properties` のすべてを生成側が満たす必要があります。`unknown` や空の対象ノードは接続に使用しません。Connection IDは `capra/layer2/ids.py` の `generate_connection_id()` が接続元、接続先、種別、artifactから決定的に生成し、`max_connections` に達した場合は安全に打ち切ってwarningを残します。
+`build_attack_operator_graph()` は生成したConnectionとLayer 3候補をOperator群とともにまとめ、最終的な `AttackOperatorGraphModel` を返します。JSON出力は `capra/layer2/exporter.py`、Streamlit用のPyVis可視化は `capra/layer2/visualization.py` が担当します。可視化では共通形式のOperatorをnode、`enables` / `requires` を有向edgeとして表示します。
 
 `capra/layer2/visualization.py` の `_build_operator_label()` は、Operator nodeのラベルを `operator_type`、`source_node`、`target_node` の3行で構成します。これにより、グラフ上で操作の種類だけでなく、元のFact Graph上の操作主体と対象資産も確認できます。CVE由来Operatorのように `source_node` が存在しない場合は `source: -` と表示し、`target_node` は対象資産IDを表示します。
 
