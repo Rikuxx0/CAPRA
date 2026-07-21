@@ -180,7 +180,7 @@ def build_attack_operator_graph_html(graph: AttackOperatorGraphModel) -> str:
             arrows="to",
         )
     network.set_options(
-        '{"physics":{"stabilization":{"iterations":150},"barnesHut":{"springLength":50,'
+        '{"physics":{"stabilization":{"enabled":true,"iterations":40},"barnesHut":{"springLength":300,'
         '"springConstant":0.01,"avoidOverlap":0.8}},"interaction":{"hover":false},'
         '"edges":{"smooth":{"type":"dynamic"}}}'
     )

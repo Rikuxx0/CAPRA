@@ -140,6 +140,7 @@ if st.button("Build Layer 1 Fact Graph"):
                     label=data.get("type", ""),
                     title=json.dumps(data, ensure_ascii=False),
                     color="#C7CED8",
+                    length=200,
                 )
             with tempfile.NamedTemporaryFile(delete=False, suffix=".html") as tmp_file:
                 layer1_net.save_graph(tmp_file.name)
