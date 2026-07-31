@@ -70,13 +70,16 @@ def parse_grype_sarif(data: dict[str, Any]) -> list[VulnerabilityModel]:
             search_text = " ".join([str(rule_id or ""), message])
             generated_id = generate_vulnerability_id("grype-sarif", result_index, rule_id)
             rule = rules_by_id.get(rule_id, {})
+            properties = rule.get("properties") or {}
             cve_id = _extract_cve_id(search_text) or _extract_cve_id(rule) or _extract_cve_id(result)
             vulnerabilities.append(
                 VulnerabilityModel(
                     id=(cve_id if cve_id else str(rule_id or generated_id)),
                     cve_id=cve_id,
-                    package_name=(rule.get("properties") or {}).get("packageName"),
-                    severity=result.get("level") or (rule.get("properties") or {}).get("security-severity"),
+                    package_name=properties.get("packageName"),
+                    installed_version=properties.get("packageVersion") or properties.get("installedVersion"),
+                    fixed_version=properties.get("fixedVersion"),
+                    severity=properties.get("severity") or properties.get("security-severity") or result.get("level"),
                     source="grype-sarif",
                     raw_evidence=result,
                 )

@@ -1,51 +1,1815 @@
 {
-  "schema_version": "0.1.0",
   "attack_operators": [
     {
-      "id": "attack_op:gcp:create_service_account_key:example",
-      "operator_type": "create_service_account_key",
-      "origin_kind": "iam_direct_edge",
-      "source_tool": "gcp_hound",
-      "source_fact_ids": ["gcp-edge-1"],
-      "source_files": ["gcp_hound.json"],
-      "source_node": "gcp:user:analyst",
-      "target_node": "gcp:serviceaccount:reporter",
-      "preconditions": ["can_create_service_account_key"],
-      "effects": ["service_account_key_created"],
-      "produces": [{"artifact_type": "credential", "subject_node_id": "gcp:serviceaccount:reporter", "properties": {}}, {"artifact_type": "identity", "subject_node_id": "gcp:serviceaccount:reporter", "properties": {}}],
-      "requires": [],
       "cve_ids": [],
       "cwe_ids": [],
-      "status": "complete",
-      "verification_status": "unverified",
-      "missing_conditions": [],
+      "effects": [
+        "instance_created",
+        "target_role_identity_may_be_obtained"
+      ],
+      "id": "attack_op:aws:launch_instance_with_role:26ce5c14afef",
       "manual_verification_required": false,
+      "mapping_rule_id": "aws.ec2.passrole.v1",
+      "metadata": {
+        "rule_set_hash": "237c432fe7bd3628aa1714f67a8d5aa5fbaa26321559edd232830a11d2019a5a",
+        "rule_set_version": "0.1.0",
+        "rule_version": "1"
+      },
+      "missing_conditions": [],
+      "operator_type": "launch_instance_with_role",
+      "origin_kind": "iam_pattern",
+      "preconditions": [
+        "can_run_instances",
+        "can_pass_target_role",
+        "instance_uses_target_role"
+      ],
+      "produces": [
+        {
+          "artifact_type": "identity",
+          "properties": {},
+          "subject_node_id": "aws:role:EKSNodeRole"
+        }
+      ],
       "public_exploit_candidate": false,
-      "mapping_rule_id": "gcp_hound.cancreatekeys.v1",
-      "raw_evidence": {},
-      "metadata": {"original_edge_type": "CanCreateKeys"}
+      "raw_evidence": {
+        "matched_edges": [
+          {
+            "fact_id": "iam-01",
+            "original_edge_type": "assume_role",
+            "permission": "sts:AssumeRole",
+            "provider": "aws",
+            "raw_evidence": {
+              "fact_id": "iam-01",
+              "permission": "sts:AssumeRole",
+              "provider": "aws",
+              "source": "aws:user:developer",
+              "source_tool": "iamhounddog",
+              "target": "aws:role:DevOpsRole",
+              "type": "assume_role"
+            },
+            "source": "aws:user:developer",
+            "source_file": null,
+            "source_tool": "iamhounddog",
+            "source_tool_inferred": false,
+            "target": "aws:role:DevOpsRole",
+            "type": "assume_role"
+          },
+          {
+            "fact_id": "iam-02",
+            "original_edge_type": "attached_policy",
+            "permission": "attached_policy",
+            "provider": "aws",
+            "raw_evidence": {
+              "fact_id": "iam-02",
+              "provider": "aws",
+              "source": "aws:role:DevOpsRole",
+              "source_tool": "iamhounddog",
+              "target": "aws:policy:EC2LaunchPolicy",
+              "type": "attached_policy"
+            },
+            "source": "aws:role:DevOpsRole",
+            "source_file": null,
+            "source_tool": "iamhounddog",
+            "source_tool_inferred": false,
+            "target": "aws:policy:EC2LaunchPolicy",
+            "type": "attached_policy"
+          },
+          {
+            "fact_id": "iam-03",
+            "original_edge_type": "ec2_run_instances",
+            "permission": "ec2:RunInstances",
+            "provider": "aws",
+            "raw_evidence": {
+              "fact_id": "iam-03",
+              "permission": "ec2:RunInstances",
+              "provider": "aws",
+              "source": "aws:policy:EC2LaunchPolicy",
+              "source_tool": "iamhounddog",
+              "target": "aws:ec2:bootstrap-runner",
+              "type": "ec2_run_instances"
+            },
+            "source": "aws:policy:EC2LaunchPolicy",
+            "source_file": null,
+            "source_tool": "iamhounddog",
+            "source_tool_inferred": false,
+            "target": "aws:ec2:bootstrap-runner",
+            "type": "ec2_run_instances"
+          },
+          {
+            "fact_id": "iam-04",
+            "original_edge_type": "instance_role",
+            "permission": "instance_role",
+            "provider": "aws",
+            "raw_evidence": {
+              "fact_id": "iam-04",
+              "provider": "aws",
+              "source": "aws:ec2:bootstrap-runner",
+              "source_tool": "iamhounddog",
+              "target": "aws:role:EKSNodeRole",
+              "type": "instance_role"
+            },
+            "source": "aws:ec2:bootstrap-runner",
+            "source_file": null,
+            "source_tool": "iamhounddog",
+            "source_tool_inferred": false,
+            "target": "aws:role:EKSNodeRole",
+            "type": "instance_role"
+          }
+        ],
+        "permission_edges": [
+          {
+            "fact_id": "iam-03",
+            "original_edge_type": "ec2_run_instances",
+            "permission": "ec2:RunInstances",
+            "provider": "aws",
+            "raw_evidence": {
+              "fact_id": "iam-03",
+              "permission": "ec2:RunInstances",
+              "provider": "aws",
+              "source": "aws:policy:EC2LaunchPolicy",
+              "source_tool": "iamhounddog",
+              "target": "aws:ec2:bootstrap-runner",
+              "type": "ec2_run_instances"
+            },
+            "source": "aws:policy:EC2LaunchPolicy",
+            "source_file": null,
+            "source_tool": "iamhounddog",
+            "source_tool_inferred": false,
+            "target": "aws:ec2:bootstrap-runner",
+            "type": "ec2_run_instances"
+          },
+          {
+            "fact_id": "iam-05",
+            "original_edge_type": "has_permission",
+            "permission": "iam:PassRole",
+            "provider": "aws",
+            "raw_evidence": {
+              "fact_id": "iam-05",
+              "permission": "iam:PassRole",
+              "provider": "aws",
+              "source": "aws:user:developer",
+              "source_tool": "iamhounddog",
+              "target": "aws:role:EKSNodeRole",
+              "type": "has_permission"
+            },
+            "source": "aws:user:developer",
+            "source_file": null,
+            "source_tool": "iamhounddog",
+            "source_tool_inferred": false,
+            "target": "aws:role:EKSNodeRole",
+            "type": "has_permission"
+          }
+        ]
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "iam-01",
+        "iam-02",
+        "iam-03",
+        "iam-04",
+        "iam-05"
+      ],
+      "source_files": [],
+      "source_node": "aws:user:developer",
+      "source_tool": "iamhounddog",
+      "status": "complete",
+      "target_node": "aws:role:EKSNodeRole",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "application_secret_added"
+      ],
+      "id": "attack_op:azure:add_application_secret:20d6bb620a83",
+      "manual_verification_required": false,
+      "mapping_rule_id": "azurehound.azaddsecret.v1",
+      "metadata": {
+        "original_edge_type": "AZAddSecret",
+        "provider": "azure",
+        "rule_set_hash": "8fab22e191c2f4029b0ec89a619b436269145d57161b612cb2476c1a08445658",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [],
+      "operator_type": "add_application_secret",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [
+        "can_modify_application_credentials"
+      ],
+      "produces": [
+        {
+          "artifact_type": "credential",
+          "properties": {},
+          "subject_node_id": "azure:application:deployment-bot"
+        },
+        {
+          "artifact_type": "identity",
+          "properties": {},
+          "subject_node_id": "azure:application:deployment-bot"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "azure-02",
+        "original_edge_type": "AZAddSecret",
+        "permission": "AZAddSecret",
+        "provider": "azure",
+        "raw_evidence": {
+          "fact_id": "azure-02",
+          "provider": "azure",
+          "source": "azure:user:release-engineer",
+          "source_tool": "azurehound",
+          "target": "azure:application:deployment-bot",
+          "type": "AZAddSecret"
+        },
+        "source": "azure:user:release-engineer",
+        "source_file": null,
+        "source_tool": "azurehound",
+        "source_tool_inferred": false,
+        "target": "azure:application:deployment-bot",
+        "type": "azaddsecret"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "azure-02"
+      ],
+      "source_files": [],
+      "source_node": "azure:user:release-engineer",
+      "source_tool": "azurehound",
+      "status": "complete",
+      "target_node": "azure:application:deployment-bot",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "group_membership_added"
+      ],
+      "id": "attack_op:azure:add_group_member:153597802270",
+      "manual_verification_required": false,
+      "mapping_rule_id": "azurehound.azaddmembers.v1",
+      "metadata": {
+        "original_edge_type": "AZAddMembers",
+        "provider": "azure",
+        "rule_set_hash": "8fab22e191c2f4029b0ec89a619b436269145d57161b612cb2476c1a08445658",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [],
+      "operator_type": "add_group_member",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [
+        "can_modify_group_membership"
+      ],
+      "produces": [
+        {
+          "artifact_type": "identity",
+          "properties": {},
+          "subject_node_id": "azure:group:production-operators"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "azure-03",
+        "original_edge_type": "AZAddMembers",
+        "permission": "AZAddMembers",
+        "provider": "azure",
+        "raw_evidence": {
+          "fact_id": "azure-03",
+          "provider": "azure",
+          "source": "azure:application:deployment-bot",
+          "source_tool": "azurehound",
+          "target": "azure:group:production-operators",
+          "type": "AZAddMembers"
+        },
+        "source": "azure:application:deployment-bot",
+        "source_file": null,
+        "source_tool": "azurehound",
+        "source_tool_inferred": false,
+        "target": "azure:group:production-operators",
+        "type": "azaddmembers"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "azure-03"
+      ],
+      "source_files": [],
+      "source_node": "azure:application:deployment-bot",
+      "source_tool": "azurehound",
+      "status": "complete",
+      "target_node": "azure:group:production-operators",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "service_account_identity_obtained"
+      ],
+      "id": "attack_op:gcp:impersonate_service_account:061d764dfc84",
+      "manual_verification_required": false,
+      "mapping_rule_id": "gcp_hound.canimpersonate.v1",
+      "metadata": {
+        "original_edge_type": "CanImpersonate",
+        "provider": "gcp",
+        "rule_set_hash": "86a52a65078dc637e2fc218b2d7a162dfbb4d1f430143eb93b83237b94dc3e08",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [],
+      "operator_type": "impersonate_service_account",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [
+        "can_impersonate_service_account"
+      ],
+      "produces": [
+        {
+          "artifact_type": "identity",
+          "properties": {},
+          "subject_node_id": "gcp:serviceaccount:analytics-exporter"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "gcp-01",
+        "original_edge_type": "CanImpersonate",
+        "permission": "CanImpersonate",
+        "provider": "gcp",
+        "raw_evidence": {
+          "fact_id": "gcp-01",
+          "provider": "gcp",
+          "source": "aws:role:EKSNodeRole",
+          "source_tool": "gcp_hound",
+          "target": "gcp:serviceaccount:analytics-exporter",
+          "type": "CanImpersonate"
+        },
+        "source": "aws:role:EKSNodeRole",
+        "source_file": null,
+        "source_tool": "gcp_hound",
+        "source_tool_inferred": false,
+        "target": "gcp:serviceaccount:analytics-exporter",
+        "type": "canimpersonate"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "gcp-01"
+      ],
+      "source_files": [],
+      "source_node": "aws:role:EKSNodeRole",
+      "source_tool": "gcp_hound",
+      "status": "complete",
+      "target_node": "gcp:serviceaccount:analytics-exporter",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "bucket_policy_modified"
+      ],
+      "id": "attack_op:gcp:modify_bucket_policy:8f3b9789f20c",
+      "manual_verification_required": false,
+      "mapping_rule_id": "gcp_hound.canmodifybucketpoliciesinproject.v1",
+      "metadata": {
+        "original_edge_type": "CanModifyBucketPoliciesInProject",
+        "provider": "gcp",
+        "rule_set_hash": "86a52a65078dc637e2fc218b2d7a162dfbb4d1f430143eb93b83237b94dc3e08",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [],
+      "operator_type": "modify_bucket_policy",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [
+        "can_modify_bucket_policy"
+      ],
+      "produces": [
+        {
+          "artifact_type": "resource_control",
+          "properties": {},
+          "subject_node_id": "gcp:bucket:audit-archive"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "gcp-03",
+        "original_edge_type": "CanModifyBucketPoliciesInProject",
+        "permission": "CanModifyBucketPoliciesInProject",
+        "provider": "gcp",
+        "raw_evidence": {
+          "fact_id": "gcp-03",
+          "provider": "gcp",
+          "source": "gcp:serviceaccount:analytics-exporter",
+          "source_tool": "gcp_hound",
+          "target": "gcp:bucket:audit-archive",
+          "type": "CanModifyBucketPoliciesInProject"
+        },
+        "source": "gcp:serviceaccount:analytics-exporter",
+        "source_file": null,
+        "source_tool": "gcp_hound",
+        "source_tool_inferred": false,
+        "target": "gcp:bucket:audit-archive",
+        "type": "canmodifybucketpoliciesinproject"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "gcp-03"
+      ],
+      "source_files": [],
+      "source_node": "gcp:serviceaccount:analytics-exporter",
+      "source_tool": "gcp_hound",
+      "status": "complete",
+      "target_node": "gcp:bucket:audit-archive",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "secret_data_may_be_read"
+      ],
+      "id": "attack_op:gcp:read_secret:d7d760152fd8",
+      "manual_verification_required": false,
+      "mapping_rule_id": "gcp_hound.canreadsecrets.v1",
+      "metadata": {
+        "original_edge_type": "CanReadSecrets",
+        "provider": "gcp",
+        "rule_set_hash": "86a52a65078dc637e2fc218b2d7a162dfbb4d1f430143eb93b83237b94dc3e08",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [],
+      "operator_type": "read_secret",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [
+        "can_access_secret"
+      ],
+      "produces": [
+        {
+          "artifact_type": "data_access",
+          "properties": {},
+          "subject_node_id": "gcp:secret:analytics-api-key"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "gcp-02",
+        "original_edge_type": "CanReadSecrets",
+        "permission": "CanReadSecrets",
+        "provider": "gcp",
+        "raw_evidence": {
+          "fact_id": "gcp-02",
+          "provider": "gcp",
+          "source": "gcp:serviceaccount:analytics-exporter",
+          "source_tool": "gcp_hound",
+          "target": "gcp:secret:analytics-api-key",
+          "type": "CanReadSecrets"
+        },
+        "source": "gcp:serviceaccount:analytics-exporter",
+        "source_file": null,
+        "source_tool": "gcp_hound",
+        "source_tool_inferred": false,
+        "target": "gcp:secret:analytics-api-key",
+        "type": "canreadsecrets"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "gcp-02"
+      ],
+      "source_files": [],
+      "source_node": "gcp:serviceaccount:analytics-exporter",
+      "source_tool": "gcp_hound",
+      "status": "complete",
+      "target_node": "gcp:secret:analytics-api-key",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "instance_metadata_may_be_accessed"
+      ],
+      "id": "attack_op:hybrid:access_instance_metadata_service:b51c4bdef29c",
+      "manual_verification_required": true,
+      "mapping_rule_id": "clusterhound.accessimds.v1",
+      "metadata": {
+        "original_edge_type": "accessIMDS",
+        "provider": "hybrid",
+        "rule_set_hash": "1f6dbbedbd1998eae08d79e7e69bf070a3f30a8f7bc464a315bc37ecd0542197",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [
+        "network_reachability_is_confirmed",
+        "imds_access_is_confirmed"
+      ],
+      "operator_type": "access_instance_metadata_service",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [],
+      "produces": [
+        {
+          "artifact_type": "credential",
+          "properties": {},
+          "subject_node_id": "aws:metadata:imds"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "k8s-05",
+        "original_edge_type": "accessIMDS",
+        "permission": "accessIMDS",
+        "provider": "hybrid",
+        "raw_evidence": {
+          "fact_id": "k8s-05",
+          "provider": "hybrid",
+          "source": "k8s:pod:checkout-api",
+          "source_tool": "clusterhound",
+          "target": "aws:metadata:imds",
+          "type": "accessIMDS"
+        },
+        "source": "k8s:pod:checkout-api",
+        "source_file": null,
+        "source_tool": "clusterhound",
+        "source_tool_inferred": false,
+        "target": "aws:metadata:imds",
+        "type": "accessimds"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "k8s-05"
+      ],
+      "source_files": [],
+      "source_node": "k8s:pod:checkout-api",
+      "source_tool": "clusterhound",
+      "status": "partial",
+      "target_node": "aws:metadata:imds",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "target_network_may_be_reachable"
+      ],
+      "id": "attack_op:hybrid:reach_network_target:9ab7159742e2",
+      "manual_verification_required": true,
+      "mapping_rule_id": "hound_generic.network_access.v1",
+      "metadata": {
+        "original_edge_type": "network",
+        "provider": "hybrid",
+        "rule_set_hash": "68acee47e4dcd81c8648db9daf6f052bd0d58b9c90bb3d1d2002377433ec36b2",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [
+        "network_route_is_confirmed",
+        "security_controls_allow_traffic"
+      ],
+      "operator_type": "reach_network_target",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [
+        "source_identity_is_available",
+        "route_and_security_controls_allow_traffic"
+      ],
+      "produces": [
+        {
+          "artifact_type": "network_reachability",
+          "properties": {},
+          "subject_node_id": "k8s:pod:payment-api"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "generic-02",
+        "original_edge_type": "network",
+        "permission": "network",
+        "provider": "hybrid",
+        "raw_evidence": {
+          "fact_id": "generic-02",
+          "permission": "network",
+          "provider": "hybrid",
+          "source": "aws:role:EKSNodeRole",
+          "source_tool": "hound_generic",
+          "target": "k8s:pod:payment-api",
+          "type": "network"
+        },
+        "source": "aws:role:EKSNodeRole",
+        "source_file": null,
+        "source_tool": "hound_generic",
+        "source_tool_inferred": false,
+        "target": "k8s:pod:payment-api",
+        "type": "network_access"
+      },
+      "requires": [
+        {
+          "artifact_type": "identity",
+          "properties": {},
+          "subject_node_id": "aws:role:EKSNodeRole"
+        }
+      ],
+      "source_fact_ids": [
+        "generic-02"
+      ],
+      "source_files": [],
+      "source_node": "aws:role:EKSNodeRole",
+      "source_tool": "hound_generic",
+      "status": "partial",
+      "target_node": "k8s:pod:payment-api",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "target_network_may_be_reachable"
+      ],
+      "id": "attack_op:hybrid:reach_network_target:be710ee41b1f",
+      "manual_verification_required": true,
+      "mapping_rule_id": "hound_generic.network_access.v1",
+      "metadata": {
+        "original_edge_type": "network",
+        "provider": "hybrid",
+        "rule_set_hash": "68acee47e4dcd81c8648db9daf6f052bd0d58b9c90bb3d1d2002377433ec36b2",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [
+        "network_route_is_confirmed",
+        "security_controls_allow_traffic"
+      ],
+      "operator_type": "reach_network_target",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [
+        "source_identity_is_available",
+        "route_and_security_controls_allow_traffic"
+      ],
+      "produces": [
+        {
+          "artifact_type": "network_reachability",
+          "properties": {},
+          "subject_node_id": "k8s:pod:checkout-api"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "generic-01",
+        "original_edge_type": "network",
+        "permission": "network",
+        "provider": "hybrid",
+        "raw_evidence": {
+          "fact_id": "generic-01",
+          "permission": "network",
+          "provider": "hybrid",
+          "source": "aws:role:EKSNodeRole",
+          "source_tool": "hound_generic",
+          "target": "k8s:pod:checkout-api",
+          "type": "network"
+        },
+        "source": "aws:role:EKSNodeRole",
+        "source_file": null,
+        "source_tool": "hound_generic",
+        "source_tool_inferred": false,
+        "target": "k8s:pod:checkout-api",
+        "type": "network_access"
+      },
+      "requires": [
+        {
+          "artifact_type": "identity",
+          "properties": {},
+          "subject_node_id": "aws:role:EKSNodeRole"
+        }
+      ],
+      "source_fact_ids": [
+        "generic-01"
+      ],
+      "source_files": [],
+      "source_node": "aws:role:EKSNodeRole",
+      "source_tool": "hound_generic",
+      "status": "partial",
+      "target_node": "k8s:pod:checkout-api",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "kubernetes_api_may_be_reachable"
+      ],
+      "id": "attack_op:k8s:access_unauthenticated_kubernetes_api:ff227cd1297d",
+      "manual_verification_required": true,
+      "mapping_rule_id": "clusterhound.unauthapiaccess.v1",
+      "metadata": {
+        "original_edge_type": "unauthAPIAccess",
+        "provider": "k8s",
+        "rule_set_hash": "1f6dbbedbd1998eae08d79e7e69bf070a3f30a8f7bc464a315bc37ecd0542197",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [
+        "network_reachability_is_confirmed",
+        "anonymous_authentication_is_enabled"
+      ],
+      "operator_type": "access_unauthenticated_kubernetes_api",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [],
+      "produces": [
+        {
+          "artifact_type": "network_reachability",
+          "properties": {},
+          "subject_node_id": "k8s:api:prod-eks"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "k8s-04",
+        "original_edge_type": "unauthAPIAccess",
+        "permission": "unauthAPIAccess",
+        "provider": "k8s",
+        "raw_evidence": {
+          "fact_id": "k8s-04",
+          "provider": "k8s",
+          "source": "internet:external:public-client",
+          "source_tool": "clusterhound",
+          "target": "k8s:api:prod-eks",
+          "type": "unauthAPIAccess"
+        },
+        "source": "internet:external:public-client",
+        "source_file": null,
+        "source_tool": "clusterhound",
+        "source_tool_inferred": false,
+        "target": "k8s:api:prod-eks",
+        "type": "unauthapiaccess"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "k8s-04"
+      ],
+      "source_files": [],
+      "source_node": "internet:external:public-client",
+      "source_tool": "clusterhound",
+      "status": "partial",
+      "target_node": "k8s:api:prod-eks",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "workload_created"
+      ],
+      "id": "attack_op:k8s:create_workload:d714e0d85862",
+      "manual_verification_required": false,
+      "mapping_rule_id": "clusterhound.cancreateworkload.v1",
+      "metadata": {
+        "original_edge_type": "canCreateWorkload",
+        "provider": "k8s",
+        "rule_set_hash": "1f6dbbedbd1998eae08d79e7e69bf070a3f30a8f7bc464a315bc37ecd0542197",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [],
+      "operator_type": "create_workload",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [],
+      "produces": [
+        {
+          "artifact_type": "resource_control",
+          "properties": {},
+          "subject_node_id": "k8s:cluster:prod-eks"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "k8s-06",
+        "original_edge_type": "canCreateWorkload",
+        "permission": "canCreateWorkload",
+        "provider": "k8s",
+        "raw_evidence": {
+          "fact_id": "k8s-06",
+          "provider": "k8s",
+          "source": "k8s:serviceaccount:checkout",
+          "source_tool": "clusterhound",
+          "target": "k8s:cluster:prod-eks",
+          "type": "canCreateWorkload"
+        },
+        "source": "k8s:serviceaccount:checkout",
+        "source_file": null,
+        "source_tool": "clusterhound",
+        "source_tool_inferred": false,
+        "target": "k8s:cluster:prod-eks",
+        "type": "cancreateworkload"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "k8s-06"
+      ],
+      "source_files": [],
+      "source_node": "k8s:serviceaccount:checkout",
+      "source_tool": "clusterhound",
+      "status": "complete",
+      "target_node": "k8s:cluster:prod-eks",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [
+        "CVE-2022-0778"
+      ],
+      "cwe_ids": [
+        "CWE-835"
+      ],
+      "effects": [
+        "vulnerability_exploitation_effect"
+      ],
+      "id": "attack_op:k8s:denial_of_service:74f032367056",
+      "manual_verification_required": false,
+      "mapping_rule_id": "cve.denial_of_service.v1",
+      "metadata": {
+        "attack_complexity": "low",
+        "attack_vector": "network",
+        "availability_impact": "high",
+        "confidentiality_impact": "none",
+        "cvss_score": 7.5,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+        "input_package_name": "openssl",
+        "integrity_impact": "none",
+        "nvd_cache_hash": "21c953d0ed1ad200d96beb04581a10f1780342e6dcfd56496a3089c4a3a4267a",
+        "package_matches_nvd_product": true,
+        "privileges_required": "none",
+        "products": [
+          "openssl:openssl"
+        ],
+        "references": [
+          {
+            "tags": [
+              "Vendor Advisory"
+            ],
+            "url": "https://www.openssl.org/news/secadv/20220315.txt"
+          }
+        ],
+        "rule_set_hash": "407713ab9ceaeeae2709bf28184c334fcaa492f712062445b1a4c97d450b6923",
+        "rule_set_version": "0.1.0",
+        "scope": "unchanged",
+        "user_interaction": "none",
+        "versions": [
+          "1.1.1",
+          "1.1.1n"
+        ]
+      },
+      "missing_conditions": [
+        "target_is_reachable"
+      ],
+      "operator_type": "denial_of_service",
+      "origin_kind": "cve",
+      "preconditions": [
+        "vulnerable_version_is_running",
+        "target_is_reachable"
+      ],
+      "produces": [],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "nvd": {
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "cpeMatch": [
+                    {
+                      "criteria": "cpe:2.3:a:openssl:openssl:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "1.1.1n",
+                      "versionStartIncluding": "1.1.1",
+                      "vulnerable": true
+                    }
+                  ],
+                  "negate": false,
+                  "operator": "OR"
+                }
+              ]
+            }
+          ],
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "The OpenSSL BN_mod_sqrt() function can enter an infinite loop when parsing a crafted certificate with invalid elliptic-curve parameters, causing a denial of service. OpenSSL 1.1.1 through 1.1.1m is affected and the issue is fixed in 1.1.1n."
+            }
+          ],
+          "id": "CVE-2022-0778",
+          "metrics": {
+            "cvssMetricV31": [
+              {
+                "cvssData": {
+                  "attackComplexity": "LOW",
+                  "attackVector": "NETWORK",
+                  "availabilityImpact": "HIGH",
+                  "baseScore": 7.5,
+                  "baseSeverity": "HIGH",
+                  "confidentialityImpact": "NONE",
+                  "integrityImpact": "NONE",
+                  "privilegesRequired": "NONE",
+                  "scope": "UNCHANGED",
+                  "userInteraction": "NONE",
+                  "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:N/I:N/A:H",
+                  "version": "3.1"
+                },
+                "source": "nvd@nist.gov",
+                "type": "Primary"
+              }
+            ]
+          },
+          "references": [
+            {
+              "source": "openssl-security@openssl.org",
+              "tags": [
+                "Vendor Advisory"
+              ],
+              "url": "https://www.openssl.org/news/secadv/20220315.txt"
+            }
+          ],
+          "sourceIdentifier": "openssl-security@openssl.org",
+          "weaknesses": [
+            {
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-835"
+                }
+              ],
+              "source": "nvd@nist.gov",
+              "type": "Primary"
+            }
+          ]
+        },
+        "vulnerability": {
+          "cve_id": "CVE-2022-0778",
+          "fixed_version": "1.1.1n",
+          "id": "CVE-2022-0778",
+          "installed_version": "1.1.1m",
+          "package_name": "openssl",
+          "raw_evidence": {
+            "artifact": {
+              "metadata": {
+                "image": "checkout-api"
+              },
+              "name": "openssl",
+              "version": "1.1.1m"
+            },
+            "vulnerability": {
+              "fix": {
+                "versions": [
+                  "1.1.1n"
+                ]
+              },
+              "id": "CVE-2022-0778",
+              "severity": "High"
+            }
+          },
+          "severity": "High",
+          "source": "grype-json"
+        }
+      },
+      "requires": [
+        {
+          "artifact_type": "network_reachability",
+          "properties": {},
+          "subject_node_id": "k8s:pod:checkout-api"
+        }
+      ],
+      "source_fact_ids": [
+        "CVE-2022-0778"
+      ],
+      "source_files": [],
+      "source_node": null,
+      "source_tool": "nvd",
+      "status": "partial",
+      "target_node": "k8s:pod:checkout-api",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "workload_command_may_be_executed"
+      ],
+      "id": "attack_op:k8s:exec_in_workload:214eae5bfb10",
+      "manual_verification_required": false,
+      "mapping_rule_id": "clusterhound.canexec.v1",
+      "metadata": {
+        "original_edge_type": "canExec",
+        "provider": "k8s",
+        "rule_set_hash": "1f6dbbedbd1998eae08d79e7e69bf070a3f30a8f7bc464a315bc37ecd0542197",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [],
+      "operator_type": "exec_in_workload",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [],
+      "produces": [
+        {
+          "artifact_type": "resource_control",
+          "properties": {},
+          "subject_node_id": "k8s:pod:payment-api"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "k8s-02",
+        "original_edge_type": "canExec",
+        "permission": "canExec",
+        "provider": "k8s",
+        "raw_evidence": {
+          "fact_id": "k8s-02",
+          "provider": "k8s",
+          "source": "k8s:serviceaccount:checkout",
+          "source_tool": "clusterhound",
+          "target": "k8s:pod:payment-api",
+          "type": "canExec"
+        },
+        "source": "k8s:serviceaccount:checkout",
+        "source_file": null,
+        "source_tool": "clusterhound",
+        "source_tool_inferred": false,
+        "target": "k8s:pod:payment-api",
+        "type": "canexec"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "k8s-02"
+      ],
+      "source_files": [],
+      "source_node": "k8s:serviceaccount:checkout",
+      "source_tool": "clusterhound",
+      "status": "complete",
+      "target_node": "k8s:pod:payment-api",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "mounted_service_account_may_be_obtained"
+      ],
+      "id": "attack_op:k8s:obtain_mounted_service_account:178edb7befbf",
+      "manual_verification_required": false,
+      "mapping_rule_id": "clusterhound.mountsserviceaccount.v1",
+      "metadata": {
+        "original_edge_type": "mountsServiceAccount",
+        "provider": "k8s",
+        "rule_set_hash": "1f6dbbedbd1998eae08d79e7e69bf070a3f30a8f7bc464a315bc37ecd0542197",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [],
+      "operator_type": "obtain_mounted_service_account",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [],
+      "produces": [
+        {
+          "artifact_type": "credential",
+          "properties": {},
+          "subject_node_id": "k8s:serviceaccount:checkout"
+        },
+        {
+          "artifact_type": "identity",
+          "properties": {},
+          "subject_node_id": "k8s:serviceaccount:checkout"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "k8s-01",
+        "original_edge_type": "mountsServiceAccount",
+        "permission": "mountsServiceAccount",
+        "provider": "k8s",
+        "raw_evidence": {
+          "fact_id": "k8s-01",
+          "provider": "k8s",
+          "source": "k8s:pod:checkout-api",
+          "source_tool": "clusterhound",
+          "target": "k8s:serviceaccount:checkout",
+          "type": "mountsServiceAccount"
+        },
+        "source": "k8s:pod:checkout-api",
+        "source_file": null,
+        "source_tool": "clusterhound",
+        "source_tool_inferred": false,
+        "target": "k8s:serviceaccount:checkout",
+        "type": "mountsserviceaccount"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "k8s-01"
+      ],
+      "source_files": [],
+      "source_node": "k8s:pod:checkout-api",
+      "source_tool": "clusterhound",
+      "status": "complete",
+      "target_node": "k8s:serviceaccount:checkout",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "workload_network_may_be_reached"
+      ],
+      "id": "attack_op:k8s:port_forward_to_workload:e73b1f641ee7",
+      "manual_verification_required": false,
+      "mapping_rule_id": "clusterhound.canportforward.v1",
+      "metadata": {
+        "original_edge_type": "canPortForward",
+        "provider": "k8s",
+        "rule_set_hash": "1f6dbbedbd1998eae08d79e7e69bf070a3f30a8f7bc464a315bc37ecd0542197",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [],
+      "operator_type": "port_forward_to_workload",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [],
+      "produces": [
+        {
+          "artifact_type": "network_reachability",
+          "properties": {},
+          "subject_node_id": "k8s:pod:payment-api"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "k8s-07",
+        "original_edge_type": "canPortForward",
+        "permission": "canPortForward",
+        "provider": "k8s",
+        "raw_evidence": {
+          "fact_id": "k8s-07",
+          "provider": "k8s",
+          "source": "k8s:serviceaccount:checkout",
+          "source_tool": "clusterhound",
+          "target": "k8s:pod:payment-api",
+          "type": "canPortForward"
+        },
+        "source": "k8s:serviceaccount:checkout",
+        "source_file": null,
+        "source_tool": "clusterhound",
+        "source_tool_inferred": false,
+        "target": "k8s:pod:payment-api",
+        "type": "canportforward"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "k8s-07"
+      ],
+      "source_files": [],
+      "source_node": "k8s:serviceaccount:checkout",
+      "source_tool": "clusterhound",
+      "status": "complete",
+      "target_node": "k8s:pod:payment-api",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [],
+      "cwe_ids": [],
+      "effects": [
+        "secret_data_may_be_read"
+      ],
+      "id": "attack_op:k8s:read_kubernetes_secret:564f3db6a58b",
+      "manual_verification_required": false,
+      "mapping_rule_id": "clusterhound.secretsread.v1",
+      "metadata": {
+        "original_edge_type": "secretsRead",
+        "provider": "k8s",
+        "rule_set_hash": "1f6dbbedbd1998eae08d79e7e69bf070a3f30a8f7bc464a315bc37ecd0542197",
+        "rule_set_version": "0.1.0"
+      },
+      "missing_conditions": [],
+      "operator_type": "read_kubernetes_secret",
+      "origin_kind": "iam_direct_edge",
+      "preconditions": [],
+      "produces": [
+        {
+          "artifact_type": "data_access",
+          "properties": {},
+          "subject_node_id": "k8s:secret:payment-db"
+        }
+      ],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "fact_id": "k8s-03",
+        "original_edge_type": "secretsRead",
+        "permission": "secretsRead",
+        "provider": "k8s",
+        "raw_evidence": {
+          "fact_id": "k8s-03",
+          "provider": "k8s",
+          "source": "k8s:serviceaccount:checkout",
+          "source_tool": "clusterhound",
+          "target": "k8s:secret:payment-db",
+          "type": "secretsRead"
+        },
+        "source": "k8s:serviceaccount:checkout",
+        "source_file": null,
+        "source_tool": "clusterhound",
+        "source_tool_inferred": false,
+        "target": "k8s:secret:payment-db",
+        "type": "secretsread"
+      },
+      "requires": [],
+      "source_fact_ids": [
+        "k8s-03"
+      ],
+      "source_files": [],
+      "source_node": "k8s:serviceaccount:checkout",
+      "source_tool": "clusterhound",
+      "status": "complete",
+      "target_node": "k8s:secret:payment-db",
+      "verification_status": "unverified"
+    },
+    {
+      "cve_ids": [
+        "CVE-2021-44228"
+      ],
+      "cwe_ids": [
+        "CWE-917"
+      ],
+      "effects": [
+        "vulnerability_exploitation_effect"
+      ],
+      "id": "attack_op:k8s:remote_code_execution:fa034733aaa6",
+      "manual_verification_required": false,
+      "mapping_rule_id": "cve.arbitrary_code_execution.v1",
+      "metadata": {
+        "attack_complexity": "low",
+        "attack_vector": "network",
+        "availability_impact": "high",
+        "confidentiality_impact": "high",
+        "cvss_score": 10.0,
+        "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+        "input_package_name": "log4j-core",
+        "integrity_impact": "high",
+        "nvd_cache_hash": "812ef20475deefa853979c5c6e8a25d0ad29aa852cd57a0d73a75c8ff6b267f3",
+        "package_matches_nvd_product": true,
+        "privileges_required": "none",
+        "products": [
+          "apache:log4j"
+        ],
+        "references": [
+          {
+            "tags": [
+              "Vendor Advisory"
+            ],
+            "url": "https://logging.apache.org/security.html#CVE-2021-44228"
+          }
+        ],
+        "rule_set_hash": "407713ab9ceaeeae2709bf28184c334fcaa492f712062445b1a4c97d450b6923",
+        "rule_set_version": "0.1.0",
+        "scope": "changed",
+        "user_interaction": "none",
+        "versions": [
+          "2.0-beta9",
+          "2.15.0"
+        ]
+      },
+      "missing_conditions": [
+        "target_is_reachable"
+      ],
+      "operator_type": "remote_code_execution",
+      "origin_kind": "cve",
+      "preconditions": [
+        "vulnerable_version_is_running",
+        "target_is_reachable"
+      ],
+      "produces": [],
+      "public_exploit_candidate": false,
+      "raw_evidence": {
+        "nvd": {
+          "configurations": [
+            {
+              "nodes": [
+                {
+                  "cpeMatch": [
+                    {
+                      "criteria": "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+                      "versionEndExcluding": "2.15.0",
+                      "versionStartIncluding": "2.0-beta9",
+                      "vulnerable": true
+                    }
+                  ],
+                  "negate": false,
+                  "operator": "OR"
+                }
+              ]
+            }
+          ],
+          "descriptions": [
+            {
+              "lang": "en",
+              "value": "Apache Log4j2 JNDI features do not protect against attacker-controlled LDAP endpoints. An attacker who controls log messages can execute arbitrary code when message lookup substitution is enabled. The issue affects log4j-core 2.14.1 and is fixed in 2.15.0 for Java 8 and later."
+            }
+          ],
+          "id": "CVE-2021-44228",
+          "metrics": {
+            "cvssMetricV31": [
+              {
+                "cvssData": {
+                  "attackComplexity": "LOW",
+                  "attackVector": "NETWORK",
+                  "availabilityImpact": "HIGH",
+                  "baseScore": 10.0,
+                  "baseSeverity": "CRITICAL",
+                  "confidentialityImpact": "HIGH",
+                  "integrityImpact": "HIGH",
+                  "privilegesRequired": "NONE",
+                  "scope": "CHANGED",
+                  "userInteraction": "NONE",
+                  "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+                  "version": "3.1"
+                },
+                "source": "nvd@nist.gov",
+                "type": "Primary"
+              }
+            ]
+          },
+          "references": [
+            {
+              "source": "security@apache.org",
+              "tags": [
+                "Vendor Advisory"
+              ],
+              "url": "https://logging.apache.org/security.html#CVE-2021-44228"
+            }
+          ],
+          "sourceIdentifier": "security@apache.org",
+          "weaknesses": [
+            {
+              "description": [
+                {
+                  "lang": "en",
+                  "value": "CWE-917"
+                }
+              ],
+              "source": "nvd@nist.gov",
+              "type": "Primary"
+            }
+          ]
+        },
+        "vulnerability": {
+          "cve_id": "CVE-2021-44228",
+          "fixed_version": "2.15.0",
+          "id": "CVE-2021-44228",
+          "installed_version": "2.14.1",
+          "package_name": "log4j-core",
+          "raw_evidence": {
+            "artifact": {
+              "metadata": {
+                "image": "payment-api"
+              },
+              "name": "log4j-core",
+              "version": "2.14.1"
+            },
+            "vulnerability": {
+              "fix": {
+                "versions": [
+                  "2.15.0"
+                ]
+              },
+              "id": "CVE-2021-44228",
+              "severity": "Critical"
+            }
+          },
+          "severity": "Critical",
+          "source": "grype-json"
+        }
+      },
+      "requires": [
+        {
+          "artifact_type": "network_reachability",
+          "properties": {},
+          "subject_node_id": "k8s:pod:payment-api"
+        }
+      ],
+      "source_fact_ids": [
+        "CVE-2021-44228"
+      ],
+      "source_files": [],
+      "source_node": null,
+      "source_tool": "nvd",
+      "status": "partial",
+      "target_node": "k8s:pod:payment-api",
+      "verification_status": "unverified"
     }
   ],
-  "connections": [],
-  "unresolved_items": [],
-  "layer3_candidates": ["attack_op:gcp:create_service_account_key:example"],
+  "connections": [
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:055d28e422d8722d",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: k8s:pod:checkout-api",
+      "source_operator_id": "attack_op:k8s:denial_of_service:74f032367056",
+      "target_operator_id": "attack_op:hybrid:access_instance_metadata_service:b51c4bdef29c"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:0c12700d34c56b38",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: aws:role:EKSNodeRole",
+      "source_operator_id": "attack_op:aws:launch_instance_with_role:26ce5c14afef",
+      "target_operator_id": "attack_op:hybrid:reach_network_target:9ab7159742e2"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:0d478473cfd5e01c",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: k8s:serviceaccount:checkout",
+      "source_operator_id": "attack_op:k8s:obtain_mounted_service_account:178edb7befbf",
+      "target_operator_id": "attack_op:k8s:create_workload:d714e0d85862"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:1a80e353107d9071",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: gcp:serviceaccount:analytics-exporter",
+      "source_operator_id": "attack_op:gcp:impersonate_service_account:061d764dfc84",
+      "target_operator_id": "attack_op:gcp:modify_bucket_policy:8f3b9789f20c"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:1b3dad40567f2ad7",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: gcp:serviceaccount:analytics-exporter",
+      "source_operator_id": "attack_op:gcp:impersonate_service_account:061d764dfc84",
+      "target_operator_id": "attack_op:gcp:read_secret:d7d760152fd8"
+    },
+    {
+      "artifact": {
+        "artifact_type": "network_reachability",
+        "properties": {},
+        "subject_node_id": "k8s:pod:payment-api"
+      },
+      "connection_type": "enables",
+      "id": "connection:29839117178ffdd8",
+      "metadata": {
+        "match_method": "artifact"
+      },
+      "reason": "Produced artifact satisfies target requirement",
+      "source_operator_id": "attack_op:hybrid:reach_network_target:9ab7159742e2",
+      "target_operator_id": "attack_op:k8s:remote_code_execution:fa034733aaa6"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:29982d963dcfd845",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: k8s:serviceaccount:checkout",
+      "source_operator_id": "attack_op:k8s:obtain_mounted_service_account:178edb7befbf",
+      "target_operator_id": "attack_op:k8s:port_forward_to_workload:e73b1f641ee7"
+    },
+    {
+      "artifact": {
+        "artifact_type": "network_reachability",
+        "properties": {},
+        "subject_node_id": "k8s:pod:payment-api"
+      },
+      "connection_type": "enables",
+      "id": "connection:2f639dfc29c5d6e3",
+      "metadata": {
+        "match_method": "artifact"
+      },
+      "reason": "Produced artifact satisfies target requirement",
+      "source_operator_id": "attack_op:k8s:port_forward_to_workload:e73b1f641ee7",
+      "target_operator_id": "attack_op:k8s:remote_code_execution:fa034733aaa6"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:3313f8632cdb78dd",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: k8s:pod:checkout-api",
+      "source_operator_id": "attack_op:hybrid:reach_network_target:be710ee41b1f",
+      "target_operator_id": "attack_op:hybrid:access_instance_metadata_service:b51c4bdef29c"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:4e1014097ef24c48",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: azure:application:deployment-bot",
+      "source_operator_id": "attack_op:azure:add_application_secret:20d6bb620a83",
+      "target_operator_id": "attack_op:azure:add_group_member:153597802270"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:5db0acd4adebd34a",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: k8s:pod:checkout-api",
+      "source_operator_id": "attack_op:hybrid:reach_network_target:be710ee41b1f",
+      "target_operator_id": "attack_op:k8s:obtain_mounted_service_account:178edb7befbf"
+    },
+    {
+      "artifact": {
+        "artifact_type": "network_reachability",
+        "properties": {},
+        "subject_node_id": "k8s:pod:checkout-api"
+      },
+      "connection_type": "enables",
+      "id": "connection:648200a2773343d1",
+      "metadata": {
+        "match_method": "artifact"
+      },
+      "reason": "Produced artifact satisfies target requirement",
+      "source_operator_id": "attack_op:hybrid:reach_network_target:be710ee41b1f",
+      "target_operator_id": "attack_op:k8s:denial_of_service:74f032367056"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:666ca15071814146",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: aws:role:EKSNodeRole",
+      "source_operator_id": "attack_op:aws:launch_instance_with_role:26ce5c14afef",
+      "target_operator_id": "attack_op:hybrid:reach_network_target:be710ee41b1f"
+    },
+    {
+      "artifact": {
+        "artifact_type": "identity",
+        "properties": {},
+        "subject_node_id": "aws:role:EKSNodeRole"
+      },
+      "connection_type": "enables",
+      "id": "connection:7a6d1c245493d8cc",
+      "metadata": {
+        "match_method": "artifact"
+      },
+      "reason": "Produced artifact satisfies target requirement",
+      "source_operator_id": "attack_op:aws:launch_instance_with_role:26ce5c14afef",
+      "target_operator_id": "attack_op:hybrid:reach_network_target:be710ee41b1f"
+    },
+    {
+      "artifact": {
+        "artifact_type": "identity",
+        "properties": {},
+        "subject_node_id": "aws:role:EKSNodeRole"
+      },
+      "connection_type": "requires",
+      "id": "connection:7c6e7bc58bb51f48",
+      "metadata": {
+        "match_method": "artifact"
+      },
+      "reason": "Source operator requires artifact produced by target",
+      "source_operator_id": "attack_op:hybrid:reach_network_target:be710ee41b1f",
+      "target_operator_id": "attack_op:aws:launch_instance_with_role:26ce5c14afef"
+    },
+    {
+      "artifact": {
+        "artifact_type": "network_reachability",
+        "properties": {},
+        "subject_node_id": "k8s:pod:payment-api"
+      },
+      "connection_type": "requires",
+      "id": "connection:7ce30937ae1a8784",
+      "metadata": {
+        "match_method": "artifact"
+      },
+      "reason": "Source operator requires artifact produced by target",
+      "source_operator_id": "attack_op:k8s:remote_code_execution:fa034733aaa6",
+      "target_operator_id": "attack_op:hybrid:reach_network_target:9ab7159742e2"
+    },
+    {
+      "artifact": {
+        "artifact_type": "identity",
+        "properties": {},
+        "subject_node_id": "aws:role:EKSNodeRole"
+      },
+      "connection_type": "requires",
+      "id": "connection:aac143be1f78d116",
+      "metadata": {
+        "match_method": "artifact"
+      },
+      "reason": "Source operator requires artifact produced by target",
+      "source_operator_id": "attack_op:hybrid:reach_network_target:9ab7159742e2",
+      "target_operator_id": "attack_op:aws:launch_instance_with_role:26ce5c14afef"
+    },
+    {
+      "artifact": {
+        "artifact_type": "network_reachability",
+        "properties": {},
+        "subject_node_id": "k8s:pod:payment-api"
+      },
+      "connection_type": "requires",
+      "id": "connection:cd531994dda3502e",
+      "metadata": {
+        "match_method": "artifact"
+      },
+      "reason": "Source operator requires artifact produced by target",
+      "source_operator_id": "attack_op:k8s:remote_code_execution:fa034733aaa6",
+      "target_operator_id": "attack_op:k8s:port_forward_to_workload:e73b1f641ee7"
+    },
+    {
+      "artifact": {
+        "artifact_type": "network_reachability",
+        "properties": {},
+        "subject_node_id": "k8s:pod:checkout-api"
+      },
+      "connection_type": "requires",
+      "id": "connection:d66c79825ac1ca38",
+      "metadata": {
+        "match_method": "artifact"
+      },
+      "reason": "Source operator requires artifact produced by target",
+      "source_operator_id": "attack_op:k8s:denial_of_service:74f032367056",
+      "target_operator_id": "attack_op:hybrid:reach_network_target:be710ee41b1f"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:e13cc4f87d4db8be",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: k8s:serviceaccount:checkout",
+      "source_operator_id": "attack_op:k8s:obtain_mounted_service_account:178edb7befbf",
+      "target_operator_id": "attack_op:k8s:read_kubernetes_secret:564f3db6a58b"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:e8927521b0d634dd",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: k8s:pod:checkout-api",
+      "source_operator_id": "attack_op:k8s:denial_of_service:74f032367056",
+      "target_operator_id": "attack_op:k8s:obtain_mounted_service_account:178edb7befbf"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:ed37d8ff3610e0f0",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: aws:role:EKSNodeRole",
+      "source_operator_id": "attack_op:aws:launch_instance_with_role:26ce5c14afef",
+      "target_operator_id": "attack_op:gcp:impersonate_service_account:061d764dfc84"
+    },
+    {
+      "artifact": null,
+      "connection_type": "enables",
+      "id": "connection:f4f3c39396406456",
+      "metadata": {
+        "match_method": "node"
+      },
+      "reason": "source target_node matches target source_node: k8s:serviceaccount:checkout",
+      "source_operator_id": "attack_op:k8s:obtain_mounted_service_account:178edb7befbf",
+      "target_operator_id": "attack_op:k8s:exec_in_workload:214eae5bfb10"
+    },
+    {
+      "artifact": {
+        "artifact_type": "identity",
+        "properties": {},
+        "subject_node_id": "aws:role:EKSNodeRole"
+      },
+      "connection_type": "enables",
+      "id": "connection:f8a9dfc795391542",
+      "metadata": {
+        "match_method": "artifact"
+      },
+      "reason": "Produced artifact satisfies target requirement",
+      "source_operator_id": "attack_op:aws:launch_instance_with_role:26ce5c14afef",
+      "target_operator_id": "attack_op:hybrid:reach_network_target:9ab7159742e2"
+    }
+  ],
+  "layer3_candidates": [
+    "attack_op:aws:launch_instance_with_role:26ce5c14afef",
+    "attack_op:azure:add_application_secret:20d6bb620a83",
+    "attack_op:azure:add_group_member:153597802270",
+    "attack_op:gcp:impersonate_service_account:061d764dfc84",
+    "attack_op:gcp:modify_bucket_policy:8f3b9789f20c",
+    "attack_op:gcp:read_secret:d7d760152fd8",
+    "attack_op:hybrid:access_instance_metadata_service:b51c4bdef29c",
+    "attack_op:hybrid:reach_network_target:9ab7159742e2",
+    "attack_op:hybrid:reach_network_target:be710ee41b1f",
+    "attack_op:k8s:access_unauthenticated_kubernetes_api:ff227cd1297d",
+    "attack_op:k8s:create_workload:d714e0d85862",
+    "attack_op:k8s:denial_of_service:74f032367056",
+    "attack_op:k8s:exec_in_workload:214eae5bfb10",
+    "attack_op:k8s:obtain_mounted_service_account:178edb7befbf",
+    "attack_op:k8s:port_forward_to_workload:e73b1f641ee7",
+    "attack_op:k8s:read_kubernetes_secret:564f3db6a58b",
+    "attack_op:k8s:remote_code_execution:fa034733aaa6"
+  ],
   "metadata": {
+    "connection_count": 24,
+    "cve_operator_count": 2,
+    "edge_classification_counts": {
+      "ATTACK_EDGE": 14,
+      "PERMISSION": 2,
+      "RELATIONSHIP": 5
+    },
+    "execution_config": {
+      "azurehound_rule_paths": [],
+      "clusterhound_rule_paths": [],
+      "cve_operator_rule_paths": [],
+      "gcp_hound_rule_paths": [],
+      "hound_generic_rule_paths": [],
+      "iamhounddog_rule_path": null,
+      "iamhounddog_rule_paths": [],
+      "max_candidates": 500,
+      "max_connections": 5000,
+      "max_hops": 6,
+      "max_matches_per_rule": 100,
+      "max_total_operators": 1000,
+      "max_uploaded_file_size": 10485760,
+      "nvd_cache_directory": "examples/layer2/nvd",
+      "nvd_cache_ttl_seconds": 10000000000,
+      "nvd_max_retries": 2,
+      "nvd_mode": "cache-only",
+      "nvd_rate_limit_seconds": 0.7,
+      "nvd_timeout_seconds": 10.0,
+      "selected_operator_types": [],
+      "selected_source_tools": []
+    },
+    "fact_edge_count": 21,
+    "fact_node_count": 21,
+    "generated_at": "example",
+    "iam_operator_count": 15,
+    "input_fact_graph_hash": "c4c1ef1bc9a57d37ed586795d3198164caa1a037c7e48aee802ba9bfa1e05b35",
     "input_fact_graph_schema_version": "0.1.0",
-    "input_fact_graph_hash": "example",
-    "rule_set_version": "0.1.0",
-    "used_source_tools": ["gcp_hound"],
-    "used_rule_ids": ["gcp_hound.cancreatekeys.v1"],
-    "nvd_cache_entries": [],
-    "fact_node_count": 2,
-    "fact_edge_count": 1,
-    "operator_count": 1,
-    "iam_operator_count": 1,
-    "cve_operator_count": 0,
-    "connection_count": 0,
-    "unresolved_count": 0,
-    "manual_verification_count": 0,
+    "layer2_schema_version": "0.1.0",
+    "limit_reached": {},
+    "manual_verification_count": 4,
+    "nvd_cache_entries": [
+      "CVE-2021-44228",
+      "CVE-2022-0778"
+    ],
+    "nvd_cache_hashes": [
+      "21c953d0ed1ad200d96beb04581a10f1780342e6dcfd56496a3089c4a3a4267a",
+      "812ef20475deefa853979c5c6e8a25d0ad29aa852cd57a0d73a75c8ff6b267f3"
+    ],
+    "nvd_cache_hit_count": 2,
+    "nvd_cache_miss_count": 0,
+    "nvd_fetch_failure_count": 0,
+    "operator_count": 17,
     "processing_time_ms": 0,
-    "generated_at": "2026-01-01T00:00:00+00:00",
-    "execution_config": {"nvd_mode": "cache-only"}
-  }
+    "rule_set_hashes": [
+      "1f6dbbedbd1998eae08d79e7e69bf070a3f30a8f7bc464a315bc37ecd0542197",
+      "237c432fe7bd3628aa1714f67a8d5aa5fbaa26321559edd232830a11d2019a5a",
+      "407713ab9ceaeeae2709bf28184c334fcaa492f712062445b1a4c97d450b6923",
+      "68acee47e4dcd81c8648db9daf6f052bd0d58b9c90bb3d1d2002377433ec36b2",
+      "86a52a65078dc637e2fc218b2d7a162dfbb4d1f430143eb93b83237b94dc3e08",
+      "8fab22e191c2f4029b0ec89a619b436269145d57161b612cb2476c1a08445658"
+    ],
+    "rule_set_version": "0.1.0",
+    "source_tool_edge_counts": {
+      "azurehound": 3,
+      "clusterhound": 7,
+      "gcp_hound": 4,
+      "hound_generic": 2,
+      "iamhounddog": 5
+    },
+    "unresolved_count": 0,
+    "used_rule_ids": [
+      "aws.ec2.passrole.v1",
+      "azurehound.azaddmembers.v1",
+      "azurehound.azaddsecret.v1",
+      "clusterhound.accessimds.v1",
+      "clusterhound.cancreateworkload.v1",
+      "clusterhound.canexec.v1",
+      "clusterhound.canportforward.v1",
+      "clusterhound.mountsserviceaccount.v1",
+      "clusterhound.secretsread.v1",
+      "clusterhound.unauthapiaccess.v1",
+      "cve.arbitrary_code_execution.v1",
+      "cve.denial_of_service.v1",
+      "gcp_hound.canimpersonate.v1",
+      "gcp_hound.canmodifybucketpoliciesinproject.v1",
+      "gcp_hound.canreadsecrets.v1",
+      "hound_generic.network_access.v1"
+    ],
+    "used_source_tools": [
+      "azurehound",
+      "clusterhound",
+      "gcp_hound",
+      "hound_generic",
+      "iamhounddog",
+      "nvd"
+    ],
+    "warnings": []
+  },
+  "schema_version": "0.1.0",
+  "unresolved_items": []
 }

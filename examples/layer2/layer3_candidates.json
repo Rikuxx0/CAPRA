@@ -1,1 +1,22 @@
-{"layer3_candidates": ["attack_op:gcp:create_service_account_key:example"], "note": "IDs identify unverified Layer 2 operators; this file contains no command or payload."}
+{
+  "layer3_candidates": [
+    "attack_op:aws:launch_instance_with_role:26ce5c14afef",
+    "attack_op:azure:add_application_secret:20d6bb620a83",
+    "attack_op:azure:add_group_member:153597802270",
+    "attack_op:gcp:impersonate_service_account:061d764dfc84",
+    "attack_op:gcp:modify_bucket_policy:8f3b9789f20c",
+    "attack_op:gcp:read_secret:d7d760152fd8",
+    "attack_op:hybrid:access_instance_metadata_service:b51c4bdef29c",
+    "attack_op:hybrid:reach_network_target:9ab7159742e2",
+    "attack_op:hybrid:reach_network_target:be710ee41b1f",
+    "attack_op:k8s:access_unauthenticated_kubernetes_api:ff227cd1297d",
+    "attack_op:k8s:create_workload:d714e0d85862",
+    "attack_op:k8s:denial_of_service:74f032367056",
+    "attack_op:k8s:exec_in_workload:214eae5bfb10",
+    "attack_op:k8s:obtain_mounted_service_account:178edb7befbf",
+    "attack_op:k8s:port_forward_to_workload:e73b1f641ee7",
+    "attack_op:k8s:read_kubernetes_secret:564f3db6a58b",
+    "attack_op:k8s:remote_code_execution:fa034733aaa6"
+  ],
+  "note": "IDs identify unverified Layer 2 operators; this file contains no command or payload."
+}

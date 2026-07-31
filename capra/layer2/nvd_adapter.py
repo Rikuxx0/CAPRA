@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 import logging
 from pathlib import Path
 from typing import Any
@@ -17,14 +18,55 @@ LOGGER = logging.getLogger(__name__)
 DEFAULT_RULE_PATH = Path(__file__).parent / "rules" / "cve_operator_rules.yaml"
 
 
-def load_cve_rules(path: str | Path = DEFAULT_RULE_PATH) -> tuple[list[dict[str, str]], str, str]:
-    raw = Path(path).read_text(encoding="utf-8")
-    payload = yaml.safe_load(raw) or {}
-    rules = payload.get("rules") or []
-    if not all(isinstance(rule, dict) and rule.get("id") and rule.get("phrase") and rule.get("operator_type") for rule in rules):
-        raise ValueError("Invalid CVE operator rule file")
+def load_cve_rules(
+    path: str | Path | Sequence[str | Path] = DEFAULT_RULE_PATH,
+) -> tuple[list[dict[str, str]], str, str]:
+    paths = (
+        [Path(item) for item in path]
+        if isinstance(path, Sequence) and not isinstance(path, (str, bytes))
+        else [Path(path)]
+    )
+    rules: list[dict[str, str]] = []
+    payloads: list[dict[str, Any]] = []
+    versions: set[str] = set()
+    rule_id_sources: dict[str, Path] = {}
+    phrase_sources: dict[str, Path] = {}
+
+    for rule_path in paths:
+        raw = rule_path.read_text(encoding="utf-8")
+        payload = yaml.safe_load(raw) or {}
+        if not isinstance(payload, dict):
+            raise ValueError(f"CVE operator rule YAML must be an object: {rule_path}")
+        raw_rules = payload.get("rules") or []
+        if not all(
+            isinstance(rule, dict)
+            and rule.get("id")
+            and rule.get("phrase")
+            and rule.get("operator_type")
+            for rule in raw_rules
+        ):
+            raise ValueError(f"Invalid CVE operator rule file: {rule_path}")
+        payloads.append(payload)
+        versions.add(str(payload.get("version") or "unknown"))
+        for rule in raw_rules:
+            rule_id = str(rule["id"])
+            phrase = str(rule["phrase"]).strip().lower()
+            if rule_id in rule_id_sources:
+                raise ValueError(
+                    f"Duplicate CVE operator rule id {rule_id!r} in "
+                    f"{rule_id_sources[rule_id]} and {rule_path}"
+                )
+            if phrase in phrase_sources:
+                raise ValueError(
+                    f"Duplicate CVE operator phrase {phrase!r} in "
+                    f"{phrase_sources[phrase]} and {rule_path}"
+                )
+            rule_id_sources[rule_id] = rule_path
+            phrase_sources[phrase] = rule_path
+            rules.append(rule)
+
     ordered = sorted(rules, key=lambda rule: (-len(str(rule["phrase"])), str(rule["id"])))
-    return ordered, str(payload.get("version") or "unknown"), stable_hash(payload)
+    return ordered, ",".join(sorted(versions)), stable_hash(sorted(payloads, key=stable_hash))
 
 
 def classify_description(description: str, rules: list[dict[str, str]]) -> tuple[str, str | None]:
@@ -35,8 +77,40 @@ def classify_description(description: str, rules: list[dict[str, str]]) -> tuple
     return "exploit_vulnerable_component", None
 
 
-def _unresolved(cve_id: str, fact_id: str, reason: str, item_type: str, raw: dict[str, Any]) -> UnresolvedItemModel:
-    missing = ["nvd_record"] if item_type.startswith("nvd_") else []
+def _normalized_product_name(value: str) -> str:
+    return "".join(character for character in str(value or "").lower() if character.isalnum())
+
+
+def _package_matches_products(package_name: str, products: list[str]) -> bool | None:
+    package_key = _normalized_product_name(package_name)
+    package_aliases = {
+        package_key,
+        package_key.removesuffix("core"),
+    }
+    product_keys = {
+        _normalized_product_name(product.rsplit(":", 1)[-1])
+        for product in products
+        if str(product).strip()
+    }
+    if not package_key or not product_keys:
+        return None
+    return bool(package_aliases & product_keys)
+
+
+def _unresolved(
+    cve_id: str,
+    fact_id: str,
+    reason: str,
+    item_type: str,
+    raw: dict[str, Any],
+    *,
+    missing_conditions: list[str] | None = None,
+) -> UnresolvedItemModel:
+    missing = (
+        missing_conditions
+        if missing_conditions is not None
+        else ["nvd_record"] if item_type.startswith("nvd_") else []
+    )
     return UnresolvedItemModel(
         id=generate_unresolved_id(item_type=item_type, source_tool="nvd", source_fact_ids=[fact_id], reason=reason, missing_conditions=missing),
         type=item_type,
@@ -54,7 +128,7 @@ def convert_cves(
     config: Layer2Config,
     *,
     client: NvdClient | None = None,
-    rule_path: str | Path = DEFAULT_RULE_PATH,
+    rule_path: str | Path | Sequence[str | Path] = DEFAULT_RULE_PATH,
 ) -> AdapterResult:
     rules, rule_version, rule_hash = load_cve_rules(rule_path)
     cache = NvdCache(config.nvd_cache_directory, config.nvd_cache_ttl_seconds)
@@ -114,6 +188,24 @@ def convert_cves(
             continue
         operator_type, rule_id = classify_description(record.description, rules)
         missing_conditions = ["target_is_reachable"]
+        package_name = str(vulnerability.get("package_name") or "").strip()
+        package_match = _package_matches_products(package_name, record.products)
+        if package_match is False:
+            missing_conditions.append("package_matches_nvd_product")
+            mismatch_reason = (
+                f"{cve_id} package {package_name!r} does not match NVD products"
+            )
+            result.warnings.append(mismatch_reason)
+            result.unresolved_items.append(
+                _unresolved(
+                    cve_id,
+                    fact_id,
+                    mismatch_reason,
+                    "cve_package_mismatch",
+                    vulnerability,
+                    missing_conditions=["package_matches_nvd_product"],
+                )
+            )
         if not vulnerability.get("installed_version"):
             missing_conditions.append("vulnerable_version_is_running")
         if not target_node:
@@ -141,6 +233,8 @@ def convert_cves(
             "integrity_impact": record.integrity_impact,
             "availability_impact": record.availability_impact,
             "products": record.products,
+            "input_package_name": package_name or None,
+            "package_matches_nvd_product": package_match,
             "versions": record.versions,
             "references": [reference.model_dump(mode="json") for reference in record.references],
             "nvd_cache_hash": cache_result.cache_hash,
@@ -163,7 +257,7 @@ def convert_cves(
                 cwe_ids=record.cwe_ids,
                 status=status,
                 missing_conditions=sorted(set(missing_conditions)),
-                manual_verification_required=record.public_exploit_candidate,
+                manual_verification_required=record.public_exploit_candidate or package_match is False,
                 public_exploit_candidate=record.public_exploit_candidate,
                 mapping_rule_id=rule_id,
                 raw_evidence=redact_sensitive_data({"vulnerability": vulnerability, "nvd": record.raw}),

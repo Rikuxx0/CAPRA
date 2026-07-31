@@ -1,6 +1,6 @@
 from capra.layer2 import visualization
 from capra.layer2.schemas import AttackOperatorGraphModel, AttackOperatorModel
-from capra.layer2.visualization import _build_operator_label
+from capra.layer2.visualization import _build_operator_label, _operator_type_color
 
 
 def test_operator_label_shows_source_and_target_nodes():
@@ -15,7 +15,8 @@ def test_operator_label_shows_source_and_target_nodes():
     )
 
     assert _build_operator_label(operator) == (
-        "create_service_account_key\n"
+        "攻撃種別: create_service_account_key\n"
+        "状態: complete\n"
         "source: gcp:user:analyst\n"
         "target: gcp:serviceaccount:reporter"
     )
@@ -32,10 +33,16 @@ def test_operator_label_marks_missing_source_node():
     )
 
     assert _build_operator_label(operator) == (
-        "buffer_overflow\n"
+        "攻撃種別: buffer_overflow\n"
+        "状態: partial\n"
         "source: -\n"
         "target: gcp:serviceaccount:reporter"
     )
+
+
+def test_operator_type_color_is_stable_and_type_specific():
+    assert _operator_type_color("buffer_overflow") == _operator_type_color("buffer_overflow")
+    assert _operator_type_color("buffer_overflow") != _operator_type_color("privilege_escalation")
 
 
 def test_visualization_reuses_fact_nodes_and_connects_operator_context(monkeypatch):
@@ -119,6 +126,23 @@ def test_visualization_reuses_fact_nodes_and_connects_operator_context(monkeypat
         for source, target, attributes in network.edges
     }
     assert all("title" not in attributes for _, attributes in network.nodes)
+    operator_nodes = {
+        node_id: attributes
+        for node_id, attributes in network.nodes
+        if not node_id.startswith(visualization.FACT_NODE_PREFIX)
+    }
+    assert operator_nodes["operator-1"]["color"]["background"] == _operator_type_color(
+        "create_service_account_key"
+    )
+    assert operator_nodes["operator-2"]["color"]["background"] == _operator_type_color(
+        "buffer_overflow"
+    )
+    assert operator_nodes["operator-1"]["color"]["border"] == visualization.STATUS_BORDER_COLORS[
+        "complete"
+    ]
+    assert operator_nodes["operator-2"]["color"]["border"] == visualization.STATUS_BORDER_COLORS[
+        "partial"
+    ]
 
 
 def test_visualization_opens_details_on_click_without_hover_tooltips():
@@ -139,10 +163,16 @@ def test_visualization_opens_details_on_click_without_hover_tooltips():
 
     assert 'network.on("click"' in html
     assert f'id="{visualization.DETAIL_PANEL_ID}" hidden' in html
+    assert f'id="{visualization.LEGEND_PANEL_ID}"' in html
+    assert "capraAttackTypeColors" in html
+    assert "buffer_overflow" in html
     assert "width: min(640px, calc(100vw - 32px))" in html
     assert "capraDetailPanel.hidden = false" in html
     assert "capraDetailPanel.hidden = true" in html
     assert '"hover": false' in html or '\\"hover\\": false' in html
     assert '"operator_type": "buffer_overflow"' in html
-    assert 'network.once("stabilizationIterationsDone"' in html
-    assert "network.setOptions({ physics: false })" in html
+    assert '"physics": {"enabled": false}' in html
+    assert '"hierarchical": {"enabled": true' in html
+    assert '"direction": "LR"' in html
+    assert '"sortMethod": "directed"' in html
+    assert "stabilizationIterationsDone" not in html

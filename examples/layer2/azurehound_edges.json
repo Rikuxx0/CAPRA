@@ -1,1 +1,146 @@
-{"edges": [{"fact_id": "az1", "source": "principal", "target": "application", "type": "AZAddSecret", "original_edge_type": "AZAddSecret", "source_tool": "azurehound"}, {"fact_id": "az2", "source": "tenant", "target": "group", "type": "AZContains", "original_edge_type": "AZContains", "source_tool": "azurehound"}]}
+{
+  "edges": [
+    {
+      "fact_id": "azure-02",
+      "original_edge_type": "AZAddSecret",
+      "permission": "AZAddSecret",
+      "provider": "azure",
+      "raw_evidence": {
+        "fact_id": "azure-02",
+        "provider": "azure",
+        "source": "azure:user:release-engineer",
+        "source_tool": "azurehound",
+        "target": "azure:application:deployment-bot",
+        "type": "AZAddSecret"
+      },
+      "source": "azure:user:release-engineer",
+      "source_file": null,
+      "source_tool": "azurehound",
+      "target": "azure:application:deployment-bot",
+      "type": "azaddsecret"
+    },
+    {
+      "fact_id": "azure-01",
+      "original_edge_type": "AZContains",
+      "permission": "AZContains",
+      "provider": "azure",
+      "raw_evidence": {
+        "fact_id": "azure-01",
+        "provider": "azure",
+        "source": "azure:tenant:production",
+        "source_tool": "azurehound",
+        "target": "azure:application:deployment-bot",
+        "type": "AZContains"
+      },
+      "source": "azure:tenant:production",
+      "source_file": null,
+      "source_tool": "azurehound",
+      "target": "azure:application:deployment-bot",
+      "type": "azcontains"
+    },
+    {
+      "fact_id": "azure-03",
+      "original_edge_type": "AZAddMembers",
+      "permission": "AZAddMembers",
+      "provider": "azure",
+      "raw_evidence": {
+        "fact_id": "azure-03",
+        "provider": "azure",
+        "source": "azure:application:deployment-bot",
+        "source_tool": "azurehound",
+        "target": "azure:group:production-operators",
+        "type": "AZAddMembers"
+      },
+      "source": "azure:application:deployment-bot",
+      "source_file": null,
+      "source_tool": "azurehound",
+      "target": "azure:group:production-operators",
+      "type": "azaddmembers"
+    }
+  ],
+  "nodes": [
+    {
+      "asset_category": "unknown",
+      "cloud": "azure",
+      "goal_candidate": false,
+      "id": "azure:application:deployment-bot",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "deployment-bot",
+      "raw_evidence": {
+        "cloud": "azure",
+        "id": "azure:application:deployment-bot",
+        "name": "deployment-bot",
+        "type": "application"
+      },
+      "type": "application",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "critical",
+      "cloud": "azure",
+      "goal_candidate": true,
+      "id": "azure:group:production-operators",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "production-operators",
+      "raw_evidence": {
+        "asset_marker": {
+          "asset_category": "critical",
+          "cloud": "azure",
+          "goal_candidate": true,
+          "id": "azure:group:production-operators",
+          "name": "production-operators",
+          "type": "group"
+        },
+        "cloud": "azure",
+        "id": "azure:group:production-operators",
+        "name": "production-operators",
+        "type": "group"
+      },
+      "type": "group",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "azure",
+      "goal_candidate": false,
+      "id": "azure:tenant:production",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "production-tenant",
+      "raw_evidence": {
+        "cloud": "azure",
+        "id": "azure:tenant:production",
+        "name": "production-tenant",
+        "type": "tenant"
+      },
+      "type": "tenant",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "azure",
+      "goal_candidate": false,
+      "id": "azure:user:release-engineer",
+      "is_entry": true,
+      "is_goal": false,
+      "name": "release-engineer",
+      "raw_evidence": {
+        "asset_marker": {
+          "cloud": "azure",
+          "id": "azure:user:release-engineer",
+          "name": "release-engineer",
+          "type": "principal"
+        },
+        "cloud": "azure",
+        "id": "azure:user:release-engineer",
+        "is_entry": true,
+        "name": "release-engineer",
+        "type": "principal"
+      },
+      "type": "principal",
+      "vulnerabilities": []
+    }
+  ]
+}

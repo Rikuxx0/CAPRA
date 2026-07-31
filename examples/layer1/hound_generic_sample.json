@@ -1,37 +1,308 @@
 {
   "nodes": [
     {
-      "id": "aws:user:low-priv-user",
-      "name": "low-priv-user",
-      "type": "user",
+      "id": "internet:external:public-client",
+      "name": "Public Internet Client",
+      "type": "external",
+      "cloud": "unknown",
+      "is_entry": true
+    },
+    {
+      "id": "aws:user:developer",
+      "name": "developer",
+      "type": "principal",
       "cloud": "aws",
       "is_entry": true
     },
     {
-      "id": "aws:role:AdminRole",
-      "name": "AdminRole",
+      "id": "aws:role:DevOpsRole",
+      "name": "DevOpsRole",
       "type": "role",
       "cloud": "aws"
     },
     {
-      "id": "k8s:pod:backend-api",
-      "name": "backend-api",
+      "id": "aws:policy:EC2LaunchPolicy",
+      "name": "EC2LaunchPolicy",
+      "type": "policy",
+      "cloud": "aws"
+    },
+    {
+      "id": "aws:ec2:bootstrap-runner",
+      "name": "bootstrap-runner",
+      "type": "ec2",
+      "cloud": "aws"
+    },
+    {
+      "id": "aws:role:EKSNodeRole",
+      "name": "EKSNodeRole",
+      "type": "role",
+      "cloud": "aws"
+    },
+    {
+      "id": "k8s:cluster:prod-eks",
+      "name": "prod-eks",
+      "type": "cluster",
+      "cloud": "k8s"
+    },
+    {
+      "id": "k8s:api:prod-eks",
+      "name": "prod-eks-api",
+      "type": "api",
+      "cloud": "k8s"
+    },
+    {
+      "id": "k8s:pod:checkout-api",
+      "name": "checkout-api",
       "type": "container",
       "cloud": "k8s"
+    },
+    {
+      "id": "k8s:pod:payment-api",
+      "name": "payment-api",
+      "type": "container",
+      "cloud": "k8s"
+    },
+    {
+      "id": "k8s:serviceaccount:checkout",
+      "name": "checkout",
+      "type": "serviceaccount",
+      "cloud": "k8s"
+    },
+    {
+      "id": "k8s:secret:payment-db",
+      "name": "payment-db",
+      "type": "secret",
+      "cloud": "k8s"
+    },
+    {
+      "id": "aws:metadata:imds",
+      "name": "EC2 Instance Metadata Service",
+      "type": "metadata",
+      "cloud": "aws"
+    },
+    {
+      "id": "gcp:project:analytics-prod",
+      "name": "analytics-prod",
+      "type": "project",
+      "cloud": "gcp"
+    },
+    {
+      "id": "gcp:serviceaccount:analytics-exporter",
+      "name": "analytics-exporter",
+      "type": "serviceaccount",
+      "cloud": "gcp"
+    },
+    {
+      "id": "gcp:secret:analytics-api-key",
+      "name": "analytics-api-key",
+      "type": "secret",
+      "cloud": "gcp"
+    },
+    {
+      "id": "gcp:bucket:audit-archive",
+      "name": "audit-archive",
+      "type": "bucket",
+      "cloud": "gcp"
+    },
+    {
+      "id": "azure:user:release-engineer",
+      "name": "release-engineer",
+      "type": "principal",
+      "cloud": "azure",
+      "is_entry": true
+    },
+    {
+      "id": "azure:tenant:production",
+      "name": "production-tenant",
+      "type": "tenant",
+      "cloud": "azure"
+    },
+    {
+      "id": "azure:application:deployment-bot",
+      "name": "deployment-bot",
+      "type": "application",
+      "cloud": "azure"
+    },
+    {
+      "id": "azure:group:production-operators",
+      "name": "production-operators",
+      "type": "group",
+      "cloud": "azure"
     }
   ],
   "edges": [
     {
-      "source": "aws:user:low-priv-user",
-      "target": "aws:role:AdminRole",
-      "type": "sts:AssumeRole",
-      "permission": "sts:AssumeRole"
+      "fact_id": "iam-01",
+      "source": "aws:user:developer",
+      "target": "aws:role:DevOpsRole",
+      "type": "assume_role",
+      "permission": "sts:AssumeRole",
+      "source_tool": "iamhounddog",
+      "provider": "aws"
     },
     {
-      "source": "aws:role:AdminRole",
-      "target": "k8s:pod:backend-api",
+      "fact_id": "iam-02",
+      "source": "aws:role:DevOpsRole",
+      "target": "aws:policy:EC2LaunchPolicy",
+      "type": "attached_policy",
+      "source_tool": "iamhounddog",
+      "provider": "aws"
+    },
+    {
+      "fact_id": "iam-03",
+      "source": "aws:policy:EC2LaunchPolicy",
+      "target": "aws:ec2:bootstrap-runner",
+      "type": "ec2_run_instances",
+      "permission": "ec2:RunInstances",
+      "source_tool": "iamhounddog",
+      "provider": "aws"
+    },
+    {
+      "fact_id": "iam-04",
+      "source": "aws:ec2:bootstrap-runner",
+      "target": "aws:role:EKSNodeRole",
+      "type": "instance_role",
+      "source_tool": "iamhounddog",
+      "provider": "aws"
+    },
+    {
+      "fact_id": "iam-05",
+      "source": "aws:user:developer",
+      "target": "aws:role:EKSNodeRole",
+      "type": "has_permission",
+      "permission": "iam:PassRole",
+      "source_tool": "iamhounddog",
+      "provider": "aws"
+    },
+    {
+      "fact_id": "generic-01",
+      "source": "aws:role:EKSNodeRole",
+      "target": "k8s:pod:checkout-api",
       "type": "network",
-      "permission": "network"
+      "permission": "network",
+      "source_tool": "hound_generic",
+      "provider": "hybrid"
+    },
+    {
+      "fact_id": "generic-02",
+      "source": "aws:role:EKSNodeRole",
+      "target": "k8s:pod:payment-api",
+      "type": "network",
+      "permission": "network",
+      "source_tool": "hound_generic",
+      "provider": "hybrid"
+    },
+    {
+      "fact_id": "k8s-01",
+      "source": "k8s:pod:checkout-api",
+      "target": "k8s:serviceaccount:checkout",
+      "type": "mountsServiceAccount",
+      "source_tool": "clusterhound",
+      "provider": "k8s"
+    },
+    {
+      "fact_id": "k8s-02",
+      "source": "k8s:serviceaccount:checkout",
+      "target": "k8s:pod:payment-api",
+      "type": "canExec",
+      "source_tool": "clusterhound",
+      "provider": "k8s"
+    },
+    {
+      "fact_id": "k8s-03",
+      "source": "k8s:serviceaccount:checkout",
+      "target": "k8s:secret:payment-db",
+      "type": "secretsRead",
+      "source_tool": "clusterhound",
+      "provider": "k8s"
+    },
+    {
+      "fact_id": "k8s-04",
+      "source": "internet:external:public-client",
+      "target": "k8s:api:prod-eks",
+      "type": "unauthAPIAccess",
+      "source_tool": "clusterhound",
+      "provider": "k8s"
+    },
+    {
+      "fact_id": "k8s-05",
+      "source": "k8s:pod:checkout-api",
+      "target": "aws:metadata:imds",
+      "type": "accessIMDS",
+      "source_tool": "clusterhound",
+      "provider": "hybrid"
+    },
+    {
+      "fact_id": "k8s-06",
+      "source": "k8s:serviceaccount:checkout",
+      "target": "k8s:cluster:prod-eks",
+      "type": "canCreateWorkload",
+      "source_tool": "clusterhound",
+      "provider": "k8s"
+    },
+    {
+      "fact_id": "k8s-07",
+      "source": "k8s:serviceaccount:checkout",
+      "target": "k8s:pod:payment-api",
+      "type": "canPortForward",
+      "source_tool": "clusterhound",
+      "provider": "k8s"
+    },
+    {
+      "fact_id": "gcp-01",
+      "source": "aws:role:EKSNodeRole",
+      "target": "gcp:serviceaccount:analytics-exporter",
+      "type": "CanImpersonate",
+      "source_tool": "gcp_hound",
+      "provider": "gcp"
+    },
+    {
+      "fact_id": "gcp-02",
+      "source": "gcp:serviceaccount:analytics-exporter",
+      "target": "gcp:secret:analytics-api-key",
+      "type": "CanReadSecrets",
+      "source_tool": "gcp_hound",
+      "provider": "gcp"
+    },
+    {
+      "fact_id": "gcp-03",
+      "source": "gcp:serviceaccount:analytics-exporter",
+      "target": "gcp:bucket:audit-archive",
+      "type": "CanModifyBucketPoliciesInProject",
+      "source_tool": "gcp_hound",
+      "provider": "gcp"
+    },
+    {
+      "fact_id": "gcp-04",
+      "source": "gcp:project:analytics-prod",
+      "target": "gcp:serviceaccount:analytics-exporter",
+      "type": "ContainsServiceAccount",
+      "source_tool": "gcp_hound",
+      "provider": "gcp"
+    },
+    {
+      "fact_id": "azure-01",
+      "source": "azure:tenant:production",
+      "target": "azure:application:deployment-bot",
+      "type": "AZContains",
+      "source_tool": "azurehound",
+      "provider": "azure"
+    },
+    {
+      "fact_id": "azure-02",
+      "source": "azure:user:release-engineer",
+      "target": "azure:application:deployment-bot",
+      "type": "AZAddSecret",
+      "source_tool": "azurehound",
+      "provider": "azure"
+    },
+    {
+      "fact_id": "azure-03",
+      "source": "azure:application:deployment-bot",
+      "target": "azure:group:production-operators",
+      "type": "AZAddMembers",
+      "source_tool": "azurehound",
+      "provider": "azure"
     }
   ]
 }

@@ -1,37 +1,62 @@
 from __future__ import annotations
 
+import colorsys
+import hashlib
 import json
 
 from pyvis.network import Network
 
 from .schemas import AttackOperatorGraphModel, AttackOperatorModel
 
-ORIGIN_COLORS = {
-    "cve": "#F6B3B3",
-    "iam_direct_edge": "#AFCBFF",
-    "iam_pattern": "#B7E4C7",
+STATUS_BORDER_COLORS = {
+    "complete": "#2D6A4F",
+    "partial": "#C77D00",
+    "unresolved": "#B02A37",
 }
 FACT_NODE_COLOR = "#E8EDF3"
 FACT_NODE_PREFIX = "fact_node:"
 CONTEXT_EDGE_COLOR = "#8A94A3"
 DETAIL_PANEL_ID = "capra-node-detail-panel"
+LEGEND_PANEL_ID = "capra-attack-type-legend"
 
 
 def _build_operator_label(operator: AttackOperatorModel) -> str:
     operator_type = str(operator.operator_type or "unknown")
     source_node = str(operator.source_node or "-")
     target_node = str(operator.target_node or "-")
-    return f"{operator_type}\nsource: {source_node}\ntarget: {target_node}"
+    return (
+        f"攻撃種別: {operator_type}\n"
+        f"状態: {operator.status}\n"
+        f"source: {source_node}\n"
+        f"target: {target_node}"
+    )
+
+
+def _operator_type_color(operator_type: str) -> str:
+    digest = hashlib.sha256(str(operator_type or "unknown").encode("utf-8")).digest()
+    hue = int.from_bytes(digest[:2], "big") / 65535
+    red, green, blue = colorsys.hls_to_rgb(hue, 0.82, 0.58)
+    return f"#{round(red * 255):02X}{round(green * 255):02X}{round(blue * 255):02X}"
 
 
 def _fact_node_visual_id(node_id: str) -> str:
     return f"{FACT_NODE_PREFIX}{node_id}"
 
 
-def _inject_click_detail_panel(html: str, node_details: dict[str, object]) -> str:
+def _inject_click_detail_panel(
+    html: str,
+    node_details: dict[str, object],
+    attack_type_colors: dict[str, str],
+) -> str:
     details_json = json.dumps(node_details, ensure_ascii=False, sort_keys=True)
+    attack_types_json = json.dumps(attack_type_colors, ensure_ascii=False, sort_keys=True)
     details_json = (
         details_json.replace("&", "\\u0026")
+        .replace("<", "\\u003c")
+        .replace(">", "\\u003e")
+    )
+    attack_types_json = (
+        attack_types_json.replace("&", "\\u0026")
         .replace("<", "\\u003c")
         .replace(">", "\\u003e")
     )
@@ -67,6 +92,38 @@ def _inject_click_detail_panel(html: str, node_details: dict[str, object]) -> st
     overflow-wrap: anywhere;
     font-size: 12px;
   }}
+  #{LEGEND_PANEL_ID} {{
+    position: fixed;
+    left: 16px;
+    bottom: 16px;
+    z-index: 900;
+    max-width: min(420px, calc(100vw - 32px));
+    max-height: 40vh;
+    overflow: auto;
+    padding: 12px 14px;
+    border: 1px solid #C7CED8;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.14);
+    font-size: 12px;
+  }}
+  #{LEGEND_PANEL_ID} .capra-legend-items {{
+    display: grid;
+    gap: 6px;
+    margin-top: 8px;
+  }}
+  #{LEGEND_PANEL_ID} .capra-legend-item {{
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }}
+  #{LEGEND_PANEL_ID} .capra-legend-swatch {{
+    width: 14px;
+    height: 14px;
+    flex: 0 0 14px;
+    border: 1px solid #5F6875;
+    border-radius: 3px;
+  }}
 </style>
 <aside id="{DETAIL_PANEL_ID}" hidden>
   <div class="capra-detail-header">
@@ -75,15 +132,30 @@ def _inject_click_detail_panel(html: str, node_details: dict[str, object]) -> st
   </div>
   <pre id="capra-node-detail-content"></pre>
 </aside>
+<aside id="{LEGEND_PANEL_ID}">
+  <strong>攻撃種別</strong>
+  <div class="capra-legend-items" id="capra-attack-type-legend-items"></div>
+</aside>
 <script>
   const capraNodeDetails = {details_json};
+  const capraAttackTypeColors = {attack_types_json};
   const capraDetailPanel = document.getElementById("{DETAIL_PANEL_ID}");
   const capraDetailTitle = document.getElementById("capra-node-detail-title");
   const capraDetailContent = document.getElementById("capra-node-detail-content");
   const capraDetailClose = document.getElementById("capra-node-detail-close");
+  const capraLegendItems = document.getElementById("capra-attack-type-legend-items");
 
-  network.once("stabilizationIterationsDone", function () {{
-    network.setOptions({{ physics: false }});
+  Object.entries(capraAttackTypeColors).forEach(function ([attackType, color]) {{
+    const item = document.createElement("div");
+    item.className = "capra-legend-item";
+    const swatch = document.createElement("span");
+    swatch.className = "capra-legend-swatch";
+    swatch.style.backgroundColor = color;
+    const label = document.createElement("span");
+    label.textContent = attackType;
+    item.appendChild(swatch);
+    item.appendChild(label);
+    capraLegendItems.appendChild(item);
   }});
 
   network.on("click", function (params) {{
@@ -113,6 +185,10 @@ def _inject_click_detail_panel(html: str, node_details: dict[str, object]) -> st
 def build_attack_operator_graph_html(graph: AttackOperatorGraphModel) -> str:
     network = Network(height="560px", width="100%", bgcolor="#ffffff", directed=True)
     node_details: dict[str, object] = {}
+    attack_type_colors = {
+        operator_type: _operator_type_color(operator_type)
+        for operator_type in sorted({operator.operator_type for operator in graph.attack_operators})
+    }
 
     fact_node_ids = sorted(
         {
@@ -137,15 +213,21 @@ def build_attack_operator_graph_html(graph: AttackOperatorGraphModel) -> str:
 
     for operator in graph.attack_operators:
         node_details[operator.id] = operator.model_dump(mode="json")
-        color = ORIGIN_COLORS.get(operator.origin_kind, "#D9D9D9")
-        if operator.status == "partial":
-            color = "#FFE08A"
-        if operator.manual_verification_required:
-            color = "#D7B5F5"
+        background_color = attack_type_colors[operator.operator_type]
+        border_color = STATUS_BORDER_COLORS.get(operator.status, "#5F6875")
         network.add_node(
             operator.id,
             label=_build_operator_label(operator),
-            color=color,
+            color={
+                "background": background_color,
+                "border": border_color,
+                "highlight": {
+                    "background": background_color,
+                    "border": border_color,
+                },
+            },
+            borderWidth=4 if operator.manual_verification_required else 2,
+            shadow={"enabled": operator.manual_verification_required, "color": "#7B2CBF"},
             shape="box",
         )
         if operator.source_node:
@@ -180,11 +262,15 @@ def build_attack_operator_graph_html(graph: AttackOperatorGraphModel) -> str:
             arrows="to",
         )
     network.set_options(
-        '{"physics":{"stabilization":{"enabled":true,"iterations":40},"barnesHut":{"springLength":300,'
-        '"springConstant":0.01,"avoidOverlap":0.8}},"interaction":{"hover":false},'
-        '"edges":{"smooth":{"type":"dynamic"}}}'
+        '{"layout":{"hierarchical":{"enabled":true,"direction":"LR","sortMethod":"directed",'
+        '"levelSeparation":340,"nodeSpacing":210,"treeSpacing":260,"blockShifting":true,'
+        '"edgeMinimization":true,"parentCentralization":true}},'
+        '"physics":{"enabled":false},"interaction":{"hover":false,"dragNodes":true,'
+        '"navigationButtons":true},"edges":{"smooth":{"enabled":true,"type":"cubicBezier",'
+        '"forceDirection":"horizontal","roundness":0.35}}}'
     )
     return _inject_click_detail_panel(
         network.generate_html(notebook=False),
         node_details,
+        attack_type_colors,
     )

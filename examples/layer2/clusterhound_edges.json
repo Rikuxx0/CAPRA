@@ -1,1 +1,354 @@
-{"edges": [{"fact_id": "k1", "source": "subject", "target": "pod", "type": "canExec", "original_edge_type": "canExec", "source_tool": "clusterhound"}, {"fact_id": "k2", "source": "internet", "target": "api", "type": "unauthAPIAccess", "original_edge_type": "unauthAPIAccess", "source_tool": "clusterhound"}, {"fact_id": "k3", "source": "internet", "target": "cluster", "type": "entryPoint", "original_edge_type": "entryPoint", "source_tool": "clusterhound"}]}
+{
+  "edges": [
+    {
+      "fact_id": "k8s-04",
+      "original_edge_type": "unauthAPIAccess",
+      "permission": "unauthAPIAccess",
+      "provider": "k8s",
+      "raw_evidence": {
+        "fact_id": "k8s-04",
+        "provider": "k8s",
+        "source": "internet:external:public-client",
+        "source_tool": "clusterhound",
+        "target": "k8s:api:prod-eks",
+        "type": "unauthAPIAccess"
+      },
+      "source": "internet:external:public-client",
+      "source_file": null,
+      "source_tool": "clusterhound",
+      "target": "k8s:api:prod-eks",
+      "type": "unauthapiaccess"
+    },
+    {
+      "fact_id": "k8s-01",
+      "original_edge_type": "mountsServiceAccount",
+      "permission": "mountsServiceAccount",
+      "provider": "k8s",
+      "raw_evidence": {
+        "fact_id": "k8s-01",
+        "provider": "k8s",
+        "source": "k8s:pod:checkout-api",
+        "source_tool": "clusterhound",
+        "target": "k8s:serviceaccount:checkout",
+        "type": "mountsServiceAccount"
+      },
+      "source": "k8s:pod:checkout-api",
+      "source_file": null,
+      "source_tool": "clusterhound",
+      "target": "k8s:serviceaccount:checkout",
+      "type": "mountsserviceaccount"
+    },
+    {
+      "fact_id": "k8s-05",
+      "original_edge_type": "accessIMDS",
+      "permission": "accessIMDS",
+      "provider": "hybrid",
+      "raw_evidence": {
+        "fact_id": "k8s-05",
+        "provider": "hybrid",
+        "source": "k8s:pod:checkout-api",
+        "source_tool": "clusterhound",
+        "target": "aws:metadata:imds",
+        "type": "accessIMDS"
+      },
+      "source": "k8s:pod:checkout-api",
+      "source_file": null,
+      "source_tool": "clusterhound",
+      "target": "aws:metadata:imds",
+      "type": "accessimds"
+    },
+    {
+      "fact_id": "k8s-02",
+      "original_edge_type": "canExec",
+      "permission": "canExec",
+      "provider": "k8s",
+      "raw_evidence": {
+        "fact_id": "k8s-02",
+        "provider": "k8s",
+        "source": "k8s:serviceaccount:checkout",
+        "source_tool": "clusterhound",
+        "target": "k8s:pod:payment-api",
+        "type": "canExec"
+      },
+      "source": "k8s:serviceaccount:checkout",
+      "source_file": null,
+      "source_tool": "clusterhound",
+      "target": "k8s:pod:payment-api",
+      "type": "canexec"
+    },
+    {
+      "fact_id": "k8s-07",
+      "original_edge_type": "canPortForward",
+      "permission": "canPortForward",
+      "provider": "k8s",
+      "raw_evidence": {
+        "fact_id": "k8s-07",
+        "provider": "k8s",
+        "source": "k8s:serviceaccount:checkout",
+        "source_tool": "clusterhound",
+        "target": "k8s:pod:payment-api",
+        "type": "canPortForward"
+      },
+      "source": "k8s:serviceaccount:checkout",
+      "source_file": null,
+      "source_tool": "clusterhound",
+      "target": "k8s:pod:payment-api",
+      "type": "canportforward"
+    },
+    {
+      "fact_id": "k8s-03",
+      "original_edge_type": "secretsRead",
+      "permission": "secretsRead",
+      "provider": "k8s",
+      "raw_evidence": {
+        "fact_id": "k8s-03",
+        "provider": "k8s",
+        "source": "k8s:serviceaccount:checkout",
+        "source_tool": "clusterhound",
+        "target": "k8s:secret:payment-db",
+        "type": "secretsRead"
+      },
+      "source": "k8s:serviceaccount:checkout",
+      "source_file": null,
+      "source_tool": "clusterhound",
+      "target": "k8s:secret:payment-db",
+      "type": "secretsread"
+    },
+    {
+      "fact_id": "k8s-06",
+      "original_edge_type": "canCreateWorkload",
+      "permission": "canCreateWorkload",
+      "provider": "k8s",
+      "raw_evidence": {
+        "fact_id": "k8s-06",
+        "provider": "k8s",
+        "source": "k8s:serviceaccount:checkout",
+        "source_tool": "clusterhound",
+        "target": "k8s:cluster:prod-eks",
+        "type": "canCreateWorkload"
+      },
+      "source": "k8s:serviceaccount:checkout",
+      "source_file": null,
+      "source_tool": "clusterhound",
+      "target": "k8s:cluster:prod-eks",
+      "type": "cancreateworkload"
+    }
+  ],
+  "nodes": [
+    {
+      "asset_category": "unknown",
+      "cloud": "aws",
+      "goal_candidate": false,
+      "id": "aws:metadata:imds",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "EC2 Instance Metadata Service",
+      "raw_evidence": {
+        "cloud": "aws",
+        "id": "aws:metadata:imds",
+        "name": "EC2 Instance Metadata Service",
+        "type": "metadata"
+      },
+      "type": "metadata",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "unknown",
+      "goal_candidate": false,
+      "id": "internet:external:public-client",
+      "is_entry": true,
+      "is_goal": false,
+      "name": "Public Internet Client",
+      "raw_evidence": {
+        "asset_marker": {
+          "cloud": "unknown",
+          "id": "internet:external:public-client",
+          "name": "Public Internet Client",
+          "type": "external"
+        },
+        "cloud": "unknown",
+        "id": "internet:external:public-client",
+        "is_entry": true,
+        "name": "Public Internet Client",
+        "type": "external"
+      },
+      "type": "external",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "k8s",
+      "goal_candidate": false,
+      "id": "k8s:api:prod-eks",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "prod-eks-api",
+      "raw_evidence": {
+        "cloud": "k8s",
+        "id": "k8s:api:prod-eks",
+        "name": "prod-eks-api",
+        "type": "api"
+      },
+      "type": "api",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "critical",
+      "cloud": "k8s",
+      "goal_candidate": true,
+      "id": "k8s:cluster:prod-eks",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "prod-eks",
+      "raw_evidence": {
+        "asset_marker": {
+          "asset_category": "critical",
+          "cloud": "k8s",
+          "goal_candidate": true,
+          "id": "k8s:cluster:prod-eks",
+          "name": "prod-eks",
+          "type": "cluster"
+        },
+        "cloud": "k8s",
+        "id": "k8s:cluster:prod-eks",
+        "name": "prod-eks",
+        "type": "cluster"
+      },
+      "type": "cluster",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "k8s",
+      "goal_candidate": false,
+      "id": "k8s:pod:checkout-api",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "checkout-api",
+      "raw_evidence": {
+        "cloud": "k8s",
+        "id": "k8s:pod:checkout-api",
+        "name": "checkout-api",
+        "type": "container"
+      },
+      "type": "container",
+      "vulnerabilities": [
+        {
+          "cve_id": "CVE-2022-0778",
+          "fixed_version": "1.1.1n",
+          "id": "CVE-2022-0778",
+          "installed_version": "1.1.1m",
+          "package_name": "openssl",
+          "raw_evidence": {
+            "artifact": {
+              "metadata": {
+                "image": "checkout-api"
+              },
+              "name": "openssl",
+              "version": "1.1.1m"
+            },
+            "vulnerability": {
+              "fix": {
+                "versions": [
+                  "1.1.1n"
+                ]
+              },
+              "id": "CVE-2022-0778",
+              "severity": "High"
+            }
+          },
+          "severity": "High",
+          "source": "grype-json"
+        }
+      ]
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "k8s",
+      "goal_candidate": false,
+      "id": "k8s:pod:payment-api",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "payment-api",
+      "raw_evidence": {
+        "cloud": "k8s",
+        "id": "k8s:pod:payment-api",
+        "name": "payment-api",
+        "type": "container"
+      },
+      "type": "container",
+      "vulnerabilities": [
+        {
+          "cve_id": "CVE-2021-44228",
+          "fixed_version": "2.15.0",
+          "id": "CVE-2021-44228",
+          "installed_version": "2.14.1",
+          "package_name": "log4j-core",
+          "raw_evidence": {
+            "artifact": {
+              "metadata": {
+                "image": "payment-api"
+              },
+              "name": "log4j-core",
+              "version": "2.14.1"
+            },
+            "vulnerability": {
+              "fix": {
+                "versions": [
+                  "2.15.0"
+                ]
+              },
+              "id": "CVE-2021-44228",
+              "severity": "Critical"
+            }
+          },
+          "severity": "Critical",
+          "source": "grype-json"
+        }
+      ]
+    },
+    {
+      "asset_category": "critical",
+      "cloud": "k8s",
+      "goal_candidate": true,
+      "id": "k8s:secret:payment-db",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "payment-db",
+      "raw_evidence": {
+        "asset_marker": {
+          "asset_category": "critical",
+          "cloud": "k8s",
+          "goal_candidate": true,
+          "id": "k8s:secret:payment-db",
+          "name": "payment-db",
+          "type": "secret"
+        },
+        "cloud": "k8s",
+        "id": "k8s:secret:payment-db",
+        "name": "payment-db",
+        "type": "secret"
+      },
+      "type": "secret",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "k8s",
+      "goal_candidate": false,
+      "id": "k8s:serviceaccount:checkout",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "checkout",
+      "raw_evidence": {
+        "cloud": "k8s",
+        "id": "k8s:serviceaccount:checkout",
+        "name": "checkout",
+        "type": "serviceaccount"
+      },
+      "type": "serviceaccount",
+      "vulnerabilities": []
+    }
+  ]
+}

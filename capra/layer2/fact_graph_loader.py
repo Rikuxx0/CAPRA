@@ -7,6 +7,7 @@ from .redaction import redact_sensitive_data
 from .schemas import FactGraphInput, UnresolvedItemModel
 
 SUPPORTED_SOURCE_TOOLS = {
+    "hound_generic",
     "iamhounddog",
     "azurehound",
     "gcp_hound",
@@ -18,6 +19,8 @@ SUPPORTED_SOURCE_TOOLS = {
     "unknown",
 }
 SOURCE_TOOL_ALIASES = {
+    "generic_hound": "hound_generic",
+    "hound-generic": "hound_generic",
     "azure_hound": "azurehound",
     "gcp-hound": "gcp_hound",
     "gcphound": "gcp_hound",
@@ -71,6 +74,9 @@ def _infer_source_tool(edge: dict[str, Any], original_type: str) -> str:
         if normalized_explicit != "unknown":
             return normalized_explicit
     edge_type = original_type.strip().lower()
+    permission = str(edge.get("permission") or raw.get("permission") or "").lower()
+    if permission == "drawio:connected":
+        return "drawio"
     if edge_type.startswith("az"):
         return "azurehound"
     if edge_type in {
@@ -86,9 +92,14 @@ def _infer_source_tool(edge: dict[str, Any], original_type: str) -> str:
         "unauthkubeletaccess", "accessimds",
     }:
         return "clusterhound"
-    permission = str(edge.get("permission") or raw.get("permission") or "").lower()
-    if permission == "drawio:connected":
-        return "drawio"
+    if edge_type in {
+        "sts:assumerole",
+        "assumerole",
+        "assume_role",
+        "network",
+        "network_access",
+    }:
+        return "hound_generic"
     return "unknown"
 
 
@@ -135,6 +146,10 @@ def load_fact_graph(data: dict[str, Any]) -> tuple[FactGraphInput, list[Unresolv
         target = str(edge.get("target") or "").strip()
         original_type = str(edge.get("original_edge_type") or raw_evidence.get("type") or edge.get("type") or "unknown").strip() or "unknown"
         source_tool = _infer_source_tool(edge, original_type)
+        explicit_source_tool = normalize_source_tool(
+            edge.get("source_tool") or raw_evidence.get("source_tool") or raw_evidence.get("tool")
+        )
+        source_tool_inferred = source_tool != "unknown" and explicit_source_tool == "unknown"
         fact_id = str(edge.get("fact_id") or edge.get("id") or "").strip()
         if not fact_id:
             fact_id = f"fact:{stable_hash({'source': source, 'target': target, 'type': original_type, 'permission': edge.get('permission')})[:16]}"
@@ -158,6 +173,7 @@ def load_fact_graph(data: dict[str, Any]) -> tuple[FactGraphInput, list[Unresolv
                 "permission": str(edge.get("permission") or "").strip(),
                 "provider": str(edge.get("provider") or "unknown").strip().lower() or "unknown",
                 "source_tool": source_tool,
+                "source_tool_inferred": source_tool_inferred,
                 "source_file": str(source_file).strip() if source_file else None,
                 "original_edge_type": original_type,
                 "raw_evidence": redact_sensitive_data(raw_evidence or edge),

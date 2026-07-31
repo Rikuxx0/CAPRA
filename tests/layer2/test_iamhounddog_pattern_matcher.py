@@ -1,4 +1,7 @@
+import pytest
+
 from capra.layer2.adapters.iamhounddog_adapter import IamHoundDogAdapter
+from capra.layer2.patterns.loader import DEFAULT_PATTERN_PATH, load_pattern_rules
 from capra.layer2.schemas import FactGraphInput, Layer2Config
 
 
@@ -40,3 +43,75 @@ def test_iamhounddog_hop_and_match_limits_are_bounded():
     assert hop_result.unresolved_items[0].type == "aws.ec2.passrole.v1"
     match_result = IamHoundDogAdapter().convert(graph(), Layer2Config(max_matches_per_rule=1))
     assert len(match_result.operators) == 1
+
+
+def test_iamhounddog_adds_rules_from_multiple_files(tmp_path):
+    first_rule = tmp_path / "first.yaml"
+    first_rule.write_text(
+        """
+version: "1.0"
+rules:
+  - id: custom.assume_role.v1
+    version: "1"
+    source_tool: iamhounddog
+    pattern:
+      - from_type: principal
+        edge_type: assume_role
+        to_type: role
+        bind_from_as: source_principal
+        bind_to_as: target_role
+    operator:
+      type: assume_role_identity
+      produces:
+        - artifact_type: identity
+          subject_node_ref: target_role
+""",
+        encoding="utf-8",
+    )
+    second_rule = tmp_path / "second.yaml"
+    second_rule.write_text(
+        """
+id: custom.attached_policy.v1
+version: "1"
+source_tool: iamhounddog
+pattern:
+  - from_type: role
+    edge_type: attached_policy
+    to_type: policy
+    bind_from_as: source_principal
+    bind_to_as: target_role
+operator:
+  type: inspect_attached_policy
+""",
+        encoding="utf-8",
+    )
+
+    result = IamHoundDogAdapter().convert(
+        graph(),
+        Layer2Config(iamhounddog_rule_paths=[first_rule, second_rule]),
+    )
+
+    assert {operator.operator_type for operator in result.operators} == {
+        "assume_role_identity",
+        "inspect_attached_policy",
+        "launch_instance_with_role",
+    }
+    assert all(operator.metadata["rule_set_hash"] for operator in result.operators)
+
+
+def test_pattern_loader_rejects_duplicate_rule_ids(tmp_path):
+    duplicate_rule = tmp_path / "duplicate.yaml"
+    duplicate_rule.write_text(
+        """
+id: aws.ec2.passrole.v1
+version: "2"
+source_tool: iamhounddog
+pattern: []
+operator:
+  type: duplicate
+""",
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="Duplicate IAMHoundDog rule id"):
+        load_pattern_rules([DEFAULT_PATTERN_PATH, duplicate_rule])

@@ -1,10 +1,204 @@
 {
-  "nodes": [{"id": "p", "type": "principal"}, {"id": "r1", "type": "role"}, {"id": "policy", "type": "policy"}, {"id": "ec2", "type": "ec2"}, {"id": "r2", "type": "role"}],
   "edges": [
-    {"fact_id": "f1", "source": "p", "target": "r1", "type": "assume_role", "source_tool": "iamhounddog"},
-    {"fact_id": "f2", "source": "r1", "target": "policy", "type": "attached_policy", "source_tool": "iamhounddog"},
-    {"fact_id": "f3", "source": "policy", "target": "ec2", "type": "ec2_run_instances", "permission": "ec2:RunInstances", "source_tool": "iamhounddog"},
-    {"fact_id": "f4", "source": "ec2", "target": "r2", "type": "instance_role", "source_tool": "iamhounddog"},
-    {"fact_id": "f5", "source": "p", "target": "r2", "type": "has_permission", "permission": "iam:PassRole", "source_tool": "iamhounddog"}
+    {
+      "fact_id": "iam-01",
+      "original_edge_type": "assume_role",
+      "permission": "sts:AssumeRole",
+      "provider": "aws",
+      "raw_evidence": {
+        "fact_id": "iam-01",
+        "permission": "sts:AssumeRole",
+        "provider": "aws",
+        "source": "aws:user:developer",
+        "source_tool": "iamhounddog",
+        "target": "aws:role:DevOpsRole",
+        "type": "assume_role"
+      },
+      "source": "aws:user:developer",
+      "source_file": null,
+      "source_tool": "iamhounddog",
+      "target": "aws:role:DevOpsRole",
+      "type": "assume_role"
+    },
+    {
+      "fact_id": "iam-05",
+      "original_edge_type": "has_permission",
+      "permission": "iam:PassRole",
+      "provider": "aws",
+      "raw_evidence": {
+        "fact_id": "iam-05",
+        "permission": "iam:PassRole",
+        "provider": "aws",
+        "source": "aws:user:developer",
+        "source_tool": "iamhounddog",
+        "target": "aws:role:EKSNodeRole",
+        "type": "has_permission"
+      },
+      "source": "aws:user:developer",
+      "source_file": null,
+      "source_tool": "iamhounddog",
+      "target": "aws:role:EKSNodeRole",
+      "type": "has_permission"
+    },
+    {
+      "fact_id": "iam-02",
+      "original_edge_type": "attached_policy",
+      "permission": "attached_policy",
+      "provider": "aws",
+      "raw_evidence": {
+        "fact_id": "iam-02",
+        "provider": "aws",
+        "source": "aws:role:DevOpsRole",
+        "source_tool": "iamhounddog",
+        "target": "aws:policy:EC2LaunchPolicy",
+        "type": "attached_policy"
+      },
+      "source": "aws:role:DevOpsRole",
+      "source_file": null,
+      "source_tool": "iamhounddog",
+      "target": "aws:policy:EC2LaunchPolicy",
+      "type": "attached_policy"
+    },
+    {
+      "fact_id": "iam-03",
+      "original_edge_type": "ec2_run_instances",
+      "permission": "ec2:RunInstances",
+      "provider": "aws",
+      "raw_evidence": {
+        "fact_id": "iam-03",
+        "permission": "ec2:RunInstances",
+        "provider": "aws",
+        "source": "aws:policy:EC2LaunchPolicy",
+        "source_tool": "iamhounddog",
+        "target": "aws:ec2:bootstrap-runner",
+        "type": "ec2_run_instances"
+      },
+      "source": "aws:policy:EC2LaunchPolicy",
+      "source_file": null,
+      "source_tool": "iamhounddog",
+      "target": "aws:ec2:bootstrap-runner",
+      "type": "ec2_run_instances"
+    },
+    {
+      "fact_id": "iam-04",
+      "original_edge_type": "instance_role",
+      "permission": "instance_role",
+      "provider": "aws",
+      "raw_evidence": {
+        "fact_id": "iam-04",
+        "provider": "aws",
+        "source": "aws:ec2:bootstrap-runner",
+        "source_tool": "iamhounddog",
+        "target": "aws:role:EKSNodeRole",
+        "type": "instance_role"
+      },
+      "source": "aws:ec2:bootstrap-runner",
+      "source_file": null,
+      "source_tool": "iamhounddog",
+      "target": "aws:role:EKSNodeRole",
+      "type": "instance_role"
+    }
+  ],
+  "nodes": [
+    {
+      "asset_category": "unknown",
+      "cloud": "aws",
+      "goal_candidate": false,
+      "id": "aws:ec2:bootstrap-runner",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "bootstrap-runner",
+      "raw_evidence": {
+        "cloud": "aws",
+        "id": "aws:ec2:bootstrap-runner",
+        "name": "bootstrap-runner",
+        "type": "ec2"
+      },
+      "type": "ec2",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "aws",
+      "goal_candidate": false,
+      "id": "aws:policy:EC2LaunchPolicy",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "EC2LaunchPolicy",
+      "raw_evidence": {
+        "cloud": "aws",
+        "id": "aws:policy:EC2LaunchPolicy",
+        "name": "EC2LaunchPolicy",
+        "type": "policy"
+      },
+      "type": "policy",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "aws",
+      "goal_candidate": false,
+      "id": "aws:role:DevOpsRole",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "DevOpsRole",
+      "raw_evidence": {
+        "cloud": "aws",
+        "id": "aws:role:DevOpsRole",
+        "name": "DevOpsRole",
+        "type": "role"
+      },
+      "type": "role",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "critical",
+      "cloud": "aws",
+      "goal_candidate": true,
+      "id": "aws:role:EKSNodeRole",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "EKSNodeRole",
+      "raw_evidence": {
+        "asset_marker": {
+          "asset_category": "critical",
+          "cloud": "aws",
+          "goal_candidate": true,
+          "id": "aws:role:EKSNodeRole",
+          "name": "EKSNodeRole",
+          "type": "role"
+        },
+        "cloud": "aws",
+        "id": "aws:role:EKSNodeRole",
+        "name": "EKSNodeRole",
+        "type": "role"
+      },
+      "type": "role",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "aws",
+      "goal_candidate": false,
+      "id": "aws:user:developer",
+      "is_entry": true,
+      "is_goal": false,
+      "name": "developer",
+      "raw_evidence": {
+        "asset_marker": {
+          "cloud": "aws",
+          "id": "aws:user:developer",
+          "name": "developer",
+          "type": "principal"
+        },
+        "cloud": "aws",
+        "id": "aws:user:developer",
+        "is_entry": true,
+        "name": "developer",
+        "type": "principal"
+      },
+      "type": "principal",
+      "vulnerabilities": []
+    }
   ]
 }

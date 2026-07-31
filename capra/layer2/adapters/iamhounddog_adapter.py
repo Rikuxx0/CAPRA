@@ -29,7 +29,13 @@ class IamHoundDogAdapter:
         return classify_edge(edge)
 
     def convert(self, fact_graph: FactGraphInput, config: Layer2Config) -> AdapterResult:
-        rules, rule_set_version, rule_set_hash = load_pattern_rules(config.iamhounddog_rule_path or self.rule_path)
+        if config.iamhounddog_rule_paths:
+            rule_paths = [self.rule_path, *config.iamhounddog_rule_paths]
+        elif config.iamhounddog_rule_path:
+            rule_paths = [config.iamhounddog_rule_path]
+        else:
+            rule_paths = [self.rule_path]
+        rules, rule_set_version, rule_set_hash = load_pattern_rules(rule_paths)
         result = AdapterResult(statistics={classification.value: 0 for classification in EdgeClassification})
         used_fact_ids: set[str] = set()
         for edge in fact_graph.edges:

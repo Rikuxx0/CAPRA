@@ -10,8 +10,8 @@ from .vuln_mapper import attach_vulnerabilities_to_nodes
 
 
 # ノード重複や欠損端点を吸収しながら有向グラフを構築する。
-def build_fact_graph(nodes: list[NodeModel], edges: list[EdgeModel]) -> nx.DiGraph:
-    graph = nx.DiGraph()
+def build_fact_graph(nodes: list[NodeModel], edges: list[EdgeModel]) -> nx.MultiDiGraph:
+    graph = nx.MultiDiGraph()
     for node in nodes:
         if graph.has_node(node.id):
             graph.nodes[node.id].update(_merge_node_dict(graph.nodes[node.id], model_to_dict(node)))
@@ -45,7 +45,7 @@ def build_layer1_fact_graph(
     vulnerability_mapping_config: dict[str, Any] | None = None,
     selected_goal_ids: set[str] | None = None,
     source_files: list[str] | None = None,
-) -> nx.DiGraph:
+) -> nx.MultiDiGraph:
     marked_nodes = apply_asset_markers(nodes, asset_config, selected_goal_ids=selected_goal_ids)
     mapped_nodes, unmapped = attach_vulnerabilities_to_nodes(
         marked_nodes,

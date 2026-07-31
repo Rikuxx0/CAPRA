@@ -60,14 +60,19 @@ def normalize_edge_type(value: str | None) -> str:
 # 複数フィールドの文字列からクラウドプロバイダを推定する。
 def infer_provider(*values: Any) -> str:
     text = " ".join(str(value or "") for value in values).lower()
-    if "arn:aws:" in text:
-        return "aws"
-    if "gserviceaccount.com" in text or "serviceaccount:" in text or "iam.gserviceaccount.com" in text:
-        return "gcp"
-    if "/subscriptions/" in text or "tenantid" in text or "microsoft." in text:
-        return "azure"
-    if "clusterrole" in text or "namespace" in text or "serviceaccount" in text or "kubernetes" in text:
-        return "k8s"
+    providers: set[str] = set()
+    if "arn:aws:" in text or "aws:" in text:
+        providers.add("aws")
+    if "gserviceaccount.com" in text or "iam.gserviceaccount.com" in text or "gcp:" in text:
+        providers.add("gcp")
+    if "/subscriptions/" in text or "tenantid" in text or "microsoft." in text or "azure:" in text:
+        providers.add("azure")
+    if "k8s:" in text or "clusterrole" in text or "namespace" in text or "kubernetes" in text:
+        providers.add("k8s")
+    if len(providers) == 1:
+        return next(iter(providers))
+    if len(providers) > 1:
+        return "hybrid"
     return "unknown"
 
 
@@ -117,7 +122,7 @@ def _parse_edge(edge: dict[str, Any]) -> EdgeModel:
         type=edge_type,
         permission=str(permission),
         provider=str(provider),
-        source_tool=str(edge.get("source_tool") or edge.get("tool") or "unknown").strip().lower(),
+        source_tool=str(edge.get("source_tool") or edge.get("tool") or "hound_generic").strip().lower(),
         source_file=str(edge.get("source_file")) if edge.get("source_file") else None,
         original_edge_type=str(edge.get("original_edge_type") or edge.get("type") or permission or "unknown"),
         raw_evidence=edge,

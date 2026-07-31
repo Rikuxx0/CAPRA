@@ -1,1 +1,191 @@
-{"edges": [{"fact_id": "g1", "source": "principal", "target": "service-account", "type": "CanImpersonate", "original_edge_type": "CanImpersonate", "source_tool": "gcp_hound"}, {"fact_id": "g2", "source": "project", "target": "service-account", "type": "ContainsServiceAccount", "original_edge_type": "ContainsServiceAccount", "source_tool": "gcp_hound"}]}
+{
+  "edges": [
+    {
+      "fact_id": "gcp-01",
+      "original_edge_type": "CanImpersonate",
+      "permission": "CanImpersonate",
+      "provider": "gcp",
+      "raw_evidence": {
+        "fact_id": "gcp-01",
+        "provider": "gcp",
+        "source": "aws:role:EKSNodeRole",
+        "source_tool": "gcp_hound",
+        "target": "gcp:serviceaccount:analytics-exporter",
+        "type": "CanImpersonate"
+      },
+      "source": "aws:role:EKSNodeRole",
+      "source_file": null,
+      "source_tool": "gcp_hound",
+      "target": "gcp:serviceaccount:analytics-exporter",
+      "type": "canimpersonate"
+    },
+    {
+      "fact_id": "gcp-04",
+      "original_edge_type": "ContainsServiceAccount",
+      "permission": "ContainsServiceAccount",
+      "provider": "gcp",
+      "raw_evidence": {
+        "fact_id": "gcp-04",
+        "provider": "gcp",
+        "source": "gcp:project:analytics-prod",
+        "source_tool": "gcp_hound",
+        "target": "gcp:serviceaccount:analytics-exporter",
+        "type": "ContainsServiceAccount"
+      },
+      "source": "gcp:project:analytics-prod",
+      "source_file": null,
+      "source_tool": "gcp_hound",
+      "target": "gcp:serviceaccount:analytics-exporter",
+      "type": "containsserviceaccount"
+    },
+    {
+      "fact_id": "gcp-02",
+      "original_edge_type": "CanReadSecrets",
+      "permission": "CanReadSecrets",
+      "provider": "gcp",
+      "raw_evidence": {
+        "fact_id": "gcp-02",
+        "provider": "gcp",
+        "source": "gcp:serviceaccount:analytics-exporter",
+        "source_tool": "gcp_hound",
+        "target": "gcp:secret:analytics-api-key",
+        "type": "CanReadSecrets"
+      },
+      "source": "gcp:serviceaccount:analytics-exporter",
+      "source_file": null,
+      "source_tool": "gcp_hound",
+      "target": "gcp:secret:analytics-api-key",
+      "type": "canreadsecrets"
+    },
+    {
+      "fact_id": "gcp-03",
+      "original_edge_type": "CanModifyBucketPoliciesInProject",
+      "permission": "CanModifyBucketPoliciesInProject",
+      "provider": "gcp",
+      "raw_evidence": {
+        "fact_id": "gcp-03",
+        "provider": "gcp",
+        "source": "gcp:serviceaccount:analytics-exporter",
+        "source_tool": "gcp_hound",
+        "target": "gcp:bucket:audit-archive",
+        "type": "CanModifyBucketPoliciesInProject"
+      },
+      "source": "gcp:serviceaccount:analytics-exporter",
+      "source_file": null,
+      "source_tool": "gcp_hound",
+      "target": "gcp:bucket:audit-archive",
+      "type": "canmodifybucketpoliciesinproject"
+    }
+  ],
+  "nodes": [
+    {
+      "asset_category": "critical",
+      "cloud": "aws",
+      "goal_candidate": true,
+      "id": "aws:role:EKSNodeRole",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "EKSNodeRole",
+      "raw_evidence": {
+        "asset_marker": {
+          "asset_category": "critical",
+          "cloud": "aws",
+          "goal_candidate": true,
+          "id": "aws:role:EKSNodeRole",
+          "name": "EKSNodeRole",
+          "type": "role"
+        },
+        "cloud": "aws",
+        "id": "aws:role:EKSNodeRole",
+        "name": "EKSNodeRole",
+        "type": "role"
+      },
+      "type": "role",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "high",
+      "cloud": "gcp",
+      "goal_candidate": true,
+      "id": "gcp:bucket:audit-archive",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "audit-archive",
+      "raw_evidence": {
+        "asset_marker": {
+          "asset_category": "high",
+          "cloud": "gcp",
+          "goal_candidate": true,
+          "id": "gcp:bucket:audit-archive",
+          "name": "audit-archive",
+          "type": "bucket"
+        },
+        "cloud": "gcp",
+        "id": "gcp:bucket:audit-archive",
+        "name": "audit-archive",
+        "type": "bucket"
+      },
+      "type": "bucket",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "gcp",
+      "goal_candidate": false,
+      "id": "gcp:project:analytics-prod",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "analytics-prod",
+      "raw_evidence": {
+        "cloud": "gcp",
+        "id": "gcp:project:analytics-prod",
+        "name": "analytics-prod",
+        "type": "project"
+      },
+      "type": "project",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "high",
+      "cloud": "gcp",
+      "goal_candidate": true,
+      "id": "gcp:secret:analytics-api-key",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "analytics-api-key",
+      "raw_evidence": {
+        "asset_marker": {
+          "asset_category": "high",
+          "cloud": "gcp",
+          "goal_candidate": true,
+          "id": "gcp:secret:analytics-api-key",
+          "name": "analytics-api-key",
+          "type": "secret"
+        },
+        "cloud": "gcp",
+        "id": "gcp:secret:analytics-api-key",
+        "name": "analytics-api-key",
+        "type": "secret"
+      },
+      "type": "secret",
+      "vulnerabilities": []
+    },
+    {
+      "asset_category": "unknown",
+      "cloud": "gcp",
+      "goal_candidate": false,
+      "id": "gcp:serviceaccount:analytics-exporter",
+      "is_entry": false,
+      "is_goal": false,
+      "name": "analytics-exporter",
+      "raw_evidence": {
+        "cloud": "gcp",
+        "id": "gcp:serviceaccount:analytics-exporter",
+        "name": "analytics-exporter",
+        "type": "serviceaccount"
+      },
+      "type": "serviceaccount",
+      "vulnerabilities": []
+    }
+  ]
+}

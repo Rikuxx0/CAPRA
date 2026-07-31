@@ -24,3 +24,33 @@ def test_invalid_edge_and_unknown_source_are_preserved_as_unresolved():
     )
     assert len(graph.edges) == 1
     assert {item.type for item in unresolved} == {"invalid_fact_edge", "unknown_source_tool"}
+
+
+def test_fact_graph_loader_infers_generic_hound_edges():
+    graph, unresolved, _ = load_fact_graph(
+        {
+            "nodes": [{"id": "user"}, {"id": "role"}, {"id": "pod"}],
+            "edges": [
+                {
+                    "source": "user",
+                    "target": "role",
+                    "type": "assume_role",
+                    "original_edge_type": "sts:AssumeRole",
+                    "permission": "sts:AssumeRole",
+                    "source_tool": "unknown",
+                },
+                {
+                    "source": "role",
+                    "target": "pod",
+                    "type": "network_access",
+                    "original_edge_type": "network",
+                    "permission": "network",
+                    "source_tool": "unknown",
+                },
+            ],
+        }
+    )
+
+    assert {edge["source_tool"] for edge in graph.edges} == {"hound_generic"}
+    assert all(edge["source_tool_inferred"] for edge in graph.edges)
+    assert not unresolved

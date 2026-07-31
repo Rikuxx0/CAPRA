@@ -9,10 +9,12 @@ from typing import Any
 from .adapters.azurehound_adapter import AzureHoundAdapter
 from .adapters.clusterhound_adapter import ClusterHoundAdapter
 from .adapters.gcp_hound_adapter import GcpHoundAdapter
+from .adapters.hound_generic_adapter import HoundGenericAdapter
 from .adapters.iamhounddog_adapter import IamHoundDogAdapter
 from .edge_classifier import classify_edge
 from .fact_graph_loader import load_fact_graph
 from .ids import generate_unresolved_id
+from .nvd_adapter import DEFAULT_RULE_PATH as DEFAULT_CVE_RULE_PATH
 from .nvd_adapter import convert_cves
 from .operator_graph_builder import build_operator_connections, extract_layer3_candidates
 from .redaction import redact_sensitive_data
@@ -49,7 +51,13 @@ def build_attack_operator_graph(
     source_counts = Counter(str(edge.get("source_tool") or "unknown") for edge in normalized.edges)
     operators: list[AttackOperatorModel] = []
     adapter_results = []
-    adapters = [AzureHoundAdapter(), GcpHoundAdapter(), ClusterHoundAdapter(), IamHoundDogAdapter()]
+    adapters = [
+        HoundGenericAdapter(rule_paths=layer2_config.hound_generic_rule_paths),
+        AzureHoundAdapter(rule_paths=layer2_config.azurehound_rule_paths),
+        GcpHoundAdapter(rule_paths=layer2_config.gcp_hound_rule_paths),
+        ClusterHoundAdapter(rule_paths=layer2_config.clusterhound_rule_paths),
+        IamHoundDogAdapter(),
+    ]
     adapters_by_tool = {adapter.source_tool: adapter for adapter in adapters}
     classification_counts = Counter(
         (
@@ -82,7 +90,13 @@ def build_attack_operator_graph(
     if has_vulnerabilities and (not selected_tools or selected_tools & {"nvd", "grype"}):
         try:
             processed_tools.add("nvd")
-            nvd_result = convert_cves(normalized, layer2_config, client=nvd_client)
+            cve_rule_paths = [DEFAULT_CVE_RULE_PATH, *layer2_config.cve_operator_rule_paths]
+            nvd_result = convert_cves(
+                normalized,
+                layer2_config,
+                client=nvd_client,
+                rule_path=cve_rule_paths,
+            )
             adapter_results.append(nvd_result)
             operators.extend(nvd_result.operators)
             unresolved.extend(nvd_result.unresolved_items)

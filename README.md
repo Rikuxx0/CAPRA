@@ -45,7 +45,7 @@ Hound系ツールが出力したクラウド資産、IAM/RBAC主体、権限、�
 - `parse_hound_generic()`: 入力からノードとエッジを抽出し、`NodeModel` と `EdgeModel` のlistを返します。エッジの端点だけに存在するIDは、推定ノードとして補完します。
 - `_extract_graph_container()`: `nodes` / `edges` が格納された階層を判定します。
 - `_parse_node()`: `name`、`label`、`displayName`、`type`、`kind`、`labels` などの表記差を吸収し、ノードIDやcloudがない場合は補完します。
-- `_parse_edge()`: `source` / `from` / `start`、`target` / `to` / `end` などの表記差を吸収し、権限名、provider、`source_tool`、元のEdge種別、raw evidenceを `EdgeModel` に保持します。
+- `_parse_edge()`: `source` / `from` / `start`、`target` / `to` / `end` などの表記差を吸収し、権限名、provider、`source_tool`、元のEdge種別、raw evidenceを `EdgeModel` に保持します。tool名がないHound generic入力には`source_tool="hound_generic"`を設定します。
 - `normalize_edge_type()`: `AssumeRole`、`sts:AssumeRole`、`iam:PassRole` などを `assume_role`、`pass_role_or_act_as` などの共通Edge種別へ正規化します。
 - `infer_provider()`: ARN、Service Account、Azure subscription、Kubernetes関連文字列などから `aws` / `gcp` / `azure` / `k8s` を推定します。
 
@@ -154,7 +154,7 @@ raw_evidence    = existing.raw_evidence と incoming.raw_evidence を統合
 Layer 1のオーケストレーションは `capra/layer1/graph_builder.py` が担当します。
 
 - `build_layer1_fact_graph()`: 重要資産マーク、脆弱性対応付け、グラフ構築を順番に実行し、未対応付け脆弱性、入力ファイル名、schema statusをグラフmetadataへ保存します。
-- `build_fact_graph()`: `NodeModel` をNetworkX node、`EdgeModel` を有向edgeとして `nx.DiGraph` に追加します。同じノードIDはマージし、同じsource、target、type、permissionのEdgeは重複排除します。Edgeの端点ノードが不足している場合は推定ノードを追加します。
+- `build_fact_graph()`: `NodeModel` をNetworkX node、`EdgeModel` を有向edgeとして `nx.MultiDiGraph` に追加します。同じノードIDはマージし、同一source/target間に異なる権限のEdgeを並列に保持します。完全に同一のsource、target、type、permissionを持つEdgeだけを重複排除し、Edgeの端点ノードが不足している場合は推定ノードを追加します。
 - `_merge_node_dict()`: Hound、重要資産、Draw.ioなど複数入力から得た同一ノードの属性を統合します。
 
 `app.py` は `build_layer1_fact_graph()` が返したグラフをPyVisの `Network` へ渡し、ブラウザ上に有向グラフとして表示します。ノードには資産名、Edgeには正規化したEdge typeを表示します。
@@ -237,6 +237,15 @@ goal_candidate=True   -> 黄: Goal 候補だが、今回の Goal には未選択
 - `vulnerability_mapping.yaml`
 - `fact_graph_sample.json`
 
+Layer 1サンプルは、AWS IAM、Amazon EKS、Kubernetes RBAC、GCP Service Account、Azure application管理を含む21ノード・21 multi-edgeのハイブリッド構成です。OpenSSLの`CVE-2022-0778`とlog4j-coreの`CVE-2021-44228`を別々のPodへ対応付けています。構成全体、入力ファイルの役割、公式根拠、再生成方法は[`examples/README.md`](examples/README.md)にあります。
+
+サンプルのCVE・バージョン根拠:
+
+- [NVD CVE-2022-0778 API](https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2022-0778)
+- [OpenSSL 1.1.1 release notes](https://mirror.openssl-library.org/news/openssl-1.1.1-notes/)
+- [NVD CVE-2021-44228 API](https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2021-44228)
+- [Apache Log4j security page](https://logging.apache.org/security.html#CVE-2021-44228)
+
 ## テスト
 
 ```bash
@@ -306,6 +315,8 @@ AttackOperatorGraphModel
 
 `convert_cves()` が作るOperatorは `origin_kind="cve"`、`source_tool="nvd"` です。対象ノードがある場合でも、実環境の到達性や稼働バージョンはLayer 2では確認しないため、通常は `status="partial"`、`verification_status="unverified"` になります。`requires` には対象ノードへの `network_reachability` を設定し、CVE/CWE、CVSS、Rule ID、入力Fact IDを根拠として保持します。ノードへ未対応付けのCVEは対象を決められないため `status="unresolved"` になります。
 
+入力脆弱性の`package_name`とNVD CPEのproduct名が両方存在する場合は整合性も確認します。一致しない場合はOperatorへ`package_matches_nvd_product`を不足条件として追加し、manual verification必須にしたうえで`cve_package_mismatch`を`unresolved_items`へ保存します。Layer 2は不一致を自動修正しません。
+
 #### 2. Hound系のIAM権限・構成関係・攻撃エッジを、IAM由来の攻撃操作へ変換
 
 Hound系入力は、単一Edge自体が攻撃操作を表す形式と、複数Edge・権限の組み合わせで攻撃操作が成立するIAMHoundDog形式を分けて処理します。
@@ -313,22 +324,26 @@ Hound系入力は、単一Edge自体が攻撃操作を表す形式と、複数Ed
 直接Edge変換の中心ファイルは次のとおりです。
 
 - `capra/layer2/adapters/direct_base.py`: AzureHound、GCPHound、ClusterHoundに共通するRule読込、Edge分類、Operator生成を `DirectEdgeAdapter` として実装します。
+- `capra/layer2/adapters/hound_generic_adapter.py`: tool名のないHound generic Edgeを`rules/hound_generic_edges.yaml`の明示mappingで変換します。
 - `capra/layer2/adapters/azurehound_adapter.py`: `source_tool="azurehound"` と `rules/azurehound_edges.yaml` を共通Adapterへ設定します。
 - `capra/layer2/adapters/gcp_hound_adapter.py`: `source_tool="gcp_hound"` と `rules/gcp_hound_edges.yaml` を設定します。
 - `capra/layer2/adapters/clusterhound_adapter.py`: `source_tool="clusterhound"` と `rules/clusterhound_edges.yaml` を設定します。
 - `capra/layer2/rules/azurehound_edges.yaml`: `AZAddSecret` などのAzureHound Edge mappingを定義します。
 - `capra/layer2/rules/gcp_hound_edges.yaml`: `CanCreateKeys`、`CanImpersonate` などのGCPHound Edge mappingを定義します。
 - `capra/layer2/rules/clusterhound_edges.yaml`: RBAC、Service Account、workload、Secret、host/node、exposureに関するClusterHound Edge mappingを定義します。
+- `capra/layer2/rules/hound_generic_edges.yaml`: `sts:AssumeRole`と`network`を、未検証条件を持つpartial Operatorへ変換します。AssumeRoleは対象Roleの`identity`を生成し、networkはそのidentityを要求して対象ノードの`network_reachability`を生成します。
 
 `DirectEdgeAdapter.convert()` は `source_tool` が一致するEdgeを安定した順序で処理し、YAML mappingの `classification` を確認します。`ATTACK_EDGE` だけを `origin_kind="iam_direct_edge"` のOperatorへ変換し、`RELATIONSHIP` と `PERMISSION` は分類統計には記録しますがOperator生成の対象にはしません。未定義Edgeは推測で変換せず `unresolved_items` に保存します。Ruleに `missing_conditions` があるEdgeは `partial`、ないEdgeは `complete` としてモデル化します。Hound AdapterはLayer 1由来のEdgeを `raw_evidence` としてそのまま引き継ぎ、Hound固有の秘密値検出や置換は行いません。
+
+Streamlit UIではGeneric Hound、AzureHound、GCPHound、ClusterHoundごとに複数の追加Edge mapping YAMLを選択できます。追加mappingは各source toolの既定mappingへ統合され、Edge種別またはRule IDが重複する場合はエラーになります。
 
 IAMHoundDogの中心ファイルは次のとおりです。
 
 - `capra/layer2/adapters/iamhounddog_adapter.py`: pattern ruleを実行し、match結果を `origin_kind="iam_pattern"` のOperatorへ変換します。
-- `capra/layer2/patterns/loader.py`: IAMHoundDog Rule YAMLを読み込み、Pydantic modelで検証し、Rule versionとhashを返します。
+- `capra/layer2/patterns/loader.py`: 1つ以上のIAMHoundDog Rule YAMLを読み込み、Pydantic modelで検証し、統合したRule versionとhashを返します。Rule IDの重複は曖昧な上書きを避けるためエラーになります。
 - `capra/layer2/patterns/models.py`: patternの各step、Operator定義、Rule全体のスキーマを定義します。
 - `capra/layer2/patterns/matcher.py`: ノード種別、Edge方向・順序、binding、required permissionを使う有向multi-edge pattern照合を実装します。
-- `capra/layer2/rules/iamhounddog_patterns.yaml`: 既定のIAMHoundDog pattern ruleを定義します。任意Rule YAMLを指定した場合はこの既定ファイルの代わりに読み込みます。
+- `capra/layer2/rules/iamhounddog_patterns.yaml`: 既定のIAMHoundDog pattern ruleを定義します。Streamlit UIでは複数の任意Rule YAMLを選択でき、各ファイル内の単一Ruleまたは`rules`配列を既定Ruleへ追加します。
 
 `match_rule()` は同じ `source_tool` のEdgeから隣接リストを作り、Ruleの `from_type`、`edge_type`、`to_type` を先頭から順番にたどります。`bind_from_as` / `bind_to_as` で主体や対象Roleを名前付きで保持し、`_find_permissions()` がpath上の主体とbindingされたノードについて `required_permissions` を確認します。`iam:PassRole` はbindingされた `target_role` に向く権限Edgeだけを有効とします。`max_hops` と `max_matches_per_rule` により探索量を制限します。
 
@@ -346,7 +361,7 @@ Hound Edgeの共通分類は `capra/layer2/edge_classifier.py` の `normalize_ed
 - `AttackOperatorGraphModel`: 最終的なOperator、Connection、unresolved item、Layer 3候補、metadataをまとめます。
 - `Layer2Config`: NVD mode/cache、探索上限、出力上限、対象tool/type、任意IAMHoundDog Rule pathを定義します。
 
-入力の正規化は `capra/layer2/fact_graph_loader.py` の `load_fact_graph()` が担当します。Layer 1 Fact Graphを `FactGraphInput` へ変換し、`source_tool` のalias、Edgeの `fact_id`、`original_edge_type`、`source_file` などを補完します。入力不備や判定不能な `source_tool` は `unresolved_items` に残し、入力全体のhashも計算します。入力境界ではsource toolに依存しない共通の安全対策を適用しますが、Hound Adapter内にHound固有のredaction処理はありません。
+入力の正規化は `capra/layer2/fact_graph_loader.py` の `load_fact_graph()` が担当します。Layer 1 Fact Graphを `FactGraphInput` へ変換し、`source_tool` のalias、Edgeの `fact_id`、`original_edge_type`、`source_file` などを補完します。既存データの`sts:AssumeRole`、`assume_role`、`network`、`network_access`は`hound_generic`として補完し、`source_tool_inferred=true`を保持します。入力不備や判定不能な `source_tool` は `unresolved_items` に残し、入力全体のhashも計算します。
 
 統合処理は `capra/layer2/service.py` の `build_attack_operator_graph()` が担当します。この関数は各Hound Adapterの `convert()` とNVDの `convert_cves()` が返した `AttackOperatorModel` を1つのlistへ集約します。その後、`_deduplicate_operators()` がOperator IDをkeyとして重複を除き、ID順に並べます。`selected_source_tools`、`selected_operator_types`、`max_total_operators` もここで適用し、上限超過分はwarningと `unresolved_items` に記録します。
 
@@ -419,6 +434,7 @@ Operator は preconditions/effects、produces/requires artifact、source fact ID
 
 ### source_tool ごとの変換
 
+- `hound_generic`: `sts:AssumeRole`をRole identity取得候補、`network`を対象へのnetwork reachability取得候補として変換します。trust policy、session constraint、route、security controlは実行時に確認しないため、どちらもmanual verification必須のpartial Operatorです。
 - `azurehound`: `AZAddSecret`、`AZAddMembers`、`AZMGGrantRole` を direct Operator に変換し、`AZContains` は関係として保持します。
 - `gcp_hound`: `CanCreateKeys`、`CanImpersonate`、Secret read、Blob/JWT sign、Bucket policy modify を direct Operator に変換します。所有・包含 edge は関係です。`CanListKeys` は鍵のメタデータ列挙だけでは credential を取得しないため、暫定的に `PERMISSION` として扱い Operator を生成しません。
 - `clusterhound`: RBAC 昇格、Service Account、workload control、Secret、host/node、exposure edge を source 固有の Operator に変換します。`entryPoint` 単独では Operator を生成しません。`unauthAPIAccess`、`unauthKubeletAccess`、`accessIMDS` は到達性や認証状態が未確認なので manual verification 必須の partial Operator です。
@@ -426,6 +442,10 @@ Operator は preconditions/effects、produces/requires artifact、source fact ID
 - `nvd`: ノードへ紐づいた CVE を NVD Description rule で分類します。CVSS は補助 metadata、CWE は分類補助、Reference tags は公開 Exploit 候補 metadata として保持します。
 
 Rule と Edge mapping は研究 PoC 用の暫定定義です。未対応または意味を確定できない Edge は推測で変換せず、`unresolved_items` へ保存します。新しい IAMHoundDog rule は `capra/layer2/rules/iamhounddog_patterns.yaml` の `rules` に、ノード種別、Edge 方向/順序、binding、required permissions、Operator artifacts を追加します。Rule ごとに一意な `id` と `version` を設定し、対応テストも追加してください。
+
+Streamlit UIのAttack Operator Graphでは、Operatorノードを`operator_type`（攻撃種別）ごとに色分けし、左下の凡例とノードラベルに攻撃種別を表示します。枠線は`complete`、`partial`、`unresolved`の状態を表します。
+
+CVE Operator Ruleも複数の追加YAMLを選択でき、既定の`cve_operator_rules.yaml`へ統合されます。Rule IDまたは正規化後の`phrase`が重複する場合はエラーになります。
 
 ### NVD cache と公開 Exploit 候補
 
@@ -464,6 +484,19 @@ result = build_attack_operator_graph(fact_graph_dict, Layer2Config(nvd_mode="cac
 ### Layer 2サンプルとテスト
 
 入力、NVD response fixture、各 Hound edge、完全/部分 IAM pattern、manual verification、unresolved、Connection、Layer 3 candidate、完成出力は `examples/layer2/` にあります。実際の NVD cache は Git 管理外です。
+
+`examples/layer2/fact_graph_sample.json`と2件のNVD fixtureはLayer 1と同じシナリオです。IAMHoundDogのPassRole patternからEKSへ進む主経路、Kubernetes ServiceAccountからSecret・workload・IMDSへ分岐する経路、GCPとAzureの管理経路を再現します。
+
+```text
+launch_instance_with_role
+  -> reach_network_target
+     |-> denial_of_service (CVE-2022-0778)
+     `-> mounted_service_account
+           |-> Kubernetes Secret / workload / IMDS
+           `-> port_forward -> remote_code_execution (CVE-2021-44228)
+```
+
+NVD fixtureはテスト用に必要なフィールドだけを保持したresponseです。CVE ID、product、affected/fixed version、CVSS、CWE、Vendor Advisoryは公式情報と一致させています。`python -m examples.regenerate`でLayer 1/2の派生fixtureを一括再生成できます。
 
 ```bash
 pytest

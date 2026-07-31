@@ -7,9 +7,21 @@
           "name": "grype",
           "rules": [
             {
-              "id": "CVE-2023-9999",
+              "id": "CVE-2022-0778",
               "properties": {
-                "packageName": "openssl"
+                "packageName": "openssl",
+                "packageVersion": "1.1.1m",
+                "fixedVersion": "1.1.1n",
+                "security-severity": "High"
+              }
+            },
+            {
+              "id": "CVE-2021-44228",
+              "properties": {
+                "packageName": "log4j-core",
+                "packageVersion": "2.14.1",
+                "fixedVersion": "2.15.0",
+                "security-severity": "Critical"
               }
             }
           ]
@@ -17,10 +29,16 @@
       },
       "results": [
         {
-          "ruleId": "CVE-2023-9999",
-          "level": "error",
+          "ruleId": "CVE-2022-0778",
           "message": {
-            "text": "CVE-2023-9999 affects openssl"
+            "text": "CVE-2022-0778 affects OpenSSL 1.1.1m in checkout-api and is fixed in 1.1.1n"
+          },
+          "locations": []
+        },
+        {
+          "ruleId": "CVE-2021-44228",
+          "message": {
+            "text": "CVE-2021-44228 affects log4j-core 2.14.1 in payment-api and is fixed in 2.15.0"
           },
           "locations": []
         }

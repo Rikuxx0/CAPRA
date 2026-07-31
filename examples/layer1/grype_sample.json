@@ -2,17 +2,37 @@
   "matches": [
     {
       "vulnerability": {
-        "id": "CVE-2023-1234",
+        "id": "CVE-2022-0778",
         "severity": "High",
         "fix": {
-          "versions": ["1.2.3"]
+          "versions": [
+            "1.1.1n"
+          ]
         }
       },
       "artifact": {
         "name": "openssl",
-        "version": "1.1.1",
+        "version": "1.1.1m",
         "metadata": {
-          "image": "backend-api"
+          "image": "checkout-api"
+        }
+      }
+    },
+    {
+      "vulnerability": {
+        "id": "CVE-2021-44228",
+        "severity": "Critical",
+        "fix": {
+          "versions": [
+            "2.15.0"
+          ]
+        }
+      },
+      "artifact": {
+        "name": "log4j-core",
+        "version": "2.14.1",
+        "metadata": {
+          "image": "payment-api"
         }
       }
     }

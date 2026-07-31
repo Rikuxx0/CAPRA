@@ -1,0 +1,34 @@
+version: "0.1.0"
+mappings:
+  "sts:AssumeRole":
+    rule_id: hound_generic.sts_assume_role.v1
+    classification: ATTACK_EDGE
+    operator_type: assume_aws_role
+    preconditions:
+      - sts_assume_role_permission_is_effective
+      - target_role_trust_policy_allows_source
+    effects:
+      - target_role_identity_may_be_obtained
+    produces:
+      - identity
+    manual_verification_required: true
+    missing_conditions:
+      - trust_policy_is_confirmed
+      - session_constraints_are_satisfied
+  network:
+    rule_id: hound_generic.network_access.v1
+    classification: ATTACK_EDGE
+    operator_type: reach_network_target
+    preconditions:
+      - source_identity_is_available
+      - route_and_security_controls_allow_traffic
+    effects:
+      - target_network_may_be_reachable
+    requires:
+      - identity
+    produces:
+      - network_reachability
+    manual_verification_required: true
+    missing_conditions:
+      - network_route_is_confirmed
+      - security_controls_allow_traffic

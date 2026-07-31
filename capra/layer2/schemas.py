@@ -97,6 +97,13 @@ class Layer2Config(BaseModel):
     max_uploaded_file_size: int = Field(default=10 * 1024 * 1024, ge=1)
     selected_source_tools: list[str] = Field(default_factory=list)
     selected_operator_types: list[str] = Field(default_factory=list)
+    hound_generic_rule_paths: list[Path] = Field(default_factory=list)
+    azurehound_rule_paths: list[Path] = Field(default_factory=list)
+    gcp_hound_rule_paths: list[Path] = Field(default_factory=list)
+    clusterhound_rule_paths: list[Path] = Field(default_factory=list)
+    iamhounddog_rule_paths: list[Path] = Field(default_factory=list)
+    cve_operator_rule_paths: list[Path] = Field(default_factory=list)
+    # Kept for callers that still provide a single replacement rule file.
     iamhounddog_rule_path: Path | None = None
 
 

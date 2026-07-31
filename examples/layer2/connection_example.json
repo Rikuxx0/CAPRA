@@ -1,1 +1,15 @@
-{"id": "connection:example", "source_operator_id": "attack_op:gcp:create_service_account_key:example", "target_operator_id": "attack_op:gcp:use_identity:example", "connection_type": "enables", "reason": "Produced artifact satisfies target requirement", "artifact": {"artifact_type": "identity", "subject_node_id": "gcp:serviceaccount:reporter", "properties": {}}, "metadata": {"match_method": "artifact"}}
+{
+  "artifact": {
+    "artifact_type": "network_reachability",
+    "properties": {},
+    "subject_node_id": "k8s:pod:payment-api"
+  },
+  "connection_type": "enables",
+  "id": "connection:2f639dfc29c5d6e3",
+  "metadata": {
+    "match_method": "artifact"
+  },
+  "reason": "Produced artifact satisfies target requirement",
+  "source_operator_id": "attack_op:k8s:port_forward_to_workload:e73b1f641ee7",
+  "target_operator_id": "attack_op:k8s:remote_code_execution:fa034733aaa6"
+}

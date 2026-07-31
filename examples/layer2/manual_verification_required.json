@@ -1,1 +1,61 @@
-{"operator_type": "access_unauthenticated_kubernetes_api", "manual_verification_required": true, "verification_status": "unverified", "missing_conditions": ["network_reachability_is_confirmed", "anonymous_authentication_is_enabled"]}
+{
+  "cve_ids": [],
+  "cwe_ids": [],
+  "effects": [
+    "kubernetes_api_may_be_reachable"
+  ],
+  "id": "attack_op:k8s:access_unauthenticated_kubernetes_api:ff227cd1297d",
+  "manual_verification_required": true,
+  "mapping_rule_id": "clusterhound.unauthapiaccess.v1",
+  "metadata": {
+    "original_edge_type": "unauthAPIAccess",
+    "provider": "k8s",
+    "rule_set_hash": "1f6dbbedbd1998eae08d79e7e69bf070a3f30a8f7bc464a315bc37ecd0542197",
+    "rule_set_version": "0.1.0"
+  },
+  "missing_conditions": [
+    "network_reachability_is_confirmed",
+    "anonymous_authentication_is_enabled"
+  ],
+  "operator_type": "access_unauthenticated_kubernetes_api",
+  "origin_kind": "iam_direct_edge",
+  "preconditions": [],
+  "produces": [
+    {
+      "artifact_type": "network_reachability",
+      "properties": {},
+      "subject_node_id": "k8s:api:prod-eks"
+    }
+  ],
+  "public_exploit_candidate": false,
+  "raw_evidence": {
+    "fact_id": "k8s-04",
+    "original_edge_type": "unauthAPIAccess",
+    "permission": "unauthAPIAccess",
+    "provider": "k8s",
+    "raw_evidence": {
+      "fact_id": "k8s-04",
+      "provider": "k8s",
+      "source": "internet:external:public-client",
+      "source_tool": "clusterhound",
+      "target": "k8s:api:prod-eks",
+      "type": "unauthAPIAccess"
+    },
+    "source": "internet:external:public-client",
+    "source_file": null,
+    "source_tool": "clusterhound",
+    "source_tool_inferred": false,
+    "target": "k8s:api:prod-eks",
+    "type": "unauthapiaccess"
+  },
+  "requires": [],
+  "source_fact_ids": [
+    "k8s-04"
+  ],
+  "source_files": [],
+  "source_node": "internet:external:public-client",
+  "source_tool": "clusterhound",
+  "status": "partial",
+  "target_node": "k8s:api:prod-eks",
+  "verification_status": "unverified"
+}

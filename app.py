@@ -163,7 +163,44 @@ st.header("Layer 2: Attack Operator Modeling")
 st.caption("Fact Graphを攻撃操作候補へ変換します。Layer 2は攻撃成功を判定せず、コマンドやペイロードも生成しません。")
 
 layer2_fact_upload = st.file_uploader("Layer 1 Fact Graph JSON", type=["json"], key="layer2_fact_graph")
-layer2_rule_upload = st.file_uploader("任意のIAMHoundDog Rule YAML", type=["yaml", "yml"], key="layer2_iamhounddog_rule")
+with st.expander("追加 Rule YAML（任意）"):
+    layer2_hound_generic_rule_uploads = st.file_uploader(
+        "Generic Hound Edge mapping YAML",
+        type=["yaml", "yml"],
+        accept_multiple_files=True,
+        key="layer2_hound_generic_rules",
+    )
+    layer2_azurehound_rule_uploads = st.file_uploader(
+        "AzureHound Edge mapping YAML",
+        type=["yaml", "yml"],
+        accept_multiple_files=True,
+        key="layer2_azurehound_rules",
+    )
+    layer2_gcp_hound_rule_uploads = st.file_uploader(
+        "GCPHound Edge mapping YAML",
+        type=["yaml", "yml"],
+        accept_multiple_files=True,
+        key="layer2_gcp_hound_rules",
+    )
+    layer2_clusterhound_rule_uploads = st.file_uploader(
+        "ClusterHound Edge mapping YAML",
+        type=["yaml", "yml"],
+        accept_multiple_files=True,
+        key="layer2_clusterhound_rules",
+    )
+    layer2_iamhounddog_rule_uploads = st.file_uploader(
+        "IAMHoundDog Pattern Rule YAML",
+        type=["yaml", "yml"],
+        accept_multiple_files=True,
+        key="layer2_iamhounddog_rules",
+        help="各YAMLには1件またはrules配列で複数件を定義できます。",
+    )
+    layer2_cve_rule_uploads = st.file_uploader(
+        "CVE Operator Rule YAML",
+        type=["yaml", "yml"],
+        accept_multiple_files=True,
+        key="layer2_cve_operator_rules",
+    )
 
 config_column_1, config_column_2, config_column_3 = st.columns(3)
 with config_column_1:
@@ -179,7 +216,7 @@ with config_column_2:
 with config_column_3:
     layer2_source_tools = st.multiselect(
         "対象source_tool（未選択はすべて）",
-        ["iamhounddog", "azurehound", "gcp_hound", "clusterhound", "nvd", "grype"],
+        ["hound_generic", "iamhounddog", "azurehound", "gcp_hound", "clusterhound", "nvd", "grype"],
     )
     layer2_operator_types_text = st.text_area(
         "対象operator_type（任意、カンマ区切り）",
@@ -187,7 +224,15 @@ with config_column_3:
     )
 
 if st.button("Build Layer 2 Attack Operator Graph"):
-    rule_temp_path = None
+    rule_upload_groups = {
+        "hound_generic": layer2_hound_generic_rule_uploads,
+        "azurehound": layer2_azurehound_rule_uploads,
+        "gcp_hound": layer2_gcp_hound_rule_uploads,
+        "clusterhound": layer2_clusterhound_rule_uploads,
+        "iamhounddog": layer2_iamhounddog_rule_uploads,
+        "cve": layer2_cve_rule_uploads,
+    }
+    rule_temp_paths = {rule_type: [] for rule_type in rule_upload_groups}
     try:
         max_upload_bytes = int(layer2_max_upload_mb) * 1024 * 1024
         if layer2_fact_upload:
@@ -200,13 +245,19 @@ if st.button("Build Layer 2 Attack Operator Graph"):
         if not layer2_fact_data:
             st.warning("Layer 1 Fact Graph JSONをアップロードするか、Layer 1を先に実行してください。")
         else:
-            if layer2_rule_upload:
-                rule_bytes = layer2_rule_upload.getvalue()
-                if len(rule_bytes) > max_upload_bytes:
-                    raise ValueError("IAMHoundDog rule YAML exceeds the configured upload-size limit")
-                with tempfile.NamedTemporaryFile(delete=False, suffix=".yaml") as rule_file:
-                    rule_file.write(rule_bytes)
-                    rule_temp_path = rule_file.name
+            total_rule_bytes = sum(
+                len(upload.getvalue())
+                for uploads in rule_upload_groups.values()
+                for upload in uploads
+            )
+            if total_rule_bytes > max_upload_bytes:
+                raise ValueError("Combined Layer 2 rule YAML files exceed the configured upload-size limit")
+            for rule_type, uploads in rule_upload_groups.items():
+                for rule_upload in uploads:
+                    rule_bytes = rule_upload.getvalue()
+                    with tempfile.NamedTemporaryFile(delete=False, suffix=".yaml") as rule_file:
+                        rule_file.write(rule_bytes)
+                        rule_temp_paths[rule_type].append(rule_file.name)
             selected_operator_types = [item.strip() for item in layer2_operator_types_text.split(",") if item.strip()]
             layer2_config = Layer2Config(
                 nvd_mode=layer2_nvd_mode,
@@ -219,7 +270,12 @@ if st.button("Build Layer 2 Attack Operator Graph"):
                 max_uploaded_file_size=max_upload_bytes,
                 selected_source_tools=layer2_source_tools,
                 selected_operator_types=selected_operator_types,
-                iamhounddog_rule_path=Path(rule_temp_path) if rule_temp_path else None,
+                hound_generic_rule_paths=[Path(path) for path in rule_temp_paths["hound_generic"]],
+                azurehound_rule_paths=[Path(path) for path in rule_temp_paths["azurehound"]],
+                gcp_hound_rule_paths=[Path(path) for path in rule_temp_paths["gcp_hound"]],
+                clusterhound_rule_paths=[Path(path) for path in rule_temp_paths["clusterhound"]],
+                iamhounddog_rule_paths=[Path(path) for path in rule_temp_paths["iamhounddog"]],
+                cve_operator_rule_paths=[Path(path) for path in rule_temp_paths["cve"]],
             )
             layer2_graph = build_attack_operator_graph(layer2_fact_data, layer2_config)
             st.session_state["layer2_attack_operator_graph"] = layer2_graph
@@ -278,5 +334,7 @@ if st.button("Build Layer 2 Attack Operator Graph"):
     except Exception as exc:
         st.error(f"Layer 2 graph build failed: {exc}")
     finally:
-        if rule_temp_path and os.path.exists(rule_temp_path):
-            os.remove(rule_temp_path)
+        for paths in rule_temp_paths.values():
+            for rule_temp_path in paths:
+                if os.path.exists(rule_temp_path):
+                    os.remove(rule_temp_path)

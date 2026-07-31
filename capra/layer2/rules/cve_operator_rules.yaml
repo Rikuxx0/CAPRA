@@ -1,5 +1,6 @@
 version: "0.1.0"
 rules:
+  - {id: cve.arbitrary_code_execution.v1, phrase: "execute arbitrary code", operator_type: remote_code_execution}
   - {id: cve.out_of_bounds_write.v1, phrase: "out-of-bounds write", operator_type: out_of_bounds_write}
   - {id: cve.authentication_bypass.v1, phrase: "authentication bypass", operator_type: authentication_bypass}
   - {id: cve.information_disclosure.v1, phrase: "information disclosure", operator_type: information_disclosure}

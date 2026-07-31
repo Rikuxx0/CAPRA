@@ -1,1 +1,173 @@
-{"operator_type": "buffer_overflow", "origin_kind": "cve", "source_tool": "nvd", "target_node": "gcp:serviceaccount:reporter", "status": "partial", "verification_status": "unverified", "missing_conditions": ["target_is_reachable"]}
+{
+  "cve_ids": [
+    "CVE-2021-44228"
+  ],
+  "cwe_ids": [
+    "CWE-917"
+  ],
+  "effects": [
+    "vulnerability_exploitation_effect"
+  ],
+  "id": "attack_op:k8s:remote_code_execution:fa034733aaa6",
+  "manual_verification_required": false,
+  "mapping_rule_id": "cve.arbitrary_code_execution.v1",
+  "metadata": {
+    "attack_complexity": "low",
+    "attack_vector": "network",
+    "availability_impact": "high",
+    "confidentiality_impact": "high",
+    "cvss_score": 10.0,
+    "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+    "input_package_name": "log4j-core",
+    "integrity_impact": "high",
+    "nvd_cache_hash": "812ef20475deefa853979c5c6e8a25d0ad29aa852cd57a0d73a75c8ff6b267f3",
+    "package_matches_nvd_product": true,
+    "privileges_required": "none",
+    "products": [
+      "apache:log4j"
+    ],
+    "references": [
+      {
+        "tags": [
+          "Vendor Advisory"
+        ],
+        "url": "https://logging.apache.org/security.html#CVE-2021-44228"
+      }
+    ],
+    "rule_set_hash": "407713ab9ceaeeae2709bf28184c334fcaa492f712062445b1a4c97d450b6923",
+    "rule_set_version": "0.1.0",
+    "scope": "changed",
+    "user_interaction": "none",
+    "versions": [
+      "2.0-beta9",
+      "2.15.0"
+    ]
+  },
+  "missing_conditions": [
+    "target_is_reachable"
+  ],
+  "operator_type": "remote_code_execution",
+  "origin_kind": "cve",
+  "preconditions": [
+    "vulnerable_version_is_running",
+    "target_is_reachable"
+  ],
+  "produces": [],
+  "public_exploit_candidate": false,
+  "raw_evidence": {
+    "nvd": {
+      "configurations": [
+        {
+          "nodes": [
+            {
+              "cpeMatch": [
+                {
+                  "criteria": "cpe:2.3:a:apache:log4j:*:*:*:*:*:*:*:*",
+                  "versionEndExcluding": "2.15.0",
+                  "versionStartIncluding": "2.0-beta9",
+                  "vulnerable": true
+                }
+              ],
+              "negate": false,
+              "operator": "OR"
+            }
+          ]
+        }
+      ],
+      "descriptions": [
+        {
+          "lang": "en",
+          "value": "Apache Log4j2 JNDI features do not protect against attacker-controlled LDAP endpoints. An attacker who controls log messages can execute arbitrary code when message lookup substitution is enabled. The issue affects log4j-core 2.14.1 and is fixed in 2.15.0 for Java 8 and later."
+        }
+      ],
+      "id": "CVE-2021-44228",
+      "metrics": {
+        "cvssMetricV31": [
+          {
+            "cvssData": {
+              "attackComplexity": "LOW",
+              "attackVector": "NETWORK",
+              "availabilityImpact": "HIGH",
+              "baseScore": 10.0,
+              "baseSeverity": "CRITICAL",
+              "confidentialityImpact": "HIGH",
+              "integrityImpact": "HIGH",
+              "privilegesRequired": "NONE",
+              "scope": "CHANGED",
+              "userInteraction": "NONE",
+              "vectorString": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
+              "version": "3.1"
+            },
+            "source": "nvd@nist.gov",
+            "type": "Primary"
+          }
+        ]
+      },
+      "references": [
+        {
+          "source": "security@apache.org",
+          "tags": [
+            "Vendor Advisory"
+          ],
+          "url": "https://logging.apache.org/security.html#CVE-2021-44228"
+        }
+      ],
+      "sourceIdentifier": "security@apache.org",
+      "weaknesses": [
+        {
+          "description": [
+            {
+              "lang": "en",
+              "value": "CWE-917"
+            }
+          ],
+          "source": "nvd@nist.gov",
+          "type": "Primary"
+        }
+      ]
+    },
+    "vulnerability": {
+      "cve_id": "CVE-2021-44228",
+      "fixed_version": "2.15.0",
+      "id": "CVE-2021-44228",
+      "installed_version": "2.14.1",
+      "package_name": "log4j-core",
+      "raw_evidence": {
+        "artifact": {
+          "metadata": {
+            "image": "payment-api"
+          },
+          "name": "log4j-core",
+          "version": "2.14.1"
+        },
+        "vulnerability": {
+          "fix": {
+            "versions": [
+              "2.15.0"
+            ]
+          },
+          "id": "CVE-2021-44228",
+          "severity": "Critical"
+        }
+      },
+      "severity": "Critical",
+      "source": "grype-json"
+    }
+  },
+  "requires": [
+    {
+      "artifact_type": "network_reachability",
+      "properties": {},
+      "subject_node_id": "k8s:pod:payment-api"
+    }
+  ],
+  "source_fact_ids": [
+    "CVE-2021-44228"
+  ],
+  "source_files": [],
+  "source_node": null,
+  "source_tool": "nvd",
+  "status": "partial",
+  "target_node": "k8s:pod:payment-api",
+  "verification_status": "unverified"
+}

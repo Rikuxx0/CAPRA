@@ -17,7 +17,7 @@ def test_asset_marker_sets_goal_candidate_not_fixed_goal():
     nodes, _ = parse_hound_generic(hound)
 
     marked = apply_asset_markers(nodes, assets)
-    admin = next(node for node in marked if node.id == "aws:role:AdminRole")
+    admin = next(node for node in marked if node.id == "aws:role:EKSNodeRole")
 
     assert admin.goal_candidate is True
     assert admin.is_goal is False
@@ -29,9 +29,17 @@ def test_build_fact_graph():
     nodes, edges = parse_hound_generic(hound)
     graph = build_fact_graph(nodes, edges)
 
-    assert graph.number_of_nodes() == 3
-    assert graph.number_of_edges() == 2
-    assert graph.nodes["aws:user:low-priv-user"]["name"] == "low-priv-user"
+    assert graph.number_of_nodes() == 21
+    assert graph.number_of_edges() == 21
+    assert graph.nodes["aws:user:developer"]["name"] == "developer"
+    parallel_edges = graph.get_edge_data(
+        "k8s:serviceaccount:checkout",
+        "k8s:pod:payment-api",
+    )
+    assert {edge["type"] for edge in parallel_edges.values()} == {
+        "canexec",
+        "canportforward",
+    }
 
 
 # 複数入力を統合した Fact Graph の JSON 出力内容を検証する。
@@ -52,9 +60,15 @@ def test_export_fact_graph_json():
     )
     exported = export_fact_graph_json(graph)
 
-    assert exported["metadata"]["node_count"] == 5
-    assert exported["metadata"]["edge_count"] == 2
-    assert exported["metadata"]["vulnerability_count"] == 1
+    assert exported["metadata"]["node_count"] == 21
+    assert exported["metadata"]["edge_count"] == 21
+    assert exported["metadata"]["vulnerability_count"] == 2
     assert exported["metadata"]["unmapped_vulnerability_count"] == 0
-    backend = next(node for node in exported["nodes"] if node["id"] == "k8s:pod:backend-api")
-    assert backend["vulnerabilities"][0]["cve_id"] == "CVE-2023-1234"
+    checkout = next(
+        node for node in exported["nodes"] if node["id"] == "k8s:pod:checkout-api"
+    )
+    payment = next(
+        node for node in exported["nodes"] if node["id"] == "k8s:pod:payment-api"
+    )
+    assert checkout["vulnerabilities"][0]["cve_id"] == "CVE-2022-0778"
+    assert payment["vulnerabilities"][0]["cve_id"] == "CVE-2021-44228"
