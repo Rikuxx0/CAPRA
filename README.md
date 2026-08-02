@@ -413,7 +413,7 @@ source Fact node ── source ──▶ Attack Operator ── target ──▶
 
 ノードの詳細はホバーでは表示しません。Operator nodeまたはFact nodeをクリックすると、グラフ右上の詳細パネルが開きます。Operatorの場合は `source_tool`、source/target node、preconditions/effects、artifact、CVE/CWE、status、evidence、metadataなどのJSONを表示し、Fact nodeの場合は元のノードIDを表示します。詳細パネルは最大640px幅で、狭い画面では左右の余白を残して画面幅に合わせます。「閉じる」ボタンを押すまで表示されるため、マウス移動だけでポップアップが開いてグラフを隠すことはありません。この処理は `capra/layer2/visualization.py` の `_inject_click_detail_panel()` がPyVis生成HTMLへ追加しています。
 
-グラフのphysicsは初期配置を安定させる間だけ有効です。`stabilizationIterationsDone` イベント後にphysicsを自動停止するため、表示後にノードが回転・漂流し続けることはありません。停止後もノードを手動でドラッグして配置を調整できます。
+グラフはLayer 1と同様の力学配置を使い、`stabilizationIterationsDone` イベント後にphysicsを自動停止します。階層配置の制約は使わないため、停止後は各ノードを上下左右へ自由にドラッグでき、接続されたエッジもノードへ追従します。右下の「自動整列」でphysicsを一時的に再開でき、「全体表示」で現在の配置を画面内へ収められます。
 
 ### 入出力
 

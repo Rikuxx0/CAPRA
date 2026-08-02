@@ -164,6 +164,7 @@ def test_visualization_opens_details_on_click_without_hover_tooltips():
     assert 'network.on("click"' in html
     assert f'id="{visualization.DETAIL_PANEL_ID}" hidden' in html
     assert f'id="{visualization.LEGEND_PANEL_ID}"' in html
+    assert f'id="{visualization.LAYOUT_CONTROLS_ID}"' in html
     assert "capraAttackTypeColors" in html
     assert "buffer_overflow" in html
     assert "width: min(640px, calc(100vw - 32px))" in html
@@ -171,8 +172,14 @@ def test_visualization_opens_details_on_click_without_hover_tooltips():
     assert "capraDetailPanel.hidden = true" in html
     assert '"hover": false' in html or '\\"hover\\": false' in html
     assert '"operator_type": "buffer_overflow"' in html
-    assert '"physics": {"enabled": false}' in html
-    assert '"hierarchical": {"enabled": true' in html
-    assert '"direction": "LR"' in html
-    assert '"sortMethod": "directed"' in html
-    assert "stabilizationIterationsDone" not in html
+    assert '"physics": {"enabled": true' in html
+    assert '"hierarchical": {"enabled": false' in html
+    assert '"dragNodes": true' in html
+    assert '"dragView": true' in html
+    assert '"zoomView": true' in html
+    assert '"type": "continuous"' in html
+    assert 'id="capra-fit-graph"' in html
+    assert 'id="capra-relayout-graph"' in html
+    assert "stabilizationIterationsDone" in html
+    assert "capraStopPhysics" in html
+    assert "network.stabilize(250)" in html

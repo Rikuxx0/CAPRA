@@ -18,6 +18,7 @@ FACT_NODE_PREFIX = "fact_node:"
 CONTEXT_EDGE_COLOR = "#8A94A3"
 DETAIL_PANEL_ID = "capra-node-detail-panel"
 LEGEND_PANEL_ID = "capra-attack-type-legend"
+LAYOUT_CONTROLS_ID = "capra-layout-controls"
 
 
 def _build_operator_label(operator: AttackOperatorModel) -> str:
@@ -124,6 +125,31 @@ def _inject_click_detail_panel(
     border: 1px solid #5F6875;
     border-radius: 3px;
   }}
+  #{LAYOUT_CONTROLS_ID} {{
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 900;
+    display: flex;
+    gap: 8px;
+    padding: 8px;
+    border: 1px solid #C7CED8;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.14);
+  }}
+  #{LAYOUT_CONTROLS_ID} button {{
+    padding: 6px 10px;
+    border: 1px solid #AEB8C5;
+    border-radius: 6px;
+    background: #FFFFFF;
+    color: #253044;
+    cursor: pointer;
+    font-size: 12px;
+  }}
+  #{LAYOUT_CONTROLS_ID} button:hover {{
+    background: #F1F5F9;
+  }}
 </style>
 <aside id="{DETAIL_PANEL_ID}" hidden>
   <div class="capra-detail-header">
@@ -136,6 +162,10 @@ def _inject_click_detail_panel(
   <strong>攻撃種別</strong>
   <div class="capra-legend-items" id="capra-attack-type-legend-items"></div>
 </aside>
+<div id="{LAYOUT_CONTROLS_ID}" aria-label="グラフ配置操作">
+  <button id="capra-fit-graph" type="button">全体表示</button>
+  <button id="capra-relayout-graph" type="button">自動整列</button>
+</div>
 <script>
   const capraNodeDetails = {details_json};
   const capraAttackTypeColors = {attack_types_json};
@@ -175,6 +205,26 @@ def _inject_click_detail_panel(
   capraDetailClose.addEventListener("click", function () {{
     capraDetailPanel.hidden = true;
   }});
+
+  function capraStopPhysics() {{
+    network.setOptions({{ physics: {{ enabled: false }} }});
+  }}
+
+  function capraRunLayout() {{
+    network.once("stabilizationIterationsDone", capraStopPhysics);
+    network.setOptions({{ physics: {{ enabled: true }} }});
+    network.stabilize(250);
+    window.setTimeout(capraStopPhysics, 5000);
+  }}
+
+  network.once("stabilizationIterationsDone", capraStopPhysics);
+  window.setTimeout(capraStopPhysics, 5000);
+
+  document.getElementById("capra-fit-graph").addEventListener("click", function () {{
+    network.fit({{ animation: {{ duration: 300, easingFunction: "easeInOutQuad" }} }});
+  }});
+
+  document.getElementById("capra-relayout-graph").addEventListener("click", capraRunLayout);
 </script>
 """
     if "</body>" in html:
@@ -262,12 +312,14 @@ def build_attack_operator_graph_html(graph: AttackOperatorGraphModel) -> str:
             arrows="to",
         )
     network.set_options(
-        '{"layout":{"hierarchical":{"enabled":true,"direction":"LR","sortMethod":"directed",'
-        '"levelSeparation":340,"nodeSpacing":210,"treeSpacing":260,"blockShifting":true,'
-        '"edgeMinimization":true,"parentCentralization":true}},'
-        '"physics":{"enabled":false},"interaction":{"hover":false,"dragNodes":true,'
-        '"navigationButtons":true},"edges":{"smooth":{"enabled":true,"type":"cubicBezier",'
-        '"forceDirection":"horizontal","roundness":0.35}}}'
+        '{"layout":{"hierarchical":{"enabled":false}},'
+        '"physics":{"enabled":true,"solver":"barnesHut",'
+        '"stabilization":{"enabled":true,"iterations":250,"updateInterval":25,"fit":true},'
+        '"barnesHut":{"gravitationalConstant":-10000,"centralGravity":0.2,'
+        '"springLength":190,"springConstant":0.04,"damping":0.35,"avoidOverlap":0.6}},'
+        '"interaction":{"hover":false,"dragNodes":true,"dragView":true,"zoomView":true,'
+        '"navigationButtons":true},"edges":{"smooth":{"enabled":true,"type":"continuous",'
+        '"roundness":0.25}}}'
     )
     return _inject_click_detail_panel(
         network.generate_html(notebook=False),
