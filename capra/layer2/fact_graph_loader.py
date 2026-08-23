@@ -12,6 +12,7 @@ SUPPORTED_SOURCE_TOOLS = {
     "azurehound",
     "gcp_hound",
     "clusterhound",
+    "bloodhound_kube",
     "grype",
     "nvd",
     "drawio",
@@ -27,6 +28,8 @@ SOURCE_TOOL_ALIASES = {
     "cluster_hound": "clusterhound",
     "iam_hound_dog": "iamhounddog",
     "iamhound": "iamhounddog",
+    "bloodhound-kube": "bloodhound_kube",
+    "bloodhoundkube": "bloodhound_kube",
 }
 
 

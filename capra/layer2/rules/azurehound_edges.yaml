@@ -8,6 +8,7 @@ mappings:
     classification: ATTACK_EDGE
     operator_type: add_application_secret
     preconditions: [can_modify_application_credentials]
+    requires: [identity]
     effects: [application_secret_added]
     produces: [credential, identity]
   AZAddMembers:
@@ -15,6 +16,7 @@ mappings:
     classification: ATTACK_EDGE
     operator_type: add_group_member
     preconditions: [can_modify_group_membership]
+    requires: [identity]
     effects: [group_membership_added]
     produces: [identity]
   AZMGGrantRole:
@@ -22,5 +24,6 @@ mappings:
     classification: ATTACK_EDGE
     operator_type: grant_management_group_role
     preconditions: [can_grant_management_group_role]
+    requires: [identity]
     effects: [management_group_role_granted]
     produces: [permission, resource_control]

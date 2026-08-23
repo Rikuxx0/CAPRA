@@ -14,8 +14,37 @@ except ImportError:  # pragma: no cover - exercised only on Pydantic v1
     PYDANTIC_V2 = False
 
 from .severity import normalize_severity
+from .redaction import redact_sensitive_data
 
 SUPPORTED_CLOUDS = {"aws", "gcp", "azure", "k8s", "hybrid", "unknown"}
+SUPPORTED_SOURCE_TOOLS = {
+    "hound_generic",
+    "iamhounddog",
+    "gcp_hound",
+    "azurehound",
+    "clusterhound",
+    "bloodhound_kube",
+    "grype",
+    "drawio",
+    "manual",
+    "unknown",
+}
+SOURCE_TOOL_ALIASES = {
+    "generic_hound": "hound_generic",
+    "hound-generic": "hound_generic",
+    "iam_hound_dog": "iamhounddog",
+    "iamhound": "iamhounddog",
+    "gcp-hound": "gcp_hound",
+    "gcphound": "gcp_hound",
+    "azure_hound": "azurehound",
+    "cluster_hound": "clusterhound",
+    "bloodhound-kube": "bloodhound_kube",
+    "bloodhoundkube": "bloodhound_kube",
+    "grype-json": "grype",
+    "grype_json": "grype",
+    "grype-sarif": "grype",
+    "grype_sarif": "grype",
+}
 
 
 # Pydantic v1/v2 の差異を吸収してモデルを辞書へ変換する。
@@ -30,6 +59,12 @@ def model_to_dict(model: BaseModel) -> dict[str, Any]:
 def _normalize_cloud(value: Any) -> str:
     cloud = str(value or "unknown").strip().lower()
     return cloud if cloud in SUPPORTED_CLOUDS else "unknown"
+
+
+def normalize_source_tool(value: Any, *, default: str = "unknown") -> str:
+    tool = str(value or default).strip().lower().replace(" ", "_")
+    tool = SOURCE_TOOL_ALIASES.get(tool, tool)
+    return tool if tool in SUPPORTED_SOURCE_TOOLS else "unknown"
 
 
 if PYDANTIC_V2:
@@ -77,6 +112,11 @@ class NodeModel(BaseModel):
     def normalize_text_field(cls, value: Any) -> str:
         return str(value or "unknown").strip().lower() or "unknown"
 
+    @before_field_validator("raw_evidence")
+    @classmethod
+    def redact_raw_evidence(cls, value: Any) -> dict[str, Any]:
+        return redact_sensitive_data(value) if isinstance(value, dict) else {}
+
 
 class EdgeModel(BaseModel):
     fact_id: str | None = None
@@ -102,6 +142,16 @@ class EdgeModel(BaseModel):
     def normalize_type(cls, value: Any) -> str:
         return str(value or "unknown").strip().lower() or "unknown"
 
+    @before_field_validator("source_tool")
+    @classmethod
+    def normalize_tool(cls, value: Any) -> str:
+        return normalize_source_tool(value)
+
+    @before_field_validator("raw_evidence")
+    @classmethod
+    def redact_raw_evidence(cls, value: Any) -> dict[str, Any]:
+        return redact_sensitive_data(value) if isinstance(value, dict) else {}
+
 
 class VulnerabilityModel(BaseModel):
     id: str
@@ -118,6 +168,7 @@ class VulnerabilityModel(BaseModel):
     # severity 表記を正規化する。
     def normalize_severity_label(cls, values: dict[str, Any]) -> dict[str, Any]:
         values["severity"] = normalize_severity(values.get("severity"))
+        values["raw_evidence"] = redact_sensitive_data(values.get("raw_evidence") or {})
         return values
 
 

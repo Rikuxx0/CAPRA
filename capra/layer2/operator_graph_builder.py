@@ -24,6 +24,16 @@ def _artifact_matches(produced: OperatorArtifactModel, required: OperatorArtifac
     return all(produced.properties.get(key) == value for key, value in required.properties.items())
 
 
+def _conditions(values: list[str]) -> dict[str, str]:
+    """Return non-empty conditions keyed by a case-insensitive canonical value."""
+    result: dict[str, str] = {}
+    for value in values:
+        condition = str(value or "").strip()
+        if condition:
+            result.setdefault(condition.lower(), condition)
+    return result
+
+
 def build_operator_connections(
     operators: list[AttackOperatorModel],
     max_connections: int,
@@ -46,14 +56,27 @@ def build_operator_connections(
         for target in ordered:
             if source.id == target.id:
                 continue
-            if _valid_node_id(source.target_node) and source.target_node == target.source_node:
+            source_effects = _conditions(source.effects)
+            target_preconditions = _conditions(target.preconditions)
+            for condition_key in sorted(source_effects.keys() & target_preconditions.keys()):
+                condition = target_preconditions[condition_key]
                 connection = AttackOperatorConnectionModel(
-                    id=generate_connection_id(source.id, target.id, "enables"),
+                    id=generate_connection_id(
+                        source.id,
+                        target.id,
+                        "enables",
+                        condition=condition,
+                    ),
                     source_operator_id=source.id,
                     target_operator_id=target.id,
                     connection_type="enables",
-                    reason=f"source target_node matches target source_node: {source.target_node}",
-                    metadata={"match_method": "node"},
+                    reason=f"Source effect satisfies target precondition: {condition}",
+                    condition=condition,
+                    metadata={
+                        "match_method": "condition",
+                        "source_effect": source_effects[condition_key],
+                        "target_precondition": condition,
+                    },
                 )
                 if not add(connection):
                     return sorted(connections.values(), key=lambda item: item.id), warnings
@@ -68,18 +91,9 @@ def build_operator_connections(
                         connection_type="enables",
                         reason="Produced artifact satisfies target requirement",
                         artifact=produced,
-                        metadata={"match_method": "artifact"},
+                        metadata={"match_method": "artifact", "match_rule": "produces_requires"},
                     )
-                    requires = AttackOperatorConnectionModel(
-                        id=generate_connection_id(target.id, source.id, "requires", required),
-                        source_operator_id=target.id,
-                        target_operator_id=source.id,
-                        connection_type="requires",
-                        reason="Source operator requires artifact produced by target",
-                        artifact=required,
-                        metadata={"match_method": "artifact"},
-                    )
-                    if not add(enables) or not add(requires):
+                    if not add(enables):
                         return sorted(connections.values(), key=lambda item: item.id), warnings
     return sorted(connections.values(), key=lambda item: item.id), warnings
 

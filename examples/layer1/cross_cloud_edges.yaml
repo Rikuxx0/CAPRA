@@ -1,0 +1,13 @@
+dependencies:
+  - source: "aws:secret:gcp-analytics-reference"
+    target: "gcp:serviceaccount:analytics-exporter"
+    type: "stores_reference_to"
+    source_tool: "manual"
+  - source: "azure:keyvault:deployment-credentials"
+    target: "k8s:serviceaccount:checkout"
+    type: "provides_configuration_to"
+    source_tool: "manual"
+  - source: "k8s:secret:payment-db"
+    target: "aws:rds:payment-db"
+    type: "references_external_resource"
+    source_tool: "manual"

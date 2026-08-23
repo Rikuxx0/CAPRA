@@ -6,6 +6,7 @@ from typing import Any
 
 import pandas as pd
 
+from .redaction import redact_sensitive_data
 from .schemas import AttackOperatorGraphModel
 
 
@@ -15,7 +16,7 @@ def export_attack_operator_graph_json(graph: AttackOperatorGraphModel) -> dict[s
     payload["connections"] = sorted(payload["connections"], key=lambda item: item["id"])
     payload["unresolved_items"] = sorted(payload["unresolved_items"], key=lambda item: item["id"])
     payload["layer3_candidates"] = sorted(payload["layer3_candidates"])
-    return payload
+    return redact_sensitive_data(payload)
 
 
 def serialize_attack_operator_graph_json(graph: AttackOperatorGraphModel, *, indent: int = 2) -> str:

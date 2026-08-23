@@ -28,7 +28,7 @@ def _extract_cve_id(value: Any) -> str | None:
 
 
 # Grype の通常 JSON から脆弱性一覧を抽出してスキーマ化する。
-def parse_grype_json(data: dict[str, Any]) -> list[VulnerabilityModel]:
+def parse_grype_json(data: dict[str, Any], *, source_file: str | None = None) -> list[VulnerabilityModel]:
     vulnerabilities: list[VulnerabilityModel] = []
     for index, match in enumerate(data.get("matches", []) or []):
         vuln = match.get("vulnerability") or {}
@@ -48,14 +48,14 @@ def parse_grype_json(data: dict[str, Any]) -> list[VulnerabilityModel]:
                 fixed_version=fixed_version,
                 severity=vuln.get("severity", "Unknown"),
                 source="grype-json",
-                raw_evidence=match,
+                raw_evidence=_with_source_file(match, source_file),
             )
         )
     return vulnerabilities
 
 
 # Grype の SARIF 形式からルール情報も参照しつつ脆弱性一覧を組み立てる。
-def parse_grype_sarif(data: dict[str, Any]) -> list[VulnerabilityModel]:
+def parse_grype_sarif(data: dict[str, Any], *, source_file: str | None = None) -> list[VulnerabilityModel]:
     vulnerabilities: list[VulnerabilityModel] = []
     runs = data.get("runs", []) or []
     for run_index, run in enumerate(runs):
@@ -81,7 +81,14 @@ def parse_grype_sarif(data: dict[str, Any]) -> list[VulnerabilityModel]:
                     fixed_version=properties.get("fixedVersion"),
                     severity=properties.get("severity") or properties.get("security-severity") or result.get("level"),
                     source="grype-sarif",
-                    raw_evidence=result,
+                    raw_evidence=_with_source_file(result, source_file),
                 )
             )
     return vulnerabilities
+
+
+def _with_source_file(value: dict[str, Any], source_file: str | None) -> dict[str, Any]:
+    evidence = dict(value)
+    if source_file:
+        evidence.setdefault("source_file", source_file)
+    return evidence

@@ -1,5 +1,3 @@
-import requests
-
 from capra.layer2.nvd.client import NVD_ENDPOINT, NvdClient
 from tests.layer2.test_nvd_parser import sample_payload
 

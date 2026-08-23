@@ -64,6 +64,7 @@ def test_export_fact_graph_json():
     assert exported["metadata"]["edge_count"] == 21
     assert exported["metadata"]["vulnerability_count"] == 2
     assert exported["metadata"]["unmapped_vulnerability_count"] == 0
+    assert "grype" in exported["metadata"]["source_tools"]
     checkout = next(
         node for node in exported["nodes"] if node["id"] == "k8s:pod:checkout-api"
     )

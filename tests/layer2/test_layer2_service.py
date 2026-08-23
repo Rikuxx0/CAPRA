@@ -3,10 +3,10 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from capra.layer2.exporter import export_attack_operator_graph_json, serialize_attack_operator_graph_json
+from capra.layer2.fact_graph_loader import load_fact_graph
 from capra.layer2.nvd.cache import NvdCache
 from capra.layer2.schemas import AttackOperatorGraphModel, Layer2Config
 from capra.layer2.service import build_attack_operator_graph
-from examples.regenerate import _build_layer1_payload, _build_layer2_payload
 from tests.layer2.test_nvd_parser import sample_payload
 
 
@@ -132,7 +132,12 @@ def test_service_connects_generic_hound_path_to_cve(tmp_path):
         "reach_network_target",
         "command_injection",
     }
-    assert len(graph.connections) == 5
+    assert len(graph.connections) == 2
+    assert all(connection.connection_type == "enables" for connection in graph.connections)
+    assert all(
+        connection.metadata.get("match_method") != "node"
+        for connection in graph.connections
+    )
     assert graph.metadata["used_source_tools"] == ["hound_generic", "nvd"]
     assert not graph.unresolved_items
 
@@ -184,7 +189,19 @@ def test_layer2_examples_form_a_consistent_attack_path(tmp_path):
         operator.metadata["package_matches_nvd_product"] is True
         for operator in cve_operators.values()
     )
-    assert len(graph.connections) == 24
+    assert len(graph.connections) == 13
+    operators_by_id = {operator.id: operator for operator in graph.attack_operators}
+    assert all(
+        connection.metadata.get("match_method") != "node"
+        for connection in graph.connections
+    )
+    assert not any(
+        connection.connection_type == "enables"
+        and operators_by_id[connection.source_operator_id].operator_type == "denial_of_service"
+        and operators_by_id[connection.target_operator_id].operator_type
+        in {"obtain_mounted_service_account", "access_instance_metadata_service"}
+        for connection in graph.connections
+    )
     assert graph.metadata["used_source_tools"] == [
         "azurehound",
         "clusterhound",
@@ -195,20 +212,85 @@ def test_layer2_examples_form_a_consistent_attack_path(tmp_path):
     ]
     assert not graph.unresolved_items
     assert len(saved_graph.attack_operators) == 17
-    assert len(saved_graph.connections) == 24
+    assert len(saved_graph.connections) == 13
 
 
-def test_generated_example_outputs_are_up_to_date():
-    layer1_payload = _build_layer1_payload()
+def test_layer1_and_layer2_example_inputs_are_in_sync_and_loadable():
     saved_layer1 = json.loads(
         Path("examples/layer1/fact_graph_sample.json").read_text()
     )
     saved_layer2_input = json.loads(
         Path("examples/layer2/fact_graph_sample.json").read_text()
     )
-    saved_layer2_output = json.loads(
-        Path("examples/layer2/attack_operator_graph_sample.json").read_text()
+    normalized, unresolved, warnings = load_fact_graph(saved_layer1)
+
+    assert saved_layer1 == saved_layer2_input
+    assert len(normalized.nodes) == saved_layer1["metadata"]["node_count"]
+    assert len(normalized.edges) == saved_layer1["metadata"]["edge_count"]
+    assert unresolved == []
+    assert warnings == []
+
+
+def test_unprocessed_unknown_and_unsupported_edges_are_preserved(tmp_path):
+    fact_graph = {
+        "nodes": [{"id": "a"}, {"id": "b"}],
+        "edges": [
+            {
+                "fact_id": "manual-1",
+                "source": "a",
+                "target": "b",
+                "type": "custom_dependency",
+                "source_tool": "manual",
+            },
+            {
+                "fact_id": "kube-1",
+                "source": "a",
+                "target": "b",
+                "type": "canBind",
+                "source_tool": "bloodhound_kube",
+            },
+            {
+                "fact_id": "drawio-1",
+                "source": "a",
+                "target": "b",
+                "type": "network_access",
+                "permission": "drawio:connected",
+                "source_tool": "drawio",
+            },
+        ],
+    }
+
+    graph = build_attack_operator_graph(
+        fact_graph,
+        Layer2Config(nvd_cache_directory=tmp_path),
     )
 
-    assert layer1_payload == saved_layer1 == saved_layer2_input
-    assert _build_layer2_payload(layer1_payload) == saved_layer2_output
+    assert {(item.type, item.source_tool) for item in graph.unresolved_items} == {
+        ("unknown_edge", "manual"),
+        ("unsupported_source_tool", "bloodhound_kube"),
+    }
+
+
+def test_metadata_exposes_research_contract_counts_and_rule_hashes(tmp_path):
+    graph = build_attack_operator_graph(
+        {
+            "nodes": [{"id": "p"}, {"id": "sa"}],
+            "edges": [
+                {
+                    "fact_id": "g1",
+                    "source": "p",
+                    "target": "sa",
+                    "type": "CanCreateKeys",
+                    "source_tool": "gcp_hound",
+                    "provider": "gcp",
+                }
+            ],
+        },
+        Layer2Config(nvd_cache_directory=tmp_path),
+    )
+
+    assert graph.metadata["partial_operator_count"] == 0
+    assert graph.metadata["layer3_candidate_count"] == 1
+    assert graph.metadata["rule_versions"] == ["0.1.0"]
+    assert graph.metadata["rule_hashes"]
+    assert not any(key.endswith("_rule_paths") for key in graph.metadata["execution_config"])

@@ -14,15 +14,25 @@ def apply_asset_markers(
 ) -> list[NodeModel]:
     """Merge critical asset candidates and entry points without fixing goals by default."""
     selected_goal_ids = selected_goal_ids or set()
-    merged: dict[str, NodeModel] = {node.id: node for node in nodes}
+    # Do not mutate parser output supplied by callers; the same observations may
+    # be rebuilt with a different Goal selection in the Streamlit session.
+    merged: dict[str, NodeModel] = {}
+    for node in nodes:
+        copied = _copy_node(node)
+        # is_goal is analysis-session state, never an observed input fact.
+        copied.is_goal = False
+        merged[copied.id] = copied
 
     for raw_asset in (asset_config or {}).get("assets", []) or []:
         node = _asset_to_node(raw_asset, goal_candidate=True)
         existing_id = _find_match(merged, node)
+        resolved_id = existing_id or node.id
         merged[existing_id or node.id] = _merge_node(
-            merged.get(existing_id or node.id),
+            merged.get(resolved_id),
             node,
-            force_goal=(existing_id or node.id) in selected_goal_ids,
+            # UI/configuration may refer to either the canonical graph ID or the
+            # asset declaration ID that was matched by name/type/cloud.
+            force_goal=resolved_id in selected_goal_ids or node.id in selected_goal_ids,
         )
 
     for raw_entry in (asset_config or {}).get("entry_points", []) or []:
@@ -86,3 +96,9 @@ def _merge_node(existing: NodeModel | None, incoming: NodeModel, force_goal: boo
     existing.asset_category = incoming.asset_category if incoming.asset_category != "unknown" else existing.asset_category
     existing.raw_evidence = {**existing.raw_evidence, "asset_marker": incoming.raw_evidence}
     return existing
+
+
+def _copy_node(node: NodeModel) -> NodeModel:
+    if hasattr(node, "model_copy"):
+        return node.model_copy(deep=True)
+    return node.copy(deep=True)  # pragma: no cover - Pydantic v1 only

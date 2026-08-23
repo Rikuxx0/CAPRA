@@ -18,7 +18,14 @@ from .nvd_adapter import DEFAULT_RULE_PATH as DEFAULT_CVE_RULE_PATH
 from .nvd_adapter import convert_cves
 from .operator_graph_builder import build_operator_connections, extract_layer3_candidates
 from .redaction import redact_sensitive_data
-from .schemas import AttackOperatorGraphModel, AttackOperatorModel, Layer2Config, UnresolvedItemModel
+from .schemas import (
+    AttackOperatorGraphModel,
+    AttackOperatorModel,
+    EdgeClassification,
+    FactGraphInput,
+    Layer2Config,
+    UnresolvedItemModel,
+)
 
 LOGGER = logging.getLogger(__name__)
 SCHEMA_VERSION = "0.1.0"
@@ -36,6 +43,68 @@ def _failure_unresolved(source_tool: str, reason: str) -> UnresolvedItemModel:
 
 def _deduplicate_operators(operators: list[AttackOperatorModel]) -> list[AttackOperatorModel]:
     return sorted({operator.id: operator for operator in operators}.values(), key=lambda item: item.id)
+
+
+def _unprocessed_edge_items(
+    fact_graph: FactGraphInput,
+    adapter_tools: set[str],
+    selected_tools: set[str],
+) -> list[UnresolvedItemModel]:
+    """Preserve non-relationship edges for which Layer 2 has no source adapter."""
+    items: list[UnresolvedItemModel] = []
+    for edge in sorted(fact_graph.edges, key=lambda item: str(item.get("fact_id") or "")):
+        source_tool = str(edge.get("source_tool") or "unknown")
+        if source_tool in adapter_tools or source_tool == "unknown":
+            continue
+        if selected_tools and source_tool not in selected_tools:
+            continue
+        classification = classify_edge(edge)
+        if classification == EdgeClassification.RELATIONSHIP:
+            continue
+        fact_id = str(edge.get("fact_id") or "unknown-fact")
+        unsupported = source_tool == "bloodhound_kube"
+        item_type = "unsupported_source_tool" if unsupported else "unknown_edge"
+        missing = ["source_specific_adapter"] if unsupported else ["mapping_rule"]
+        reason = (
+            f"No Layer 2 source-specific adapter is available for {source_tool}"
+            if unsupported
+            else f"No Layer 2 mapping exists for {source_tool} edge"
+        )
+        items.append(
+            UnresolvedItemModel(
+                id=generate_unresolved_id(
+                    item_type=item_type,
+                    source_tool=source_tool,
+                    source_fact_ids=[fact_id],
+                    reason=reason,
+                    missing_conditions=missing,
+                ),
+                type=item_type,
+                source_tool=source_tool,
+                source_fact_ids=[fact_id],
+                missing_conditions=missing,
+                reason=reason,
+                raw_evidence=edge,
+                metadata={
+                    "classification": classification.value,
+                    "original_edge_type": edge.get("original_edge_type"),
+                },
+            )
+        )
+    return items
+
+
+def _execution_config(config: Layer2Config) -> dict[str, Any]:
+    payload = config.model_dump(mode="json")
+    # Uploaded rule temp paths are runtime-specific. Rule versions and hashes
+    # below capture the effective rule content deterministically.
+    for key in list(payload):
+        if key.endswith("_rule_paths") or key in {
+            "iamhounddog_rule_path",
+            "nvd_cache_directory",
+        }:
+            payload.pop(key, None)
+    return redact_sensitive_data(payload)
 
 
 def build_attack_operator_graph(
@@ -84,6 +153,14 @@ def build_attack_operator_graph(
             LOGGER.warning("Layer 2 adapter %s failed: %s", adapter.source_tool, type(exc).__name__)
             warnings.append(f"Adapter {adapter.source_tool} failed: {type(exc).__name__}")
             unresolved.append(_failure_unresolved(adapter.source_tool, f"Adapter failed: {type(exc).__name__}"))
+
+    unresolved.extend(
+        _unprocessed_edge_items(
+            normalized,
+            set(adapters_by_tool),
+            selected_tools,
+        )
+    )
 
     nvd_statistics = {"cache_hit": 0, "cache_miss": 0, "fetch_failure": 0}
     has_vulnerabilities = bool(normalized.unmapped_vulnerabilities) or any(node.get("vulnerabilities") for node in normalized.nodes)
@@ -160,22 +237,29 @@ def build_attack_operator_graph(
         "input_fact_graph_schema_version": str(normalized.metadata.get("schema_version") or normalized.metadata.get("schema_status") or "unknown"),
         "input_fact_graph_hash": normalized.input_hash,
         "rule_set_version": ",".join(rule_versions) if rule_versions else "unknown",
+        "rule_versions": rule_versions,
         "used_source_tools": sorted(processed_tools),
         "used_rule_ids": used_rule_ids,
         "rule_set_hashes": rule_set_hashes,
+        "rule_hashes": rule_set_hashes,
         "nvd_cache_entries": nvd_entries,
+        "nvd_cache_entry_count": len(nvd_entries),
         "nvd_cache_hashes": nvd_cache_hashes,
         "fact_node_count": len(normalized.nodes),
         "fact_edge_count": len(normalized.edges),
         "operator_count": len(operators),
+        "complete_operator_count": sum(operator.status == "complete" for operator in operators),
+        "partial_operator_count": sum(operator.status == "partial" for operator in operators),
+        "unresolved_operator_count": sum(operator.status == "unresolved" for operator in operators),
         "iam_operator_count": iam_count,
         "cve_operator_count": cve_count,
         "connection_count": len(connections),
+        "layer3_candidate_count": len(candidates),
         "unresolved_count": len(unresolved),
         "manual_verification_count": sum(operator.manual_verification_required for operator in operators),
         "processing_time_ms": elapsed_ms,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "execution_config": redact_sensitive_data(layer2_config.model_dump(mode="json")),
+        "execution_config": _execution_config(layer2_config),
         "source_tool_edge_counts": dict(sorted(source_counts.items())),
         "edge_classification_counts": dict(sorted(classification_counts.items())),
         "nvd_cache_hit_count": nvd_statistics.get("cache_hit", 0),

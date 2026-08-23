@@ -7,13 +7,27 @@ from typing import Any
 import networkx as nx
 import pandas as pd
 
+from .redaction import redact_sensitive_data
+from .schemas import normalize_source_tool
+
 
 # Fact Graph を API/保存向けの JSON 互換辞書にまとめる。
 def export_fact_graph_json(graph: nx.DiGraph) -> dict[str, Any]:
-    nodes = [dict(data) for _, data in graph.nodes(data=True)]
-    edges = [dict(data) for _, _, data in graph.edges(data=True)]
+    nodes = sorted(
+        (redact_sensitive_data(dict(data)) for _, data in graph.nodes(data=True)),
+        key=lambda item: item.get("id", ""),
+    )
+    edges = sorted(
+        (redact_sensitive_data(dict(data)) for _, _, data in graph.edges(data=True)),
+        key=lambda item: (
+            item.get("fact_id", ""), item.get("source", ""), item.get("target", "")
+        ),
+    )
     vulnerabilities = [vuln for node in nodes for vuln in node.get("vulnerabilities", [])]
-    unmapped = graph.graph.get("unmapped_vulnerabilities", [])
+    unmapped = sorted(
+        redact_sensitive_data(graph.graph.get("unmapped_vulnerabilities", [])),
+        key=lambda item: (item.get("id", ""), item.get("cve_id") or ""),
+    )
     vulnerability_count = len(vulnerabilities) + len(unmapped)
     return {
         "nodes": nodes,
@@ -22,6 +36,9 @@ def export_fact_graph_json(graph: nx.DiGraph) -> dict[str, Any]:
         "metadata": {
             "schema_version": "0.1.0",
             "source_files": graph.graph.get("source_files", []),
+            "source_tools": _source_tools(nodes, edges, vulnerabilities, unmapped),
+            "cloud_providers": _cloud_providers(nodes, edges),
+            "input_hashes": dict(sorted(graph.graph.get("input_hashes", {}).items())),
             "node_count": graph.number_of_nodes(),
             "edge_count": graph.number_of_edges(),
             "vulnerability_count": vulnerability_count,
@@ -30,6 +47,27 @@ def export_fact_graph_json(graph: nx.DiGraph) -> dict[str, Any]:
             "schema_status": graph.graph.get("schema_status", "provisional"),
         },
     }
+
+
+def _source_tools(
+    nodes: list[dict[str, Any]],
+    edges: list[dict[str, Any]],
+    vulnerabilities: list[dict[str, Any]],
+    unmapped: list[dict[str, Any]],
+) -> list[str]:
+    tools = {edge.get("source_tool") for edge in edges}
+    tools.update(normalize_source_tool(item.get("source")) for item in [*vulnerabilities, *unmapped])
+    for node in nodes:
+        evidence = node.get("raw_evidence", {})
+        records = evidence.get("records", [evidence]) if isinstance(evidence, dict) else []
+        tools.update(record.get("source_tool") for record in records if isinstance(record, dict))
+    return sorted(tool for tool in tools if tool and tool != "unknown")
+
+
+def _cloud_providers(nodes: list[dict[str, Any]], edges: list[dict[str, Any]]) -> list[str]:
+    providers = {node.get("cloud") for node in nodes}
+    providers.update(edge.get("provider") for edge in edges)
+    return sorted(provider for provider in providers if provider and provider != "unknown")
 
 
 # ノード一覧を表示用 DataFrame に整形し、重い生データは除外する。

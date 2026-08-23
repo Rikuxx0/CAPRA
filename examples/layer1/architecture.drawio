@@ -1,0 +1,19 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="Layer 1 sample">
+    <mxGraphModel>
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+        <mxCell id="internet" value="Public Internet Client" vertex="1" parent="1">
+          <mxGeometry x="40" y="80" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="api" value="Checkout API" vertex="1" parent="1">
+          <mxGeometry x="280" y="80" width="160" height="60" as="geometry"/>
+        </mxCell>
+        <mxCell id="connection" edge="1" source="internet" target="api" parent="1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

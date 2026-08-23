@@ -32,7 +32,7 @@ def test_cache_only_cve_operator_is_partial_and_never_fetches(tmp_path):
     assert operator.verification_status == "unverified"
     assert operator.public_exploit_candidate is True
     assert operator.manual_verification_required is True
-    assert operator.missing_conditions == ["target_is_reachable"]
+    assert operator.missing_conditions == ["target_is_reachable", "vulnerable_version_is_running"]
     assert result.statistics["cache_hit"] == 1
 
 
@@ -41,6 +41,29 @@ def test_cache_only_miss_is_unresolved(tmp_path):
     result = convert_cves(graph, Layer2Config(nvd_cache_directory=tmp_path, nvd_mode="cache-only"))
     assert not result.operators
     assert result.unresolved_items[0].type == "nvd_fetch_failure"
+
+
+def test_unmapped_cve_with_cache_is_preserved_as_unresolved_operator_and_item(tmp_path):
+    NvdCache(tmp_path).write(
+        "CVE-2024-1234",
+        sample_payload(),
+        datetime.now(timezone.utc),
+    )
+    graph = FactGraphInput(
+        unmapped_vulnerabilities=[
+            {"id": "CVE-2024-1234", "cve_id": "CVE-2024-1234"}
+        ]
+    )
+
+    result = convert_cves(
+        graph,
+        Layer2Config(nvd_cache_directory=tmp_path, nvd_mode="cache-only"),
+    )
+
+    assert result.operators[0].status == "unresolved"
+    assert result.operators[0].target_node is None
+    assert "target_node" in result.operators[0].missing_conditions
+    assert {item.type for item in result.unresolved_items} == {"unmapped_cve_target"}
 
 
 def test_cache_then_fetch_uses_injected_client_and_populates_cache(tmp_path):

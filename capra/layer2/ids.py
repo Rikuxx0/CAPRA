@@ -68,6 +68,9 @@ def generate_connection_id(
     target_operator_id: str,
     connection_type: str,
     artifact: Any = None,
+    *,
+    condition: str | None = None,
+    rule_id: str | None = None,
 ) -> str:
     payload = {
         "source_operator_id": _normalized_text(source_operator_id),
@@ -75,6 +78,10 @@ def generate_connection_id(
         "connection_type": _normalized_text(connection_type, lower=True),
         "artifact": _jsonable(artifact),
     }
+    if condition is not None:
+        payload["condition"] = _normalized_text(condition, lower=True)
+    if rule_id is not None:
+        payload["rule_id"] = _normalized_text(rule_id)
     return f"connection:{stable_hash(payload)[:16]}"
 
 

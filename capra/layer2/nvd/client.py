@@ -5,7 +5,7 @@ import os
 import time
 from typing import Any
 
-import requests
+import httpx
 
 from .cache import normalize_cve_id
 
@@ -25,7 +25,7 @@ class NvdClient:
         self.timeout_seconds = timeout_seconds
         self.max_retries = max(0, int(max_retries))
         self.rate_limit_seconds = max(0.0, float(rate_limit_seconds))
-        self.session = session or requests.Session()
+        self.session = session or httpx.Client()
         self._last_request_at = 0.0
 
     def fetch(self, cve_id: str) -> dict[str, Any]:
@@ -52,7 +52,7 @@ class NvdClient:
                 if not isinstance(payload, dict):
                     raise ValueError("NVD response root is not an object")
                 return payload
-            except (requests.RequestException, ValueError) as exc:
+            except (httpx.HTTPError, ValueError) as exc:
                 last_error = exc
                 LOGGER.warning("NVD request failed for %s (attempt %s)", normalized, attempt + 1)
         raise RuntimeError(f"NVD request failed for {normalized}") from last_error

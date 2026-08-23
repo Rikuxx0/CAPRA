@@ -44,7 +44,13 @@ def match_rule(fact_graph: FactGraphInput, rule: PatternRuleModel, config: Layer
         if len(matches) >= config.max_matches_per_rule:
             return
         if step_index == len(rule.pattern):
-            permission_edges, missing = _find_permissions(fact_graph, rule.required_permissions, bindings, path)
+            permission_edges, missing = _find_permissions(
+                fact_graph,
+                rule.required_permissions,
+                bindings,
+                path,
+                source_tool=rule.source_tool,
+            )
             matches.append(PatternMatch(dict(bindings), list(path), permission_edges, missing))
             return
         step = rule.pattern[step_index]
@@ -85,6 +91,8 @@ def _find_permissions(
     required: list[str],
     bindings: dict[str, str],
     path: list[dict[str, Any]],
+    *,
+    source_tool: str,
 ) -> tuple[list[dict[str, Any]], list[str]]:
     allowed_sources = {str(edge.get("source")) for edge in path} | set(bindings.values())
     target_role = bindings.get("target_role")
@@ -94,6 +102,8 @@ def _find_permissions(
         normalized = required_permission.strip().lower()
         candidates = []
         for edge in fact_graph.edges:
+            if edge.get("source_tool") != source_tool:
+                continue
             permission = str(edge.get("permission") or "").strip().lower()
             if permission != normalized:
                 continue

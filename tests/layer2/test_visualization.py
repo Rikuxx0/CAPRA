@@ -1,5 +1,9 @@
 from capra.layer2 import visualization
-from capra.layer2.schemas import AttackOperatorGraphModel, AttackOperatorModel
+from capra.layer2.schemas import (
+    AttackOperatorConnectionModel,
+    AttackOperatorGraphModel,
+    AttackOperatorModel,
+)
 from capra.layer2.visualization import _build_operator_label, _operator_type_color
 
 
@@ -17,6 +21,7 @@ def test_operator_label_shows_source_and_target_nodes():
     assert _build_operator_label(operator) == (
         "攻撃種別: create_service_account_key\n"
         "状態: complete\n"
+        "source_tool: gcp_hound\n"
         "source: gcp:user:analyst\n"
         "target: gcp:serviceaccount:reporter"
     )
@@ -35,6 +40,7 @@ def test_operator_label_marks_missing_source_node():
     assert _build_operator_label(operator) == (
         "攻撃種別: buffer_overflow\n"
         "状態: partial\n"
+        "source_tool: nvd\n"
         "source: -\n"
         "target: gcp:serviceaccount:reporter"
     )
@@ -86,7 +92,23 @@ def test_visualization_reuses_fact_nodes_and_connects_operator_context(monkeypat
                 target_node="gcp:serviceaccount:reporter",
                 status="partial",
             ),
-        ]
+        ],
+        connections=[
+            AttackOperatorConnectionModel(
+                id="forward",
+                source_operator_id="operator-1",
+                target_operator_id="operator-2",
+                connection_type="enables",
+                reason="forward causal dependency",
+            ),
+            AttackOperatorConnectionModel(
+                id="legacy-reverse",
+                source_operator_id="operator-2",
+                target_operator_id="operator-1",
+                connection_type="requires",
+                reason="legacy reverse dependency",
+            ),
+        ],
     )
 
     visualization.build_attack_operator_graph_html(graph)
@@ -126,6 +148,12 @@ def test_visualization_reuses_fact_nodes_and_connects_operator_context(monkeypat
         for source, target, attributes in network.edges
     }
     assert all("title" not in attributes for _, attributes in network.nodes)
+    dependency_edges = [
+        (source, target, attributes.get("label"))
+        for source, target, attributes in network.edges
+        if attributes.get("label") not in {"source", "target"}
+    ]
+    assert dependency_edges == [("operator-1", "operator-2", "enables")]
     operator_nodes = {
         node_id: attributes
         for node_id, attributes in network.nodes

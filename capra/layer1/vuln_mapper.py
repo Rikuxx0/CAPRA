@@ -14,6 +14,11 @@ def attach_vulnerabilities_to_nodes(
     mapping_rules = (mapping_config or {}).get("vulnerability_mappings", []) or []
     node_by_id = {node.id: node for node in nodes}
     unmapped: list[VulnerabilityModel] = []
+    seen_mapped: dict[str, set[tuple[Any, ...]]] = {
+        node.id: {_vulnerability_key(item) for item in node.vulnerabilities}
+        for node in nodes
+    }
+    seen_unmapped: set[tuple[Any, ...]] = set()
 
     for vulnerability in vulnerabilities:
         target = _match_by_mapping(vulnerability, mapping_rules, nodes)
@@ -23,9 +28,16 @@ def attach_vulnerabilities_to_nodes(
             target = _match_by_partial_name(vulnerability, nodes)
 
         if target is None:
-            unmapped.append(vulnerability)
+            key = _vulnerability_key(model_to_dict(vulnerability))
+            if key not in seen_unmapped:
+                unmapped.append(vulnerability)
+                seen_unmapped.add(key)
         else:
-            node_by_id[target.id].vulnerabilities.append(model_to_dict(vulnerability))
+            item = model_to_dict(vulnerability)
+            key = _vulnerability_key(item)
+            if key not in seen_mapped[target.id]:
+                node_by_id[target.id].vulnerabilities.append(item)
+                seen_mapped[target.id].add(key)
 
     return list(node_by_id.values()), unmapped
 
@@ -54,7 +66,14 @@ def _match_by_target_hint(vulnerability: VulnerabilityModel, nodes: list[NodeMod
     for hint in hints:
         normalized_hint = hint.lower()
         for node in nodes:
-            if normalized_hint and (normalized_hint in node.name.lower() or normalized_hint in node.id.lower()):
+            node_name = node.name.lower()
+            node_id = node.id.lower()
+            if normalized_hint and (
+                normalized_hint in node_name
+                or normalized_hint in node_id
+                or node_name in normalized_hint
+                or node_id in normalized_hint
+            ):
                 return node
     return None
 
@@ -90,3 +109,14 @@ def _extract_target_hints(raw: dict[str, Any]) -> list[str]:
         if metadata.get(key):
             hints.append(str(metadata[key]))
     return hints
+
+
+def _vulnerability_key(vulnerability: dict[str, Any]) -> tuple[Any, ...]:
+    """Identify the same scanner finding without collapsing distinct packages."""
+    return (
+        vulnerability.get("id"),
+        vulnerability.get("cve_id"),
+        vulnerability.get("package_name"),
+        vulnerability.get("installed_version"),
+        vulnerability.get("source"),
+    )

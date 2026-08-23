@@ -4,10 +4,12 @@
     "properties": {},
     "subject_node_id": "k8s:pod:payment-api"
   },
+  "condition": null,
   "connection_type": "enables",
   "id": "connection:2f639dfc29c5d6e3",
   "metadata": {
-    "match_method": "artifact"
+    "match_method": "artifact",
+    "match_rule": "produces_requires"
   },
   "reason": "Produced artifact satisfies target requirement",
   "source_operator_id": "attack_op:k8s:port_forward_to_workload:e73b1f641ee7",

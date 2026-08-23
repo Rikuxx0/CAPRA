@@ -1,415 +1,961 @@
 {
+  "nodes": [
+    {
+      "id": "aws:ec2:bootstrap-runner",
+      "name": "bootstrap-runner",
+      "type": "ec2",
+      "cloud": "aws",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "aws:ec2:bootstrap-runner",
+        "name": "bootstrap-runner",
+        "type": "ec2",
+        "cloud": "aws",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "aws:metadata:imds",
+      "name": "EC2 Instance Metadata Service",
+      "type": "metadata",
+      "cloud": "aws",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "aws:metadata:imds",
+        "name": "EC2 Instance Metadata Service",
+        "type": "metadata",
+        "cloud": "aws",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "aws:policy:EC2LaunchPolicy",
+      "name": "EC2LaunchPolicy",
+      "type": "policy",
+      "cloud": "aws",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "aws:policy:EC2LaunchPolicy",
+        "name": "EC2LaunchPolicy",
+        "type": "policy",
+        "cloud": "aws",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "aws:role:DevOpsRole",
+      "name": "DevOpsRole",
+      "type": "role",
+      "cloud": "aws",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "aws:role:DevOpsRole",
+        "name": "DevOpsRole",
+        "type": "role",
+        "cloud": "aws",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "aws:role:EKSNodeRole",
+      "name": "EKSNodeRole",
+      "type": "role",
+      "cloud": "aws",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": true,
+      "asset_category": "critical",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "aws:role:EKSNodeRole",
+        "name": "EKSNodeRole",
+        "type": "role",
+        "cloud": "aws",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic",
+        "asset_marker": {
+          "id": "aws:role:EKSNodeRole",
+          "name": "EKSNodeRole",
+          "type": "role",
+          "cloud": "aws",
+          "goal_candidate": true,
+          "asset_category": "critical"
+        }
+      }
+    },
+    {
+      "id": "aws:user:developer",
+      "name": "developer",
+      "type": "principal",
+      "cloud": "aws",
+      "is_entry": true,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "aws:user:developer",
+        "name": "developer",
+        "type": "principal",
+        "cloud": "aws",
+        "is_entry": true,
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic",
+        "asset_marker": {
+          "id": "aws:user:developer",
+          "name": "developer",
+          "type": "principal",
+          "cloud": "aws"
+        }
+      }
+    },
+    {
+      "id": "azure:application:deployment-bot",
+      "name": "deployment-bot",
+      "type": "application",
+      "cloud": "azure",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "azure:application:deployment-bot",
+        "name": "deployment-bot",
+        "type": "application",
+        "cloud": "azure",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "azure:group:production-operators",
+      "name": "production-operators",
+      "type": "group",
+      "cloud": "azure",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": true,
+      "asset_category": "critical",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "azure:group:production-operators",
+        "name": "production-operators",
+        "type": "group",
+        "cloud": "azure",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic",
+        "asset_marker": {
+          "id": "azure:group:production-operators",
+          "name": "production-operators",
+          "type": "group",
+          "cloud": "azure",
+          "goal_candidate": true,
+          "asset_category": "critical"
+        }
+      }
+    },
+    {
+      "id": "azure:tenant:production",
+      "name": "production-tenant",
+      "type": "tenant",
+      "cloud": "azure",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "azure:tenant:production",
+        "name": "production-tenant",
+        "type": "tenant",
+        "cloud": "azure",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "azure:user:release-engineer",
+      "name": "release-engineer",
+      "type": "principal",
+      "cloud": "azure",
+      "is_entry": true,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "azure:user:release-engineer",
+        "name": "release-engineer",
+        "type": "principal",
+        "cloud": "azure",
+        "is_entry": true,
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic",
+        "asset_marker": {
+          "id": "azure:user:release-engineer",
+          "name": "release-engineer",
+          "type": "principal",
+          "cloud": "azure"
+        }
+      }
+    },
+    {
+      "id": "gcp:bucket:audit-archive",
+      "name": "audit-archive",
+      "type": "bucket",
+      "cloud": "gcp",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": true,
+      "asset_category": "high",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "gcp:bucket:audit-archive",
+        "name": "audit-archive",
+        "type": "bucket",
+        "cloud": "gcp",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic",
+        "asset_marker": {
+          "id": "gcp:bucket:audit-archive",
+          "name": "audit-archive",
+          "type": "bucket",
+          "cloud": "gcp",
+          "goal_candidate": true,
+          "asset_category": "high"
+        }
+      }
+    },
+    {
+      "id": "gcp:project:analytics-prod",
+      "name": "analytics-prod",
+      "type": "project",
+      "cloud": "gcp",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "gcp:project:analytics-prod",
+        "name": "analytics-prod",
+        "type": "project",
+        "cloud": "gcp",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "gcp:secret:analytics-api-key",
+      "name": "analytics-api-key",
+      "type": "secret",
+      "cloud": "gcp",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": true,
+      "asset_category": "high",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "gcp:secret:analytics-api-key",
+        "name": "analytics-api-key",
+        "type": "secret",
+        "cloud": "gcp",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic",
+        "asset_marker": {
+          "id": "gcp:secret:analytics-api-key",
+          "name": "analytics-api-key",
+          "type": "secret",
+          "cloud": "gcp",
+          "goal_candidate": true,
+          "asset_category": "high"
+        }
+      }
+    },
+    {
+      "id": "gcp:serviceaccount:analytics-exporter",
+      "name": "analytics-exporter",
+      "type": "serviceaccount",
+      "cloud": "gcp",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "gcp:serviceaccount:analytics-exporter",
+        "name": "analytics-exporter",
+        "type": "serviceaccount",
+        "cloud": "gcp",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "internet:external:public-client",
+      "name": "Public Internet Client",
+      "type": "external",
+      "cloud": "unknown",
+      "is_entry": true,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "internet:external:public-client",
+        "name": "Public Internet Client",
+        "type": "external",
+        "cloud": "unknown",
+        "is_entry": true,
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic",
+        "asset_marker": {
+          "id": "internet:external:public-client",
+          "name": "Public Internet Client",
+          "type": "external",
+          "cloud": "unknown"
+        }
+      }
+    },
+    {
+      "id": "k8s:api:prod-eks",
+      "name": "prod-eks-api",
+      "type": "api",
+      "cloud": "k8s",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "k8s:api:prod-eks",
+        "name": "prod-eks-api",
+        "type": "api",
+        "cloud": "k8s",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "k8s:cluster:prod-eks",
+      "name": "prod-eks",
+      "type": "cluster",
+      "cloud": "k8s",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": true,
+      "asset_category": "critical",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "k8s:cluster:prod-eks",
+        "name": "prod-eks",
+        "type": "cluster",
+        "cloud": "k8s",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic",
+        "asset_marker": {
+          "id": "k8s:cluster:prod-eks",
+          "name": "prod-eks",
+          "type": "cluster",
+          "cloud": "k8s",
+          "goal_candidate": true,
+          "asset_category": "critical"
+        }
+      }
+    },
+    {
+      "id": "k8s:pod:checkout-api",
+      "name": "checkout-api",
+      "type": "container",
+      "cloud": "k8s",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [
+        {
+          "id": "CVE-2022-0778",
+          "cve_id": "CVE-2022-0778",
+          "package_name": "openssl",
+          "installed_version": "1.1.1m",
+          "fixed_version": "1.1.1n",
+          "severity": "High",
+          "source": "grype-json",
+          "raw_evidence": {
+            "vulnerability": {
+              "id": "CVE-2022-0778",
+              "severity": "High",
+              "fix": {
+                "versions": [
+                  "1.1.1n"
+                ]
+              }
+            },
+            "artifact": {
+              "name": "openssl",
+              "version": "1.1.1m",
+              "metadata": {
+                "image": "checkout-api"
+              }
+            },
+            "source_file": "grype_sample.json"
+          }
+        }
+      ],
+      "raw_evidence": {
+        "id": "k8s:pod:checkout-api",
+        "name": "checkout-api",
+        "type": "container",
+        "cloud": "k8s",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "k8s:pod:payment-api",
+      "name": "payment-api",
+      "type": "container",
+      "cloud": "k8s",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [
+        {
+          "id": "CVE-2021-44228",
+          "cve_id": "CVE-2021-44228",
+          "package_name": "log4j-core",
+          "installed_version": "2.14.1",
+          "fixed_version": "2.15.0",
+          "severity": "Critical",
+          "source": "grype-json",
+          "raw_evidence": {
+            "vulnerability": {
+              "id": "CVE-2021-44228",
+              "severity": "Critical",
+              "fix": {
+                "versions": [
+                  "2.15.0"
+                ]
+              }
+            },
+            "artifact": {
+              "name": "log4j-core",
+              "version": "2.14.1",
+              "metadata": {
+                "image": "payment-api"
+              }
+            },
+            "source_file": "grype_sample.json"
+          }
+        }
+      ],
+      "raw_evidence": {
+        "id": "k8s:pod:payment-api",
+        "name": "payment-api",
+        "type": "container",
+        "cloud": "k8s",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    },
+    {
+      "id": "k8s:secret:payment-db",
+      "name": "payment-db",
+      "type": "secret",
+      "cloud": "k8s",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": true,
+      "asset_category": "critical",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "k8s:secret:payment-db",
+        "name": "payment-db",
+        "type": "secret",
+        "cloud": "k8s",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic",
+        "asset_marker": {
+          "id": "k8s:secret:payment-db",
+          "name": "payment-db",
+          "type": "secret",
+          "cloud": "k8s",
+          "goal_candidate": true,
+          "asset_category": "critical"
+        }
+      }
+    },
+    {
+      "id": "k8s:serviceaccount:checkout",
+      "name": "checkout",
+      "type": "serviceaccount",
+      "cloud": "k8s",
+      "is_entry": false,
+      "is_goal": false,
+      "goal_candidate": false,
+      "asset_category": "unknown",
+      "vulnerabilities": [],
+      "raw_evidence": {
+        "id": "k8s:serviceaccount:checkout",
+        "name": "checkout",
+        "type": "serviceaccount",
+        "cloud": "k8s",
+        "source_file": "hound_generic_sample.json",
+        "source_tool": "hound_generic"
+      }
+    }
+  ],
   "edges": [
     {
-      "fact_id": "k8s-04",
-      "original_edge_type": "unauthAPIAccess",
-      "permission": "unauthAPIAccess",
-      "provider": "k8s",
+      "fact_id": "azure-01",
+      "source": "azure:tenant:production",
+      "target": "azure:application:deployment-bot",
+      "type": "azcontains",
+      "permission": "AZContains",
+      "provider": "azure",
+      "source_tool": "azurehound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "AZContains",
       "raw_evidence": {
-        "fact_id": "k8s-04",
-        "provider": "k8s",
-        "source": "internet:external:public-client",
-        "source_tool": "clusterhound",
-        "target": "k8s:api:prod-eks",
-        "type": "unauthAPIAccess"
-      },
-      "source": "internet:external:public-client",
-      "source_file": null,
-      "source_tool": "clusterhound",
-      "target": "k8s:api:prod-eks",
-      "type": "unauthapiaccess"
-    },
-    {
-      "fact_id": "iam-01",
-      "original_edge_type": "assume_role",
-      "permission": "sts:AssumeRole",
-      "provider": "aws",
-      "raw_evidence": {
-        "fact_id": "iam-01",
-        "permission": "sts:AssumeRole",
-        "provider": "aws",
-        "source": "aws:user:developer",
-        "source_tool": "iamhounddog",
-        "target": "aws:role:DevOpsRole",
-        "type": "assume_role"
-      },
-      "source": "aws:user:developer",
-      "source_file": null,
-      "source_tool": "iamhounddog",
-      "target": "aws:role:DevOpsRole",
-      "type": "assume_role"
-    },
-    {
-      "fact_id": "iam-05",
-      "original_edge_type": "has_permission",
-      "permission": "iam:PassRole",
-      "provider": "aws",
-      "raw_evidence": {
-        "fact_id": "iam-05",
-        "permission": "iam:PassRole",
-        "provider": "aws",
-        "source": "aws:user:developer",
-        "source_tool": "iamhounddog",
-        "target": "aws:role:EKSNodeRole",
-        "type": "has_permission"
-      },
-      "source": "aws:user:developer",
-      "source_file": null,
-      "source_tool": "iamhounddog",
-      "target": "aws:role:EKSNodeRole",
-      "type": "has_permission"
-    },
-    {
-      "fact_id": "iam-02",
-      "original_edge_type": "attached_policy",
-      "permission": "attached_policy",
-      "provider": "aws",
-      "raw_evidence": {
-        "fact_id": "iam-02",
-        "provider": "aws",
-        "source": "aws:role:DevOpsRole",
-        "source_tool": "iamhounddog",
-        "target": "aws:policy:EC2LaunchPolicy",
-        "type": "attached_policy"
-      },
-      "source": "aws:role:DevOpsRole",
-      "source_file": null,
-      "source_tool": "iamhounddog",
-      "target": "aws:policy:EC2LaunchPolicy",
-      "type": "attached_policy"
-    },
-    {
-      "fact_id": "iam-03",
-      "original_edge_type": "ec2_run_instances",
-      "permission": "ec2:RunInstances",
-      "provider": "aws",
-      "raw_evidence": {
-        "fact_id": "iam-03",
-        "permission": "ec2:RunInstances",
-        "provider": "aws",
-        "source": "aws:policy:EC2LaunchPolicy",
-        "source_tool": "iamhounddog",
-        "target": "aws:ec2:bootstrap-runner",
-        "type": "ec2_run_instances"
-      },
-      "source": "aws:policy:EC2LaunchPolicy",
-      "source_file": null,
-      "source_tool": "iamhounddog",
-      "target": "aws:ec2:bootstrap-runner",
-      "type": "ec2_run_instances"
-    },
-    {
-      "fact_id": "iam-04",
-      "original_edge_type": "instance_role",
-      "permission": "instance_role",
-      "provider": "aws",
-      "raw_evidence": {
-        "fact_id": "iam-04",
-        "provider": "aws",
-        "source": "aws:ec2:bootstrap-runner",
-        "source_tool": "iamhounddog",
-        "target": "aws:role:EKSNodeRole",
-        "type": "instance_role"
-      },
-      "source": "aws:ec2:bootstrap-runner",
-      "source_file": null,
-      "source_tool": "iamhounddog",
-      "target": "aws:role:EKSNodeRole",
-      "type": "instance_role"
-    },
-    {
-      "fact_id": "generic-01",
-      "original_edge_type": "network",
-      "permission": "network",
-      "provider": "hybrid",
-      "raw_evidence": {
-        "fact_id": "generic-01",
-        "permission": "network",
-        "provider": "hybrid",
-        "source": "aws:role:EKSNodeRole",
-        "source_tool": "hound_generic",
-        "target": "k8s:pod:checkout-api",
-        "type": "network"
-      },
-      "source": "aws:role:EKSNodeRole",
-      "source_file": null,
-      "source_tool": "hound_generic",
-      "target": "k8s:pod:checkout-api",
-      "type": "network_access"
-    },
-    {
-      "fact_id": "generic-02",
-      "original_edge_type": "network",
-      "permission": "network",
-      "provider": "hybrid",
-      "raw_evidence": {
-        "fact_id": "generic-02",
-        "permission": "network",
-        "provider": "hybrid",
-        "source": "aws:role:EKSNodeRole",
-        "source_tool": "hound_generic",
-        "target": "k8s:pod:payment-api",
-        "type": "network"
-      },
-      "source": "aws:role:EKSNodeRole",
-      "source_file": null,
-      "source_tool": "hound_generic",
-      "target": "k8s:pod:payment-api",
-      "type": "network_access"
-    },
-    {
-      "fact_id": "gcp-01",
-      "original_edge_type": "CanImpersonate",
-      "permission": "CanImpersonate",
-      "provider": "gcp",
-      "raw_evidence": {
-        "fact_id": "gcp-01",
-        "provider": "gcp",
-        "source": "aws:role:EKSNodeRole",
-        "source_tool": "gcp_hound",
-        "target": "gcp:serviceaccount:analytics-exporter",
-        "type": "CanImpersonate"
-      },
-      "source": "aws:role:EKSNodeRole",
-      "source_file": null,
-      "source_tool": "gcp_hound",
-      "target": "gcp:serviceaccount:analytics-exporter",
-      "type": "canimpersonate"
-    },
-    {
-      "fact_id": "k8s-01",
-      "original_edge_type": "mountsServiceAccount",
-      "permission": "mountsServiceAccount",
-      "provider": "k8s",
-      "raw_evidence": {
-        "fact_id": "k8s-01",
-        "provider": "k8s",
-        "source": "k8s:pod:checkout-api",
-        "source_tool": "clusterhound",
-        "target": "k8s:serviceaccount:checkout",
-        "type": "mountsServiceAccount"
-      },
-      "source": "k8s:pod:checkout-api",
-      "source_file": null,
-      "source_tool": "clusterhound",
-      "target": "k8s:serviceaccount:checkout",
-      "type": "mountsserviceaccount"
-    },
-    {
-      "fact_id": "k8s-05",
-      "original_edge_type": "accessIMDS",
-      "permission": "accessIMDS",
-      "provider": "hybrid",
-      "raw_evidence": {
-        "fact_id": "k8s-05",
-        "provider": "hybrid",
-        "source": "k8s:pod:checkout-api",
-        "source_tool": "clusterhound",
-        "target": "aws:metadata:imds",
-        "type": "accessIMDS"
-      },
-      "source": "k8s:pod:checkout-api",
-      "source_file": null,
-      "source_tool": "clusterhound",
-      "target": "aws:metadata:imds",
-      "type": "accessimds"
-    },
-    {
-      "fact_id": "k8s-02",
-      "original_edge_type": "canExec",
-      "permission": "canExec",
-      "provider": "k8s",
-      "raw_evidence": {
-        "fact_id": "k8s-02",
-        "provider": "k8s",
-        "source": "k8s:serviceaccount:checkout",
-        "source_tool": "clusterhound",
-        "target": "k8s:pod:payment-api",
-        "type": "canExec"
-      },
-      "source": "k8s:serviceaccount:checkout",
-      "source_file": null,
-      "source_tool": "clusterhound",
-      "target": "k8s:pod:payment-api",
-      "type": "canexec"
-    },
-    {
-      "fact_id": "k8s-07",
-      "original_edge_type": "canPortForward",
-      "permission": "canPortForward",
-      "provider": "k8s",
-      "raw_evidence": {
-        "fact_id": "k8s-07",
-        "provider": "k8s",
-        "source": "k8s:serviceaccount:checkout",
-        "source_tool": "clusterhound",
-        "target": "k8s:pod:payment-api",
-        "type": "canPortForward"
-      },
-      "source": "k8s:serviceaccount:checkout",
-      "source_file": null,
-      "source_tool": "clusterhound",
-      "target": "k8s:pod:payment-api",
-      "type": "canportforward"
-    },
-    {
-      "fact_id": "k8s-03",
-      "original_edge_type": "secretsRead",
-      "permission": "secretsRead",
-      "provider": "k8s",
-      "raw_evidence": {
-        "fact_id": "k8s-03",
-        "provider": "k8s",
-        "source": "k8s:serviceaccount:checkout",
-        "source_tool": "clusterhound",
-        "target": "k8s:secret:payment-db",
-        "type": "secretsRead"
-      },
-      "source": "k8s:serviceaccount:checkout",
-      "source_file": null,
-      "source_tool": "clusterhound",
-      "target": "k8s:secret:payment-db",
-      "type": "secretsread"
-    },
-    {
-      "fact_id": "k8s-06",
-      "original_edge_type": "canCreateWorkload",
-      "permission": "canCreateWorkload",
-      "provider": "k8s",
-      "raw_evidence": {
-        "fact_id": "k8s-06",
-        "provider": "k8s",
-        "source": "k8s:serviceaccount:checkout",
-        "source_tool": "clusterhound",
-        "target": "k8s:cluster:prod-eks",
-        "type": "canCreateWorkload"
-      },
-      "source": "k8s:serviceaccount:checkout",
-      "source_file": null,
-      "source_tool": "clusterhound",
-      "target": "k8s:cluster:prod-eks",
-      "type": "cancreateworkload"
-    },
-    {
-      "fact_id": "gcp-04",
-      "original_edge_type": "ContainsServiceAccount",
-      "permission": "ContainsServiceAccount",
-      "provider": "gcp",
-      "raw_evidence": {
-        "fact_id": "gcp-04",
-        "provider": "gcp",
-        "source": "gcp:project:analytics-prod",
-        "source_tool": "gcp_hound",
-        "target": "gcp:serviceaccount:analytics-exporter",
-        "type": "ContainsServiceAccount"
-      },
-      "source": "gcp:project:analytics-prod",
-      "source_file": null,
-      "source_tool": "gcp_hound",
-      "target": "gcp:serviceaccount:analytics-exporter",
-      "type": "containsserviceaccount"
-    },
-    {
-      "fact_id": "gcp-02",
-      "original_edge_type": "CanReadSecrets",
-      "permission": "CanReadSecrets",
-      "provider": "gcp",
-      "raw_evidence": {
-        "fact_id": "gcp-02",
-        "provider": "gcp",
-        "source": "gcp:serviceaccount:analytics-exporter",
-        "source_tool": "gcp_hound",
-        "target": "gcp:secret:analytics-api-key",
-        "type": "CanReadSecrets"
-      },
-      "source": "gcp:serviceaccount:analytics-exporter",
-      "source_file": null,
-      "source_tool": "gcp_hound",
-      "target": "gcp:secret:analytics-api-key",
-      "type": "canreadsecrets"
-    },
-    {
-      "fact_id": "gcp-03",
-      "original_edge_type": "CanModifyBucketPoliciesInProject",
-      "permission": "CanModifyBucketPoliciesInProject",
-      "provider": "gcp",
-      "raw_evidence": {
-        "fact_id": "gcp-03",
-        "provider": "gcp",
-        "source": "gcp:serviceaccount:analytics-exporter",
-        "source_tool": "gcp_hound",
-        "target": "gcp:bucket:audit-archive",
-        "type": "CanModifyBucketPoliciesInProject"
-      },
-      "source": "gcp:serviceaccount:analytics-exporter",
-      "source_file": null,
-      "source_tool": "gcp_hound",
-      "target": "gcp:bucket:audit-archive",
-      "type": "canmodifybucketpoliciesinproject"
+        "fact_id": "azure-01",
+        "source": "azure:tenant:production",
+        "target": "azure:application:deployment-bot",
+        "type": "AZContains",
+        "source_tool": "azurehound",
+        "provider": "azure",
+        "source_file": "hound_generic_sample.json"
+      }
     },
     {
       "fact_id": "azure-02",
-      "original_edge_type": "AZAddSecret",
+      "source": "azure:user:release-engineer",
+      "target": "azure:application:deployment-bot",
+      "type": "azaddsecret",
       "permission": "AZAddSecret",
       "provider": "azure",
+      "source_tool": "azurehound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "AZAddSecret",
       "raw_evidence": {
         "fact_id": "azure-02",
-        "provider": "azure",
         "source": "azure:user:release-engineer",
-        "source_tool": "azurehound",
         "target": "azure:application:deployment-bot",
-        "type": "AZAddSecret"
-      },
-      "source": "azure:user:release-engineer",
-      "source_file": null,
-      "source_tool": "azurehound",
-      "target": "azure:application:deployment-bot",
-      "type": "azaddsecret"
-    },
-    {
-      "fact_id": "azure-01",
-      "original_edge_type": "AZContains",
-      "permission": "AZContains",
-      "provider": "azure",
-      "raw_evidence": {
-        "fact_id": "azure-01",
+        "type": "AZAddSecret",
+        "source_tool": "azurehound",
         "provider": "azure",
-        "source": "azure:tenant:production",
-        "source_tool": "azurehound",
-        "target": "azure:application:deployment-bot",
-        "type": "AZContains"
-      },
-      "source": "azure:tenant:production",
-      "source_file": null,
-      "source_tool": "azurehound",
-      "target": "azure:application:deployment-bot",
-      "type": "azcontains"
+        "source_file": "hound_generic_sample.json"
+      }
     },
     {
       "fact_id": "azure-03",
-      "original_edge_type": "AZAddMembers",
+      "source": "azure:application:deployment-bot",
+      "target": "azure:group:production-operators",
+      "type": "azaddmembers",
       "permission": "AZAddMembers",
       "provider": "azure",
+      "source_tool": "azurehound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "AZAddMembers",
       "raw_evidence": {
         "fact_id": "azure-03",
-        "provider": "azure",
         "source": "azure:application:deployment-bot",
-        "source_tool": "azurehound",
         "target": "azure:group:production-operators",
-        "type": "AZAddMembers"
-      },
-      "source": "azure:application:deployment-bot",
-      "source_file": null,
-      "source_tool": "azurehound",
-      "target": "azure:group:production-operators",
-      "type": "azaddmembers"
+        "type": "AZAddMembers",
+        "source_tool": "azurehound",
+        "provider": "azure",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "gcp-01",
+      "source": "aws:role:EKSNodeRole",
+      "target": "gcp:serviceaccount:analytics-exporter",
+      "type": "canimpersonate",
+      "permission": "CanImpersonate",
+      "provider": "gcp",
+      "source_tool": "gcp_hound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "CanImpersonate",
+      "raw_evidence": {
+        "fact_id": "gcp-01",
+        "source": "aws:role:EKSNodeRole",
+        "target": "gcp:serviceaccount:analytics-exporter",
+        "type": "CanImpersonate",
+        "source_tool": "gcp_hound",
+        "provider": "gcp",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "gcp-02",
+      "source": "gcp:serviceaccount:analytics-exporter",
+      "target": "gcp:secret:analytics-api-key",
+      "type": "canreadsecrets",
+      "permission": "CanReadSecrets",
+      "provider": "gcp",
+      "source_tool": "gcp_hound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "CanReadSecrets",
+      "raw_evidence": {
+        "fact_id": "gcp-02",
+        "source": "gcp:serviceaccount:analytics-exporter",
+        "target": "gcp:secret:analytics-api-key",
+        "type": "CanReadSecrets",
+        "source_tool": "gcp_hound",
+        "provider": "gcp",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "gcp-03",
+      "source": "gcp:serviceaccount:analytics-exporter",
+      "target": "gcp:bucket:audit-archive",
+      "type": "canmodifybucketpoliciesinproject",
+      "permission": "CanModifyBucketPoliciesInProject",
+      "provider": "gcp",
+      "source_tool": "gcp_hound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "CanModifyBucketPoliciesInProject",
+      "raw_evidence": {
+        "fact_id": "gcp-03",
+        "source": "gcp:serviceaccount:analytics-exporter",
+        "target": "gcp:bucket:audit-archive",
+        "type": "CanModifyBucketPoliciesInProject",
+        "source_tool": "gcp_hound",
+        "provider": "gcp",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "gcp-04",
+      "source": "gcp:project:analytics-prod",
+      "target": "gcp:serviceaccount:analytics-exporter",
+      "type": "containsserviceaccount",
+      "permission": "ContainsServiceAccount",
+      "provider": "gcp",
+      "source_tool": "gcp_hound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "ContainsServiceAccount",
+      "raw_evidence": {
+        "fact_id": "gcp-04",
+        "source": "gcp:project:analytics-prod",
+        "target": "gcp:serviceaccount:analytics-exporter",
+        "type": "ContainsServiceAccount",
+        "source_tool": "gcp_hound",
+        "provider": "gcp",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "generic-01",
+      "source": "aws:role:EKSNodeRole",
+      "target": "k8s:pod:checkout-api",
+      "type": "network_access",
+      "permission": "network",
+      "provider": "hybrid",
+      "source_tool": "hound_generic",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "network",
+      "raw_evidence": {
+        "fact_id": "generic-01",
+        "source": "aws:role:EKSNodeRole",
+        "target": "k8s:pod:checkout-api",
+        "type": "network",
+        "permission": "network",
+        "source_tool": "hound_generic",
+        "provider": "hybrid",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "generic-02",
+      "source": "aws:role:EKSNodeRole",
+      "target": "k8s:pod:payment-api",
+      "type": "network_access",
+      "permission": "network",
+      "provider": "hybrid",
+      "source_tool": "hound_generic",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "network",
+      "raw_evidence": {
+        "fact_id": "generic-02",
+        "source": "aws:role:EKSNodeRole",
+        "target": "k8s:pod:payment-api",
+        "type": "network",
+        "permission": "network",
+        "source_tool": "hound_generic",
+        "provider": "hybrid",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "iam-01",
+      "source": "aws:user:developer",
+      "target": "aws:role:DevOpsRole",
+      "type": "assume_role",
+      "permission": "sts:AssumeRole",
+      "provider": "aws",
+      "source_tool": "iamhounddog",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "assume_role",
+      "raw_evidence": {
+        "fact_id": "iam-01",
+        "source": "aws:user:developer",
+        "target": "aws:role:DevOpsRole",
+        "type": "assume_role",
+        "permission": "sts:AssumeRole",
+        "source_tool": "iamhounddog",
+        "provider": "aws",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "iam-02",
+      "source": "aws:role:DevOpsRole",
+      "target": "aws:policy:EC2LaunchPolicy",
+      "type": "attached_policy",
+      "permission": "attached_policy",
+      "provider": "aws",
+      "source_tool": "iamhounddog",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "attached_policy",
+      "raw_evidence": {
+        "fact_id": "iam-02",
+        "source": "aws:role:DevOpsRole",
+        "target": "aws:policy:EC2LaunchPolicy",
+        "type": "attached_policy",
+        "source_tool": "iamhounddog",
+        "provider": "aws",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "iam-03",
+      "source": "aws:policy:EC2LaunchPolicy",
+      "target": "aws:ec2:bootstrap-runner",
+      "type": "ec2_run_instances",
+      "permission": "ec2:RunInstances",
+      "provider": "aws",
+      "source_tool": "iamhounddog",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "ec2_run_instances",
+      "raw_evidence": {
+        "fact_id": "iam-03",
+        "source": "aws:policy:EC2LaunchPolicy",
+        "target": "aws:ec2:bootstrap-runner",
+        "type": "ec2_run_instances",
+        "permission": "ec2:RunInstances",
+        "source_tool": "iamhounddog",
+        "provider": "aws",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "iam-04",
+      "source": "aws:ec2:bootstrap-runner",
+      "target": "aws:role:EKSNodeRole",
+      "type": "instance_role",
+      "permission": "instance_role",
+      "provider": "aws",
+      "source_tool": "iamhounddog",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "instance_role",
+      "raw_evidence": {
+        "fact_id": "iam-04",
+        "source": "aws:ec2:bootstrap-runner",
+        "target": "aws:role:EKSNodeRole",
+        "type": "instance_role",
+        "source_tool": "iamhounddog",
+        "provider": "aws",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "iam-05",
+      "source": "aws:user:developer",
+      "target": "aws:role:EKSNodeRole",
+      "type": "has_permission",
+      "permission": "iam:PassRole",
+      "provider": "aws",
+      "source_tool": "iamhounddog",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "has_permission",
+      "raw_evidence": {
+        "fact_id": "iam-05",
+        "source": "aws:user:developer",
+        "target": "aws:role:EKSNodeRole",
+        "type": "has_permission",
+        "permission": "iam:PassRole",
+        "source_tool": "iamhounddog",
+        "provider": "aws",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "k8s-01",
+      "source": "k8s:pod:checkout-api",
+      "target": "k8s:serviceaccount:checkout",
+      "type": "mountsserviceaccount",
+      "permission": "mountsServiceAccount",
+      "provider": "k8s",
+      "source_tool": "clusterhound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "mountsServiceAccount",
+      "raw_evidence": {
+        "fact_id": "k8s-01",
+        "source": "k8s:pod:checkout-api",
+        "target": "k8s:serviceaccount:checkout",
+        "type": "mountsServiceAccount",
+        "source_tool": "clusterhound",
+        "provider": "k8s",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "k8s-02",
+      "source": "k8s:serviceaccount:checkout",
+      "target": "k8s:pod:payment-api",
+      "type": "canexec",
+      "permission": "canExec",
+      "provider": "k8s",
+      "source_tool": "clusterhound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "canExec",
+      "raw_evidence": {
+        "fact_id": "k8s-02",
+        "source": "k8s:serviceaccount:checkout",
+        "target": "k8s:pod:payment-api",
+        "type": "canExec",
+        "source_tool": "clusterhound",
+        "provider": "k8s",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "k8s-03",
+      "source": "k8s:serviceaccount:checkout",
+      "target": "k8s:secret:payment-db",
+      "type": "secretsread",
+      "permission": "secretsRead",
+      "provider": "k8s",
+      "source_tool": "clusterhound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "secretsRead",
+      "raw_evidence": {
+        "fact_id": "k8s-03",
+        "source": "k8s:serviceaccount:checkout",
+        "target": "k8s:secret:payment-db",
+        "type": "secretsRead",
+        "source_tool": "clusterhound",
+        "provider": "k8s",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "k8s-04",
+      "source": "internet:external:public-client",
+      "target": "k8s:api:prod-eks",
+      "type": "unauthapiaccess",
+      "permission": "unauthAPIAccess",
+      "provider": "k8s",
+      "source_tool": "clusterhound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "unauthAPIAccess",
+      "raw_evidence": {
+        "fact_id": "k8s-04",
+        "source": "internet:external:public-client",
+        "target": "k8s:api:prod-eks",
+        "type": "unauthAPIAccess",
+        "source_tool": "clusterhound",
+        "provider": "k8s",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "k8s-05",
+      "source": "k8s:pod:checkout-api",
+      "target": "aws:metadata:imds",
+      "type": "accessimds",
+      "permission": "accessIMDS",
+      "provider": "hybrid",
+      "source_tool": "clusterhound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "accessIMDS",
+      "raw_evidence": {
+        "fact_id": "k8s-05",
+        "source": "k8s:pod:checkout-api",
+        "target": "aws:metadata:imds",
+        "type": "accessIMDS",
+        "source_tool": "clusterhound",
+        "provider": "hybrid",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "k8s-06",
+      "source": "k8s:serviceaccount:checkout",
+      "target": "k8s:cluster:prod-eks",
+      "type": "cancreateworkload",
+      "permission": "canCreateWorkload",
+      "provider": "k8s",
+      "source_tool": "clusterhound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "canCreateWorkload",
+      "raw_evidence": {
+        "fact_id": "k8s-06",
+        "source": "k8s:serviceaccount:checkout",
+        "target": "k8s:cluster:prod-eks",
+        "type": "canCreateWorkload",
+        "source_tool": "clusterhound",
+        "provider": "k8s",
+        "source_file": "hound_generic_sample.json"
+      }
+    },
+    {
+      "fact_id": "k8s-07",
+      "source": "k8s:serviceaccount:checkout",
+      "target": "k8s:pod:payment-api",
+      "type": "canportforward",
+      "permission": "canPortForward",
+      "provider": "k8s",
+      "source_tool": "clusterhound",
+      "source_file": "hound_generic_sample.json",
+      "original_edge_type": "canPortForward",
+      "raw_evidence": {
+        "fact_id": "k8s-07",
+        "source": "k8s:serviceaccount:checkout",
+        "target": "k8s:pod:payment-api",
+        "type": "canPortForward",
+        "source_tool": "clusterhound",
+        "provider": "k8s",
+        "source_file": "hound_generic_sample.json"
+      }
     }
   ],
+  "unmapped_vulnerabilities": [],
   "metadata": {
-    "edge_count": 21,
-    "mapped_vulnerability_count": 2,
-    "node_count": 21,
-    "schema_status": "provisional",
     "schema_version": "0.1.0",
     "source_files": [
       "grype_sample.json",
@@ -417,492 +963,32 @@
       "important_assets.yaml",
       "vulnerability_mapping.yaml"
     ],
+    "source_tools": [
+      "azurehound",
+      "clusterhound",
+      "gcp_hound",
+      "grype",
+      "hound_generic",
+      "iamhounddog"
+    ],
+    "cloud_providers": [
+      "aws",
+      "azure",
+      "gcp",
+      "hybrid",
+      "k8s"
+    ],
+    "input_hashes": {
+      "grype_sample.json": "ed3c93fd6b298e8d40ad463e1f37013632990358870ca5fff3d8c28019069d38",
+      "hound_generic_sample.json": "cf280f7f0c50544a6dbe3d5ffa838b6315ec666f270680140eb81221daf79d06",
+      "important_assets.yaml": "9149a0338ac79d2fd418df835adc4198dfed5b27daa12b09d60e34360c1c75cb",
+      "vulnerability_mapping.yaml": "a1ef8fe45e30783066927fb8ad565e7379545e587022506bfa584118286a95ba"
+    },
+    "node_count": 21,
+    "edge_count": 21,
+    "vulnerability_count": 2,
+    "mapped_vulnerability_count": 2,
     "unmapped_vulnerability_count": 0,
-    "vulnerability_count": 2
-  },
-  "nodes": [
-    {
-      "asset_category": "unknown",
-      "cloud": "unknown",
-      "goal_candidate": false,
-      "id": "internet:external:public-client",
-      "is_entry": true,
-      "is_goal": false,
-      "name": "Public Internet Client",
-      "raw_evidence": {
-        "asset_marker": {
-          "cloud": "unknown",
-          "id": "internet:external:public-client",
-          "name": "Public Internet Client",
-          "type": "external"
-        },
-        "cloud": "unknown",
-        "id": "internet:external:public-client",
-        "is_entry": true,
-        "name": "Public Internet Client",
-        "type": "external"
-      },
-      "type": "external",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "aws",
-      "goal_candidate": false,
-      "id": "aws:user:developer",
-      "is_entry": true,
-      "is_goal": false,
-      "name": "developer",
-      "raw_evidence": {
-        "asset_marker": {
-          "cloud": "aws",
-          "id": "aws:user:developer",
-          "name": "developer",
-          "type": "principal"
-        },
-        "cloud": "aws",
-        "id": "aws:user:developer",
-        "is_entry": true,
-        "name": "developer",
-        "type": "principal"
-      },
-      "type": "principal",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "aws",
-      "goal_candidate": false,
-      "id": "aws:role:DevOpsRole",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "DevOpsRole",
-      "raw_evidence": {
-        "cloud": "aws",
-        "id": "aws:role:DevOpsRole",
-        "name": "DevOpsRole",
-        "type": "role"
-      },
-      "type": "role",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "aws",
-      "goal_candidate": false,
-      "id": "aws:policy:EC2LaunchPolicy",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "EC2LaunchPolicy",
-      "raw_evidence": {
-        "cloud": "aws",
-        "id": "aws:policy:EC2LaunchPolicy",
-        "name": "EC2LaunchPolicy",
-        "type": "policy"
-      },
-      "type": "policy",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "aws",
-      "goal_candidate": false,
-      "id": "aws:ec2:bootstrap-runner",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "bootstrap-runner",
-      "raw_evidence": {
-        "cloud": "aws",
-        "id": "aws:ec2:bootstrap-runner",
-        "name": "bootstrap-runner",
-        "type": "ec2"
-      },
-      "type": "ec2",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "critical",
-      "cloud": "aws",
-      "goal_candidate": true,
-      "id": "aws:role:EKSNodeRole",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "EKSNodeRole",
-      "raw_evidence": {
-        "asset_marker": {
-          "asset_category": "critical",
-          "cloud": "aws",
-          "goal_candidate": true,
-          "id": "aws:role:EKSNodeRole",
-          "name": "EKSNodeRole",
-          "type": "role"
-        },
-        "cloud": "aws",
-        "id": "aws:role:EKSNodeRole",
-        "name": "EKSNodeRole",
-        "type": "role"
-      },
-      "type": "role",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "critical",
-      "cloud": "k8s",
-      "goal_candidate": true,
-      "id": "k8s:cluster:prod-eks",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "prod-eks",
-      "raw_evidence": {
-        "asset_marker": {
-          "asset_category": "critical",
-          "cloud": "k8s",
-          "goal_candidate": true,
-          "id": "k8s:cluster:prod-eks",
-          "name": "prod-eks",
-          "type": "cluster"
-        },
-        "cloud": "k8s",
-        "id": "k8s:cluster:prod-eks",
-        "name": "prod-eks",
-        "type": "cluster"
-      },
-      "type": "cluster",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "k8s",
-      "goal_candidate": false,
-      "id": "k8s:api:prod-eks",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "prod-eks-api",
-      "raw_evidence": {
-        "cloud": "k8s",
-        "id": "k8s:api:prod-eks",
-        "name": "prod-eks-api",
-        "type": "api"
-      },
-      "type": "api",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "k8s",
-      "goal_candidate": false,
-      "id": "k8s:pod:checkout-api",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "checkout-api",
-      "raw_evidence": {
-        "cloud": "k8s",
-        "id": "k8s:pod:checkout-api",
-        "name": "checkout-api",
-        "type": "container"
-      },
-      "type": "container",
-      "vulnerabilities": [
-        {
-          "cve_id": "CVE-2022-0778",
-          "fixed_version": "1.1.1n",
-          "id": "CVE-2022-0778",
-          "installed_version": "1.1.1m",
-          "package_name": "openssl",
-          "raw_evidence": {
-            "artifact": {
-              "metadata": {
-                "image": "checkout-api"
-              },
-              "name": "openssl",
-              "version": "1.1.1m"
-            },
-            "vulnerability": {
-              "fix": {
-                "versions": [
-                  "1.1.1n"
-                ]
-              },
-              "id": "CVE-2022-0778",
-              "severity": "High"
-            }
-          },
-          "severity": "High",
-          "source": "grype-json"
-        }
-      ]
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "k8s",
-      "goal_candidate": false,
-      "id": "k8s:pod:payment-api",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "payment-api",
-      "raw_evidence": {
-        "cloud": "k8s",
-        "id": "k8s:pod:payment-api",
-        "name": "payment-api",
-        "type": "container"
-      },
-      "type": "container",
-      "vulnerabilities": [
-        {
-          "cve_id": "CVE-2021-44228",
-          "fixed_version": "2.15.0",
-          "id": "CVE-2021-44228",
-          "installed_version": "2.14.1",
-          "package_name": "log4j-core",
-          "raw_evidence": {
-            "artifact": {
-              "metadata": {
-                "image": "payment-api"
-              },
-              "name": "log4j-core",
-              "version": "2.14.1"
-            },
-            "vulnerability": {
-              "fix": {
-                "versions": [
-                  "2.15.0"
-                ]
-              },
-              "id": "CVE-2021-44228",
-              "severity": "Critical"
-            }
-          },
-          "severity": "Critical",
-          "source": "grype-json"
-        }
-      ]
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "k8s",
-      "goal_candidate": false,
-      "id": "k8s:serviceaccount:checkout",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "checkout",
-      "raw_evidence": {
-        "cloud": "k8s",
-        "id": "k8s:serviceaccount:checkout",
-        "name": "checkout",
-        "type": "serviceaccount"
-      },
-      "type": "serviceaccount",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "critical",
-      "cloud": "k8s",
-      "goal_candidate": true,
-      "id": "k8s:secret:payment-db",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "payment-db",
-      "raw_evidence": {
-        "asset_marker": {
-          "asset_category": "critical",
-          "cloud": "k8s",
-          "goal_candidate": true,
-          "id": "k8s:secret:payment-db",
-          "name": "payment-db",
-          "type": "secret"
-        },
-        "cloud": "k8s",
-        "id": "k8s:secret:payment-db",
-        "name": "payment-db",
-        "type": "secret"
-      },
-      "type": "secret",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "aws",
-      "goal_candidate": false,
-      "id": "aws:metadata:imds",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "EC2 Instance Metadata Service",
-      "raw_evidence": {
-        "cloud": "aws",
-        "id": "aws:metadata:imds",
-        "name": "EC2 Instance Metadata Service",
-        "type": "metadata"
-      },
-      "type": "metadata",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "gcp",
-      "goal_candidate": false,
-      "id": "gcp:project:analytics-prod",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "analytics-prod",
-      "raw_evidence": {
-        "cloud": "gcp",
-        "id": "gcp:project:analytics-prod",
-        "name": "analytics-prod",
-        "type": "project"
-      },
-      "type": "project",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "gcp",
-      "goal_candidate": false,
-      "id": "gcp:serviceaccount:analytics-exporter",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "analytics-exporter",
-      "raw_evidence": {
-        "cloud": "gcp",
-        "id": "gcp:serviceaccount:analytics-exporter",
-        "name": "analytics-exporter",
-        "type": "serviceaccount"
-      },
-      "type": "serviceaccount",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "high",
-      "cloud": "gcp",
-      "goal_candidate": true,
-      "id": "gcp:secret:analytics-api-key",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "analytics-api-key",
-      "raw_evidence": {
-        "asset_marker": {
-          "asset_category": "high",
-          "cloud": "gcp",
-          "goal_candidate": true,
-          "id": "gcp:secret:analytics-api-key",
-          "name": "analytics-api-key",
-          "type": "secret"
-        },
-        "cloud": "gcp",
-        "id": "gcp:secret:analytics-api-key",
-        "name": "analytics-api-key",
-        "type": "secret"
-      },
-      "type": "secret",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "high",
-      "cloud": "gcp",
-      "goal_candidate": true,
-      "id": "gcp:bucket:audit-archive",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "audit-archive",
-      "raw_evidence": {
-        "asset_marker": {
-          "asset_category": "high",
-          "cloud": "gcp",
-          "goal_candidate": true,
-          "id": "gcp:bucket:audit-archive",
-          "name": "audit-archive",
-          "type": "bucket"
-        },
-        "cloud": "gcp",
-        "id": "gcp:bucket:audit-archive",
-        "name": "audit-archive",
-        "type": "bucket"
-      },
-      "type": "bucket",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "azure",
-      "goal_candidate": false,
-      "id": "azure:user:release-engineer",
-      "is_entry": true,
-      "is_goal": false,
-      "name": "release-engineer",
-      "raw_evidence": {
-        "asset_marker": {
-          "cloud": "azure",
-          "id": "azure:user:release-engineer",
-          "name": "release-engineer",
-          "type": "principal"
-        },
-        "cloud": "azure",
-        "id": "azure:user:release-engineer",
-        "is_entry": true,
-        "name": "release-engineer",
-        "type": "principal"
-      },
-      "type": "principal",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "azure",
-      "goal_candidate": false,
-      "id": "azure:tenant:production",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "production-tenant",
-      "raw_evidence": {
-        "cloud": "azure",
-        "id": "azure:tenant:production",
-        "name": "production-tenant",
-        "type": "tenant"
-      },
-      "type": "tenant",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "unknown",
-      "cloud": "azure",
-      "goal_candidate": false,
-      "id": "azure:application:deployment-bot",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "deployment-bot",
-      "raw_evidence": {
-        "cloud": "azure",
-        "id": "azure:application:deployment-bot",
-        "name": "deployment-bot",
-        "type": "application"
-      },
-      "type": "application",
-      "vulnerabilities": []
-    },
-    {
-      "asset_category": "critical",
-      "cloud": "azure",
-      "goal_candidate": true,
-      "id": "azure:group:production-operators",
-      "is_entry": false,
-      "is_goal": false,
-      "name": "production-operators",
-      "raw_evidence": {
-        "asset_marker": {
-          "asset_category": "critical",
-          "cloud": "azure",
-          "goal_candidate": true,
-          "id": "azure:group:production-operators",
-          "name": "production-operators",
-          "type": "group"
-        },
-        "cloud": "azure",
-        "id": "azure:group:production-operators",
-        "name": "production-operators",
-        "type": "group"
-      },
-      "type": "group",
-      "vulnerabilities": []
-    }
-  ],
-  "unmapped_vulnerabilities": []
+    "schema_status": "provisional"
+  }
 }

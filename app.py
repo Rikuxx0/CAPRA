@@ -1,10 +1,12 @@
-import streamlit as st
+import hashlib
 import json
-import pandas as pd
-from pyvis.network import Network
-import tempfile
 import os
+import tempfile
 from pathlib import Path
+
+import pandas as pd
+import streamlit as st
+from pyvis.network import Network
 
 from capra.layer1.exporters import (
     export_edges_dataframe,
@@ -14,6 +16,7 @@ from capra.layer1.exporters import (
 )
 from capra.layer1.graph_builder import build_layer1_fact_graph
 from capra.layer1.parsers.drawio_parser import parse_drawio_to_layer1
+from capra.layer1.parsers.dependency_parser import parse_cross_cloud_dependencies
 from capra.layer1.parsers.grype_parser import parse_grype_json, parse_grype_sarif
 from capra.layer1.parsers.hound_parser import parse_hound_generic
 from capra.layer1.utils.file_loader import load_json_or_yaml
@@ -41,6 +44,11 @@ layer1_hound = st.file_uploader("Hound generic JSON", type=["json"], key="layer1
 layer1_assets = st.file_uploader("重要資産候補 YAML/JSON", type=["yaml", "yml", "json"], key="layer1_assets")
 layer1_mapping = st.file_uploader("任意のCVE-to-node mapping YAML/JSON", type=["yaml", "yml", "json"], key="layer1_mapping")
 layer1_drawio = st.file_uploader("任意のDraw.io XML/.drawio", type=["xml", "drawio"], key="layer1_drawio")
+layer1_dependencies = st.file_uploader(
+    "任意のクラウド間依存関係 YAML/JSON",
+    type=["yaml", "yml", "json"],
+    key="layer1_dependencies",
+)
 
 layer1_nodes = []
 layer1_edges = []
@@ -48,35 +56,49 @@ layer1_vulnerabilities = []
 layer1_asset_config = {}
 layer1_mapping_config = {}
 layer1_source_files = []
+layer1_input_hashes = {}
 layer1_parse_errors = []
+
+
+def record_layer1_input(upload) -> bytes:
+    content = upload.getvalue()
+    layer1_source_files.append(upload.name)
+    layer1_input_hashes[upload.name] = hashlib.sha256(content).hexdigest()
+    return content
 
 try:
     if layer1_grype:
-        grype_text = layer1_grype.getvalue().decode("utf-8")
+        grype_text = record_layer1_input(layer1_grype).decode("utf-8")
         grype_data = json.loads(grype_text)
         layer1_vulnerabilities = (
-            parse_grype_sarif(grype_data)
+            parse_grype_sarif(grype_data, source_file=layer1_grype.name)
             if layer1_grype.name.lower().endswith(".sarif") or "runs" in grype_data
-            else parse_grype_json(grype_data)
+            else parse_grype_json(grype_data, source_file=layer1_grype.name)
         )
-        layer1_source_files.append(layer1_grype.name)
     if layer1_hound:
-        hound_data = json.loads(layer1_hound.getvalue().decode("utf-8"))
-        hound_nodes, hound_edges = parse_hound_generic(hound_data)
+        hound_data = json.loads(record_layer1_input(layer1_hound).decode("utf-8"))
+        hound_nodes, hound_edges = parse_hound_generic(hound_data, source_file=layer1_hound.name)
         layer1_nodes.extend(hound_nodes)
         layer1_edges.extend(hound_edges)
-        layer1_source_files.append(layer1_hound.name)
     if layer1_assets:
-        layer1_asset_config = load_json_or_yaml(layer1_assets.getvalue().decode("utf-8"), layer1_assets.name)
-        layer1_source_files.append(layer1_assets.name)
+        layer1_asset_config = load_json_or_yaml(record_layer1_input(layer1_assets).decode("utf-8"), layer1_assets.name)
     if layer1_mapping:
-        layer1_mapping_config = load_json_or_yaml(layer1_mapping.getvalue().decode("utf-8"), layer1_mapping.name)
-        layer1_source_files.append(layer1_mapping.name)
+        layer1_mapping_config = load_json_or_yaml(record_layer1_input(layer1_mapping).decode("utf-8"), layer1_mapping.name)
     if layer1_drawio:
-        drawio_nodes, drawio_edges = parse_drawio_to_layer1(layer1_drawio.getvalue().decode("utf-8"))
+        drawio_nodes, drawio_edges = parse_drawio_to_layer1(
+            record_layer1_input(layer1_drawio).decode("utf-8"), source_file=layer1_drawio.name
+        )
         layer1_nodes.extend(drawio_nodes)
         layer1_edges.extend(drawio_edges)
-        layer1_source_files.append(layer1_drawio.name)
+    if layer1_dependencies:
+        dependency_data = load_json_or_yaml(
+            record_layer1_input(layer1_dependencies).decode("utf-8"), layer1_dependencies.name
+        )
+        dependency_nodes, dependency_edges = parse_cross_cloud_dependencies(
+            dependency_data, source_file=layer1_dependencies.name
+        )
+        layer1_nodes.extend(dependency_nodes)
+        layer1_edges.extend(dependency_edges)
 except Exception as exc:
     layer1_parse_errors.append(str(exc))
 
@@ -96,7 +118,7 @@ if layer1_parse_errors:
     st.error("Layer 1 input parse error: " + "; ".join(layer1_parse_errors))
 
 if st.button("Build Layer 1 Fact Graph"):
-    if not (layer1_grype or layer1_hound or layer1_assets or layer1_drawio):
+    if not (layer1_grype or layer1_hound or layer1_assets or layer1_drawio or layer1_dependencies):
         st.warning("Layer 1入力を少なくとも1つアップロードしてください。")
     else:
         try:
@@ -108,6 +130,7 @@ if st.button("Build Layer 1 Fact Graph"):
                 vulnerability_mapping_config=layer1_mapping_config,
                 selected_goal_ids=set(selected_layer1_goals),
                 source_files=layer1_source_files,
+                input_hashes=layer1_input_hashes,
             )
             fact_json = export_fact_graph_json(fact_graph)
             st.session_state["layer1_fact_graph"] = fact_json
@@ -115,11 +138,19 @@ if st.button("Build Layer 1 Fact Graph"):
             edges_df = export_edges_dataframe(fact_graph)
             vulns_df = export_vulnerabilities_dataframe(fact_graph)
 
-            m1, m2, m3, m4 = st.columns(4)
-            m1.metric("Nodes", fact_json["metadata"]["node_count"])
-            m2.metric("Edges", fact_json["metadata"]["edge_count"])
-            m3.metric("CVEs", fact_json["metadata"]["vulnerability_count"])
-            m4.metric("Unmapped CVEs", fact_json["metadata"]["unmapped_vulnerability_count"])
+            metrics = [
+                ("Nodes", fact_json["metadata"]["node_count"]),
+                ("Edges", fact_json["metadata"]["edge_count"]),
+                ("CVEs", fact_json["metadata"]["vulnerability_count"]),
+                ("Unmapped CVEs", fact_json["metadata"]["unmapped_vulnerability_count"]),
+                ("Entry Points", sum(bool(node.get("is_entry")) for node in fact_json["nodes"])),
+                ("Goal Candidates", sum(bool(node.get("goal_candidate")) for node in fact_json["nodes"])),
+                ("Selected Goals", sum(bool(node.get("is_goal")) for node in fact_json["nodes"])),
+            ]
+            for offset in range(0, len(metrics), 4):
+                columns = st.columns(4)
+                for column, (label, value) in zip(columns, metrics[offset : offset + 4]):
+                    column.metric(label, value)
 
             st.subheader("Layer 1 Node Table")
             st.dataframe(nodes_df)
@@ -216,7 +247,7 @@ with config_column_2:
 with config_column_3:
     layer2_source_tools = st.multiselect(
         "対象source_tool（未選択はすべて）",
-        ["hound_generic", "iamhounddog", "azurehound", "gcp_hound", "clusterhound", "nvd", "grype"],
+        ["hound_generic", "iamhounddog", "azurehound", "gcp_hound", "clusterhound", "bloodhound_kube", "nvd", "grype"],
     )
     layer2_operator_types_text = st.text_area(
         "対象operator_type（任意、カンマ区切り）",
@@ -287,9 +318,11 @@ if st.button("Build Layer 2 Attack Operator Graph"):
                 ("Operators", metadata["operator_count"]),
                 ("IAM Operators", metadata["iam_operator_count"]),
                 ("CVE Operators", metadata["cve_operator_count"]),
+                ("Partial Operators", metadata["partial_operator_count"]),
                 ("Connections", metadata["connection_count"]),
                 ("Unresolved", metadata["unresolved_count"]),
                 ("Manual verification", metadata["manual_verification_count"]),
+                ("Layer 3 Candidates", metadata["layer3_candidate_count"]),
                 ("NVD cache hits", metadata["nvd_cache_hit_count"]),
                 ("NVD cache misses", metadata["nvd_cache_miss_count"]),
                 ("NVD fetch failures", metadata["nvd_fetch_failure_count"]),

@@ -1,0 +1,28 @@
+{
+  "attack_operators": [
+    {
+      "id": "example:denial-of-service",
+      "operator_type": "denial_of_service",
+      "source_node": null,
+      "target_node": "k8s:pod:checkout-api",
+      "effects": ["service_unavailable"],
+      "produces": []
+    },
+    {
+      "id": "example:obtain-service-account",
+      "operator_type": "obtain_mounted_service_account",
+      "source_node": "k8s:pod:checkout-api",
+      "target_node": "k8s:serviceaccount:checkout",
+      "preconditions": ["workload_controlled"],
+      "requires": [
+        {
+          "artifact_type": "resource_control",
+          "subject_node_id": "k8s:pod:checkout-api",
+          "properties": {}
+        }
+      ]
+    }
+  ],
+  "expected_connections": [],
+  "reason": "A target_node/source_node match is context only; effects/preconditions and produces/requires do not match."
+}

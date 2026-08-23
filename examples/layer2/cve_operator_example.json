@@ -20,7 +20,7 @@
     "cvss_vector": "CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:C/C:H/I:H/A:H",
     "input_package_name": "log4j-core",
     "integrity_impact": "high",
-    "nvd_cache_hash": "812ef20475deefa853979c5c6e8a25d0ad29aa852cd57a0d73a75c8ff6b267f3",
+    "nvd_cache_hash": "e73d4b103d5ff7ea6cccf6243fb7c914a1f6bba8d14dd4ba2565cd54893fe769",
     "package_matches_nvd_product": true,
     "privileges_required": "none",
     "products": [
@@ -44,7 +44,8 @@
     ]
   },
   "missing_conditions": [
-    "target_is_reachable"
+    "target_is_reachable",
+    "vulnerable_version_is_running"
   ],
   "operator_type": "remote_code_execution",
   "origin_kind": "cve",
@@ -140,6 +141,7 @@
           "name": "log4j-core",
           "version": "2.14.1"
         },
+        "source_file": "grype_sample.json",
         "vulnerability": {
           "fix": {
             "versions": [
@@ -164,7 +166,9 @@
   "source_fact_ids": [
     "CVE-2021-44228"
   ],
-  "source_files": [],
+  "source_files": [
+    "grype_sample.json"
+  ],
   "source_node": null,
   "source_tool": "nvd",
   "status": "partial",

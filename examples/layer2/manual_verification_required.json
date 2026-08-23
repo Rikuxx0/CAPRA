@@ -10,7 +10,7 @@
   "metadata": {
     "original_edge_type": "unauthAPIAccess",
     "provider": "k8s",
-    "rule_set_hash": "1f6dbbedbd1998eae08d79e7e69bf070a3f30a8f7bc464a315bc37ecd0542197",
+    "rule_set_hash": "7f36a8b6e7775310d34833665a0bf28834249755581baf703168e33b86663081",
     "rule_set_version": "0.1.0"
   },
   "missing_conditions": [
@@ -37,12 +37,13 @@
       "fact_id": "k8s-04",
       "provider": "k8s",
       "source": "internet:external:public-client",
+      "source_file": "hound_generic_sample.json",
       "source_tool": "clusterhound",
       "target": "k8s:api:prod-eks",
       "type": "unauthAPIAccess"
     },
     "source": "internet:external:public-client",
-    "source_file": null,
+    "source_file": "hound_generic_sample.json",
     "source_tool": "clusterhound",
     "source_tool_inferred": false,
     "target": "k8s:api:prod-eks",
@@ -52,7 +53,9 @@
   "source_fact_ids": [
     "k8s-04"
   ],
-  "source_files": [],
+  "source_files": [
+    "hound_generic_sample.json"
+  ],
   "source_node": "internet:external:public-client",
   "source_tool": "clusterhound",
   "status": "partial",

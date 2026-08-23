@@ -20,3 +20,11 @@ def test_deterministic_connection_and_unresolved_ids():
     assert generate_unresolved_id(item_type="edge", source_tool="x", source_fact_ids=["2", "1"], reason="missing") == generate_unresolved_id(
         item_type="edge", source_tool="x", source_fact_ids=["1", "2"], reason="missing"
     )
+
+
+def test_deterministic_condition_connection_id_normalizes_condition():
+    assert generate_connection_id(
+        "a", "b", "enables", condition=" Identity_Obtained "
+    ) == generate_connection_id(
+        "a", "b", "enables", condition="identity_obtained"
+    )

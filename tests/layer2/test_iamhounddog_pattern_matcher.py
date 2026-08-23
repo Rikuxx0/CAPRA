@@ -115,3 +115,23 @@ operator:
 
     with pytest.raises(ValueError, match="Duplicate IAMHoundDog rule id"):
         load_pattern_rules([DEFAULT_PATTERN_PATH, duplicate_rule])
+
+
+def test_iamhounddog_required_permissions_do_not_mix_source_tools():
+    mixed = graph(include_passrole=False)
+    mixed.edges.append(
+        {
+            "fact_id": "foreign",
+            "source": "p",
+            "target": "r2",
+            "type": "has_permission",
+            "permission": "iam:PassRole",
+            "source_tool": "gcp_hound",
+        }
+    )
+
+    result = IamHoundDogAdapter().convert(mixed, Layer2Config())
+
+    assert result.operators[0].status == "partial"
+    assert result.operators[0].missing_conditions == ["iam:PassRole"]
+    assert "foreign" not in result.operators[0].source_fact_ids

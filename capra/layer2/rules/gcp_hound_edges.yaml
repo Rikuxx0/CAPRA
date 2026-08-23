@@ -5,6 +5,7 @@ mappings:
     classification: ATTACK_EDGE
     operator_type: create_service_account_key
     preconditions: [can_create_service_account_key]
+    requires: [identity]
     effects: [service_account_key_created]
     produces: [credential, identity]
   CanImpersonate:
@@ -12,6 +13,7 @@ mappings:
     classification: ATTACK_EDGE
     operator_type: impersonate_service_account
     preconditions: [can_impersonate_service_account]
+    requires: [identity]
     effects: [service_account_identity_obtained]
     produces: [identity]
   CanReadSecrets:
@@ -19,6 +21,7 @@ mappings:
     classification: ATTACK_EDGE
     operator_type: read_secret
     preconditions: [can_access_secret]
+    requires: [identity]
     effects: [secret_data_may_be_read]
     produces: [data_access]
   CanReadSecretsInProject:
@@ -26,6 +29,7 @@ mappings:
     classification: ATTACK_EDGE
     operator_type: read_project_secrets
     preconditions: [can_access_project_secrets]
+    requires: [identity]
     effects: [project_secret_data_may_be_read]
     produces: [data_access]
   CanSignBlob:
@@ -33,12 +37,14 @@ mappings:
     classification: ATTACK_EDGE
     operator_type: sign_blob_as_service_account
     preconditions: [can_sign_blob]
+    requires: [identity]
     effects: [blob_signed_as_service_account]
   CanSignJWT:
     rule_id: gcp_hound.cansignjwt.v1
     classification: ATTACK_EDGE
     operator_type: sign_jwt_as_service_account
     preconditions: [can_sign_jwt]
+    requires: [identity]
     effects: [jwt_signed_as_service_account]
     produces: [identity]
   CanModifyBucketPoliciesInProject:
@@ -46,6 +52,7 @@ mappings:
     classification: ATTACK_EDGE
     operator_type: modify_bucket_policy
     preconditions: [can_modify_bucket_policy]
+    requires: [identity]
     effects: [bucket_policy_modified]
     produces: [resource_control]
   CanListKeys:

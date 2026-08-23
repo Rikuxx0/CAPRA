@@ -4,7 +4,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Any, Literal
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
+
+from .redaction import redact_sensitive_data
 
 
 class EdgeClassification(str, Enum):
@@ -25,6 +27,11 @@ class OperatorArtifactModel(BaseModel):
     ]
     subject_node_id: str | None = None
     properties: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("properties", mode="before")
+    @classmethod
+    def redact_properties(cls, value: Any) -> dict[str, Any]:
+        return redact_sensitive_data(value) if isinstance(value, dict) else {}
 
 
 class AttackOperatorModel(BaseModel):
@@ -51,14 +58,22 @@ class AttackOperatorModel(BaseModel):
     raw_evidence: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
 
+    @field_validator("raw_evidence", mode="before")
+    @classmethod
+    def redact_raw_evidence(cls, value: Any) -> dict[str, Any]:
+        return redact_sensitive_data(value) if isinstance(value, dict) else {}
+
 
 class AttackOperatorConnectionModel(BaseModel):
     id: str
     source_operator_id: str
     target_operator_id: str
+    # "requires" remains readable for compatibility with older exports. New
+    # Layer 2 graphs only generate forward "enables" causal connections.
     connection_type: Literal["enables", "requires"]
     reason: str
     artifact: OperatorArtifactModel | None = None
+    condition: str | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
@@ -71,6 +86,11 @@ class UnresolvedItemModel(BaseModel):
     reason: str
     raw_evidence: dict[str, Any] = Field(default_factory=dict)
     metadata: dict[str, Any] = Field(default_factory=dict)
+
+    @field_validator("raw_evidence", mode="before")
+    @classmethod
+    def redact_raw_evidence(cls, value: Any) -> dict[str, Any]:
+        return redact_sensitive_data(value) if isinstance(value, dict) else {}
 
 
 class AttackOperatorGraphModel(BaseModel):

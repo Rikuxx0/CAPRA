@@ -3,14 +3,18 @@ from __future__ import annotations
 import html
 import re
 from typing import Any
-from xml.etree import ElementTree as ET
+from lxml import etree
 
 from ..schemas import EdgeModel, NodeModel
-from ..utils.ids import generate_node_id
+from ..utils.ids import generate_fact_id, generate_node_id
 
 
 # Draw.io XML を Layer 1 のノード・エッジ構造へ変換する。
-def parse_drawio_to_layer1(xml_text: str) -> tuple[list[NodeModel], list[EdgeModel]]:
+def parse_drawio_to_layer1(
+    xml_text: str,
+    *,
+    source_file: str | None = None,
+) -> tuple[list[NodeModel], list[EdgeModel]]:
     """Parse Draw.io XML into Layer 1's provisional schema."""
     graph = _parse_drawio_xml(xml_text)
     id_map: dict[str, str] = {}
@@ -31,7 +35,7 @@ def parse_drawio_to_layer1(xml_text: str) -> tuple[list[NodeModel], list[EdgeMod
                 is_entry=is_entry,
                 goal_candidate=goal_candidate,
                 asset_category="critical" if goal_candidate else "unknown",
-                raw_evidence=raw_node,
+                raw_evidence={**raw_node, "source_file": source_file, "source_tool": "drawio"},
             )
         )
 
@@ -39,17 +43,27 @@ def parse_drawio_to_layer1(xml_text: str) -> tuple[list[NodeModel], list[EdgeMod
         source = id_map.get(str(raw_edge.get("source")))
         target = id_map.get(str(raw_edge.get("target")))
         if source and target:
+            fact_id = str(raw_edge.get("id")) if raw_edge.get("id") else generate_fact_id(
+                source=source,
+                target=target,
+                edge_type="network_access",
+                permission="drawio:connected",
+                source_tool="drawio",
+                source_file=source_file,
+                original_edge_type="network_access",
+            )
             edges.append(
                 EdgeModel(
-                    fact_id=str(raw_edge.get("id")) if raw_edge.get("id") else None,
+                    fact_id=fact_id,
                     source=source,
                     target=target,
                     type="network_access",
                     permission="drawio:connected",
                     provider="unknown",
                     source_tool="drawio",
+                    source_file=source_file,
                     original_edge_type="network_access",
-                    raw_evidence=raw_edge,
+                    raw_evidence={**raw_edge, "source_file": source_file, "source_tool": "drawio"},
                 )
             )
     return nodes, edges
@@ -57,14 +71,15 @@ def parse_drawio_to_layer1(xml_text: str) -> tuple[list[NodeModel], list[EdgeMod
 
 # Draw.io XML 内の mxCell を走査してノードとエッジの生データへ分解する。
 def _parse_drawio_xml(xml_text: str) -> dict[str, list[dict[str, Any]]]:
-    root = ET.fromstring(xml_text)
+    parser = etree.XMLParser(resolve_entities=False, no_network=True, recover=False)
+    root = etree.fromstring(xml_text.encode("utf-8"), parser=parser)
     nodes: list[dict[str, Any]] = []
     edges: list[dict[str, Any]] = []
 
     for mxcell in root.iter("mxCell"):
-        attr = mxcell.attrib.copy()
+        attr = dict(mxcell.attrib)
         geometry = mxcell.find("mxGeometry")
-        geometry_data = geometry.attrib.copy() if geometry is not None else {}
+        geometry_data = dict(geometry.attrib) if geometry is not None else {}
 
         if attr.get("vertex") == "1":
             nodes.append(

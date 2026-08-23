@@ -28,6 +28,7 @@ def _build_operator_label(operator: AttackOperatorModel) -> str:
     return (
         f"攻撃種別: {operator_type}\n"
         f"状態: {operator.status}\n"
+        f"source_tool: {operator.source_tool}\n"
         f"source: {source_node}\n"
         f"target: {target_node}"
     )
@@ -302,13 +303,16 @@ def build_attack_operator_graph_html(graph: AttackOperatorGraphModel) -> str:
             )
 
     for connection in graph.connections:
-        color = "#5B8FF9" if connection.connection_type == "enables" else "#9B6BCB"
+        # Older exports may contain reverse ``requires`` connections. They are
+        # compatibility data, not forward causal edges, so do not render them.
+        if connection.connection_type != "enables":
+            continue
         network.add_edge(
             connection.source_operator_id,
             connection.target_operator_id,
             label=connection.connection_type,
             title=connection.reason,
-            color=color,
+            color="#5B8FF9",
             arrows="to",
         )
     network.set_options(

@@ -5,4 +5,5 @@ pyvis
 pydantic
 PyYAML
 pytest
-requests
+httpx
+lxml

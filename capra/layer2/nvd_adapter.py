@@ -187,7 +187,9 @@ def convert_cves(
             result.unresolved_items.append(_unresolved(cve_id, fact_id, str(exc), "nvd_parse_failure", vulnerability))
             continue
         operator_type, rule_id = classify_description(record.description, rules)
-        missing_conditions = ["target_is_reachable"]
+        # Grype/NVD records describe observations, not confirmation that the
+        # vulnerable version is currently running or reachable in the target.
+        missing_conditions = ["target_is_reachable", "vulnerable_version_is_running"]
         package_name = str(vulnerability.get("package_name") or "").strip()
         package_match = _package_matches_products(package_name, record.products)
         if package_match is False:
@@ -206,8 +208,6 @@ def convert_cves(
                     missing_conditions=["package_matches_nvd_product"],
                 )
             )
-        if not vulnerability.get("installed_version"):
-            missing_conditions.append("vulnerable_version_is_running")
         if not target_node:
             missing_conditions.append("target_node")
         status = "unresolved" if not target_node else "partial"
@@ -241,6 +241,12 @@ def convert_cves(
             "rule_set_version": rule_version,
             "rule_set_hash": rule_hash,
         }
+        raw_vulnerability_evidence = (
+            vulnerability.get("raw_evidence")
+            if isinstance(vulnerability.get("raw_evidence"), dict)
+            else {}
+        )
+        source_file = vulnerability.get("source_file") or raw_vulnerability_evidence.get("source_file")
         result.operators.append(
             AttackOperatorModel(
                 id=operator_id,
@@ -248,7 +254,7 @@ def convert_cves(
                 origin_kind="cve",
                 source_tool="nvd",
                 source_fact_ids=[fact_id],
-                source_files=[str(vulnerability["source_file"])] if vulnerability.get("source_file") else [],
+                source_files=[str(source_file)] if source_file else [],
                 target_node=target_node,
                 preconditions=["vulnerable_version_is_running", "target_is_reachable"],
                 effects=["vulnerability_exploitation_effect"],
@@ -264,4 +270,15 @@ def convert_cves(
                 metadata=metadata,
             )
         )
+        if not target_node:
+            result.unresolved_items.append(
+                _unresolved(
+                    cve_id,
+                    fact_id,
+                    "CVE is not mapped to a target node",
+                    "unmapped_cve_target",
+                    vulnerability,
+                    missing_conditions=["target_node"],
+                )
+            )
     return result
