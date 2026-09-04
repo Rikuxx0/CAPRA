@@ -10,6 +10,8 @@ import pandas as pd
 from .redaction import redact_sensitive_data
 from .schemas import normalize_source_tool
 
+SCHEMA_VERSION = "0.1.0"
+
 
 # Fact Graph を API/保存向けの JSON 互換辞書にまとめる。
 def export_fact_graph_json(graph: nx.DiGraph) -> dict[str, Any]:
@@ -34,7 +36,7 @@ def export_fact_graph_json(graph: nx.DiGraph) -> dict[str, Any]:
         "edges": edges,
         "unmapped_vulnerabilities": unmapped,
         "metadata": {
-            "schema_version": "0.1.0",
+            "schema_version": SCHEMA_VERSION,
             "source_files": graph.graph.get("source_files", []),
             "source_tools": _source_tools(nodes, edges, vulnerabilities, unmapped),
             "cloud_providers": _cloud_providers(nodes, edges),

@@ -192,7 +192,6 @@ def test_visualization_opens_details_on_click_without_hover_tooltips():
     assert 'network.on("click"' in html
     assert f'id="{visualization.DETAIL_PANEL_ID}" hidden' in html
     assert f'id="{visualization.LEGEND_PANEL_ID}"' in html
-    assert f'id="{visualization.LAYOUT_CONTROLS_ID}"' in html
     assert "capraAttackTypeColors" in html
     assert "buffer_overflow" in html
     assert "width: min(640px, calc(100vw - 32px))" in html
@@ -206,8 +205,8 @@ def test_visualization_opens_details_on_click_without_hover_tooltips():
     assert '"dragView": true' in html
     assert '"zoomView": true' in html
     assert '"type": "continuous"' in html
-    assert 'id="capra-fit-graph"' in html
-    assert 'id="capra-relayout-graph"' in html
+    assert "capra-fit-graph" not in html
+    assert "capra-relayout-graph" not in html
+    assert "capraRunLayout" not in html
     assert "stabilizationIterationsDone" in html
     assert "capraStopPhysics" in html
-    assert "network.stabilize(250)" in html

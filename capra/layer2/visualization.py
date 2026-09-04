@@ -18,7 +18,6 @@ FACT_NODE_PREFIX = "fact_node:"
 CONTEXT_EDGE_COLOR = "#8A94A3"
 DETAIL_PANEL_ID = "capra-node-detail-panel"
 LEGEND_PANEL_ID = "capra-attack-type-legend"
-LAYOUT_CONTROLS_ID = "capra-layout-controls"
 
 
 def _build_operator_label(operator: AttackOperatorModel) -> str:
@@ -126,31 +125,6 @@ def _inject_click_detail_panel(
     border: 1px solid #5F6875;
     border-radius: 3px;
   }}
-  #{LAYOUT_CONTROLS_ID} {{
-    position: fixed;
-    right: 16px;
-    bottom: 16px;
-    z-index: 900;
-    display: flex;
-    gap: 8px;
-    padding: 8px;
-    border: 1px solid #C7CED8;
-    border-radius: 8px;
-    background: rgba(255, 255, 255, 0.96);
-    box-shadow: 0 3px 12px rgba(0, 0, 0, 0.14);
-  }}
-  #{LAYOUT_CONTROLS_ID} button {{
-    padding: 6px 10px;
-    border: 1px solid #AEB8C5;
-    border-radius: 6px;
-    background: #FFFFFF;
-    color: #253044;
-    cursor: pointer;
-    font-size: 12px;
-  }}
-  #{LAYOUT_CONTROLS_ID} button:hover {{
-    background: #F1F5F9;
-  }}
 </style>
 <aside id="{DETAIL_PANEL_ID}" hidden>
   <div class="capra-detail-header">
@@ -163,10 +137,6 @@ def _inject_click_detail_panel(
   <strong>攻撃種別</strong>
   <div class="capra-legend-items" id="capra-attack-type-legend-items"></div>
 </aside>
-<div id="{LAYOUT_CONTROLS_ID}" aria-label="グラフ配置操作">
-  <button id="capra-fit-graph" type="button">全体表示</button>
-  <button id="capra-relayout-graph" type="button">自動整列</button>
-</div>
 <script>
   const capraNodeDetails = {details_json};
   const capraAttackTypeColors = {attack_types_json};
@@ -211,21 +181,8 @@ def _inject_click_detail_panel(
     network.setOptions({{ physics: {{ enabled: false }} }});
   }}
 
-  function capraRunLayout() {{
-    network.once("stabilizationIterationsDone", capraStopPhysics);
-    network.setOptions({{ physics: {{ enabled: true }} }});
-    network.stabilize(250);
-    window.setTimeout(capraStopPhysics, 5000);
-  }}
-
   network.once("stabilizationIterationsDone", capraStopPhysics);
   window.setTimeout(capraStopPhysics, 5000);
-
-  document.getElementById("capra-fit-graph").addEventListener("click", function () {{
-    network.fit({{ animation: {{ duration: 300, easingFunction: "easeInOutQuad" }} }});
-  }});
-
-  document.getElementById("capra-relayout-graph").addEventListener("click", capraRunLayout);
 </script>
 """
     if "</body>" in html:
@@ -234,7 +191,7 @@ def _inject_click_detail_panel(
 
 
 def build_attack_operator_graph_html(graph: AttackOperatorGraphModel) -> str:
-    network = Network(height="560px", width="100%", bgcolor="#ffffff", directed=True)
+    network = Network(height="550px", width="100%", bgcolor="#ffffff", directed=True)
     node_details: dict[str, object] = {}
     attack_type_colors = {
         operator_type: _operator_type_color(operator_type)
@@ -265,7 +222,7 @@ def build_attack_operator_graph_html(graph: AttackOperatorGraphModel) -> str:
     for operator in graph.attack_operators:
         node_details[operator.id] = operator.model_dump(mode="json")
         background_color = attack_type_colors[operator.operator_type]
-        border_color = STATUS_BORDER_COLORS.get(operator.status, "#5F6875")
+        border_color = STATUS_BORDER_COLORS.get(operator.status, "#5F6876")
         network.add_node(
             operator.id,
             label=_build_operator_label(operator),
