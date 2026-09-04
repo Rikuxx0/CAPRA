@@ -1,6 +1,6 @@
 # CAPRA: Cloud Attack Path Risk Analyzer
 
-CAPRAは、クラウド環境から収集した脆弱性情報とIAM/RBAC・構成情報を整理し、確認すべきAttack Operator候補とその依存関係を可視化するStreamlitベースのPlannerです。
+CAPRAは、クラウド環境から収集した脆弱性情報とIAM/RBAC・構成情報を整理し、確認すべき攻撃操作候補とその依存関係を可視化するStreamlitベースのプランナーです。
 
 入力データは最初にFact Graphへ正規化され、そのFactだけを使ってAttack Operator Graphが生成されます。AWS、Google Cloud、Azure、Kubernetesをまたぐ情報も、共通のグラフとして扱えます。
 
