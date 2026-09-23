@@ -2,6 +2,12 @@
 
 CAPRAは、クラウド環境から収集した脆弱性情報とIAM/RBAC・構成情報を整理し、確認すべき攻撃操作候補とその依存関係を可視化するStreamlitベースのプランナーです。
 
+本プロジェクトは、**RedAgent for CAPRA**というマルチクラウドおよびクラウドネイティブ環境におけるCAPRA専用のAI侵入テストエージェントを併用することで、自律的で効率的かつ安全なマルチクラウドペネトレーションテストを実現します。
+
+以下はRedAgent for CAPRAの実際の様子です。
+
+<img width="983" height="406" alt="layer_3" src="https://github.com/user-attachments/assets/24978440-7c05-491a-8a8e-fe42c9b22c86" />
+
 入力データは最初にFact Graphへ正規化され、そのFactだけを使ってAttack Operator Graphが生成されます。AWS、Google Cloud、Azure、Kubernetesをまたぐ情報も、共通のグラフとして扱えます。
 
 > [!IMPORTANT]
@@ -128,6 +134,11 @@ streamlit run app.py
 4. `Run CAPRA Planner`を押します。
 
 このモードではFact Graphを再構築せず、互換loaderで読み込んでAttack Operator Graphを生成します。
+
+<img width="1068" height="670" alt="layer_1" src="https://github.com/user-attachments/assets/fbfa406b-3df6-44df-a6af-216bcdc35830" />
+
+<img width="1068" height="670" alt="layer_2" src="https://github.com/user-attachments/assets/d0670bb0-a987-4598-8b7c-ac22ae37c11c" />
+
 
 サンプル環境の構成と各ファイルの詳細は、[`examples/README.md`](examples/README.md)を参照してください。
 
